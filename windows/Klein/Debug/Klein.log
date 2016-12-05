@@ -1,0 +1,193 @@
+﻿  Bufferator.cpp
+d:\src\cpp\sg-audio\samplefile.h(224): error C4996: 'tell': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _tell. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\corecrt_io.h(541): note: see declaration of 'tell'
+d:\src\cpp\sg-audio\samplefile.h(225): error C4996: 'write': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _write. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\corecrt_io.h(556): note: see declaration of 'write'
+d:\src\cpp\sg-audio\samplefile.h(226): error C4996: 'read': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _read. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\corecrt_io.h(521): note: see declaration of 'read'
+d:\src\cpp\sg-audio\samplefile.h(227): error C4996: 'lseek': The POSIX name for this item is deprecated. Instead, use the ISO C and C++ conformant name: _lseek. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\corecrt_io.h(501): note: see declaration of 'lseek'
+d:\src\cpp\klein\include\bufferator.h(103): error C2653: 'Bufferator': is not a class or namespace name
+d:\src\cpp\klein\include\bufferator.h(103): error C3646: 'lastErrorLevel': unknown override specifier
+d:\src\cpp\klein\include\bufferator.h(103): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+d:\src\cpp\klein\include\bufferator.h(111): error C2653: 'Bufferator': is not a class or namespace name
+d:\src\cpp\klein\include\bufferator.h(111): error C2061: syntax error: identifier 'ErrorLevel'
+d:\src\cpp\klein\src\bufferator.cpp(65): error C2660: 'SampleInfo::setError': function does not take 2 arguments
+d:\src\cpp\klein\src\bufferator.cpp(176): error C2039: 'readFrames': is not a member of 'SampleFile'
+  d:\src\cpp\sg-audio\samplefile.h(185): note: see declaration of 'SampleFile'
+d:\src\cpp\klein\src\bufferator.cpp(200): warning C4018: '>=': signed/unsigned mismatch
+d:\src\cpp\klein\src\bufferator.cpp(209): error C2065: 'System': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(209): error C2228: left of '.currentTimeMillis' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(209): note: type is 'unknown-type'
+d:\src\cpp\klein\src\bufferator.cpp(222): warning C4091: '': ignored on left of 'int' when no variable is declared
+d:\src\cpp\klein\src\bufferator.cpp(222): error C2143: syntax error: missing ';' before '['
+d:\src\cpp\klein\src\bufferator.cpp(222): error C3409: empty attribute block is not allowed
+d:\src\cpp\klein\src\bufferator.cpp(222): error C2059: syntax error: '<default int type>'
+d:\src\cpp\klein\src\bufferator.cpp(223): error C2065: 'null': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(223): error C2039: 'length': is not a member of 'std::vector<SampleChunkInfo *,std::allocator<_Ty>>'
+          with
+          [
+              _Ty=SampleChunkInfo *
+          ]
+  d:\src\cpp\klein\include\bufferator.h(97): note: see declaration of 'std::vector<SampleChunkInfo *,std::allocator<_Ty>>'
+          with
+          [
+              _Ty=SampleChunkInfo *
+          ]
+d:\src\cpp\klein\src\bufferator.cpp(226): error C2065: 'reqChunk': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(227): error C2065: 'reqChunk': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(229): error C2065: 'reqChunk': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(229): error C2228: left of '.length' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(229): note: type is 'unknown-type'
+d:\src\cpp\klein\src\bufferator.cpp(230): error C2065: 'reqChunk': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(233): error C2065: 'reqChunk': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(234): error C2065: 'reqChunk': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(253): warning C4018: '<': signed/unsigned mismatch
+d:\src\cpp\klein\src\bufferator.cpp(263): error C2065: 'i': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(270): error C2065: 'null': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(270): error C2039: 'length': is not a member of 'std::vector<SampleChunkInfo *,std::allocator<_Ty>>'
+          with
+          [
+              _Ty=SampleChunkInfo *
+          ]
+  d:\src\cpp\klein\include\bufferator.h(97): note: see declaration of 'std::vector<SampleChunkInfo *,std::allocator<_Ty>>'
+          with
+          [
+              _Ty=SampleChunkInfo *
+          ]
+d:\src\cpp\klein\src\bufferator.cpp(276): error C2065: 'refCount': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(276): error C2065: 'minBufferPerSample': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(280): error C2512: 'SampleChunkInfo': no appropriate default constructor available
+d:\src\cpp\klein\src\bufferator.cpp(282): error C2065: 'null': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(286): error C2065: 'null': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(288): error C2664: 'void SampleInfo::checkAddOldest(SampleChunkInfo *,std::vector<SampleChunkInfo *,std::allocator<_Ty>> &)': cannot convert argument 2 from 'SampleChunkInfo *' to 'std::vector<SampleChunkInfo *,std::allocator<_Ty>> &'
+          with
+          [
+              _Ty=SampleChunkInfo *
+          ]
+d:\src\cpp\klein\src\bufferator.cpp(293): error C2228: left of '.length' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(293): note: type is 'SampleChunkInfo *'
+  d:\src\cpp\klein\src\bufferator.cpp(293): note: did you intend to use '->' instead?
+d:\src\cpp\klein\src\bufferator.cpp(295): error C2065: 'null': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(298): error C2065: 'null': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(299): error C2065: 'null': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(300): error C2065: 'null': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(328): error C2039: 'length': is not a member of 'std::vector<SampleChunkInfo *,std::allocator<_Ty>>'
+          with
+          [
+              _Ty=SampleChunkInfo *
+          ]
+  d:\src\cpp\klein\include\bufferator.h(97): note: see declaration of 'std::vector<SampleChunkInfo *,std::allocator<_Ty>>'
+          with
+          [
+              _Ty=SampleChunkInfo *
+          ]
+d:\src\cpp\klein\src\bufferator.cpp(328): error C2679: binary '>': no operator found which takes a right-hand operand of type 'std::_Vector_iterator<std::_Vector_val<std::_Simple_types<SampleChunkInfo *>>>' (or there is no acceptable conversion)
+  c:\program files (x86)\microsoft visual studio 14.0\vc\include\thread(234): note: could be 'bool std::operator >(std::thread::id,std::thread::id) noexcept'
+  d:\src\cpp\klein\src\bufferator.cpp(328): note: while trying to match the argument list '(int, std::_Vector_iterator<std::_Vector_val<std::_Simple_types<SampleChunkInfo *>>>)'
+d:\src\cpp\klein\src\bufferator.cpp(331): error C2679: binary '[': no operator found which takes a right-hand operand of type 'std::_Vector_iterator<std::_Vector_val<std::_Simple_types<SampleChunkInfo *>>>' (or there is no acceptable conversion)
+  c:\program files (x86)\microsoft visual studio 14.0\vc\include\vector(1231): note: could be 'SampleChunkInfo *&std::vector<SampleChunkInfo *,std::allocator<_Ty>>::operator [](unsigned int)'
+          with
+          [
+              _Ty=SampleChunkInfo *
+          ]
+  c:\program files (x86)\microsoft visual studio 14.0\vc\include\vector(1215): note: or       'SampleChunkInfo *const &std::vector<SampleChunkInfo *,std::allocator<_Ty>>::operator [](unsigned int) const'
+          with
+          [
+              _Ty=SampleChunkInfo *
+          ]
+  d:\src\cpp\klein\src\bufferator.cpp(331): note: while trying to match the argument list '(std::vector<SampleChunkInfo *,std::allocator<_Ty>>, std::_Vector_iterator<std::_Vector_val<std::_Simple_types<SampleChunkInfo *>>>)'
+          with
+          [
+              _Ty=SampleChunkInfo *
+          ]
+d:\src\cpp\klein\src\bufferator.cpp(356): warning C4018: '<': signed/unsigned mismatch
+d:\src\cpp\klein\src\bufferator.cpp(399): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
+d:\src\cpp\klein\src\bufferator.cpp(446): error C2065: 'ActivityManager': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(446): error C2146: syntax error: missing ';' before identifier 'am'
+d:\src\cpp\klein\src\bufferator.cpp(446): error C2065: 'am': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(446): error C2146: syntax error: missing ';' before identifier 'sampleManager'
+d:\src\cpp\klein\src\bufferator.cpp(446): error C2228: left of '.getContext' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(446): note: type is 'Bufferator::Client *'
+  d:\src\cpp\klein\src\bufferator.cpp(446): note: did you intend to use '->' instead?
+d:\src\cpp\klein\src\bufferator.cpp(446): error C2228: left of '.getSystemService' must have class/struct/union
+d:\src\cpp\klein\src\bufferator.cpp(446): error C2065: 'Context': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(446): error C2228: left of '.ACTIVITY_SERVICE' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(446): note: type is 'unknown-type'
+d:\src\cpp\klein\src\bufferator.cpp(447): error C2065: 'ActivityManager': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(447): error C2228: left of '.MemoryInfo' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(447): note: type is 'unknown-type'
+d:\src\cpp\klein\src\bufferator.cpp(447): error C2146: syntax error: missing ';' before identifier 'aMemInf'
+d:\src\cpp\klein\src\bufferator.cpp(447): error C2065: 'aMemInf': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(447): error C2061: syntax error: identifier 'ActivityManager'
+d:\src\cpp\klein\src\bufferator.cpp(448): error C2065: 'am': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(448): error C2228: left of '.getMemoryInfo' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(448): note: type is 'unknown-type'
+d:\src\cpp\klein\src\bufferator.cpp(448): error C2065: 'aMemInf': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(449): error C2065: 'Runtime': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(449): error C2146: syntax error: missing ';' before identifier 'rt'
+d:\src\cpp\klein\src\bufferator.cpp(449): error C2065: 'rt': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(449): error C2228: left of '.getRuntime' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(449): note: type is 'unknown-type'
+d:\src\cpp\klein\src\bufferator.cpp(453): error C2065: 'Debug': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(453): error C2228: left of '.MemoryInfo' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(453): note: type is 'unknown-type'
+d:\src\cpp\klein\src\bufferator.cpp(453): error C2146: syntax error: missing ';' before identifier 'dMemInf'
+d:\src\cpp\klein\src\bufferator.cpp(453): error C2065: 'dMemInf': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(453): error C2061: syntax error: identifier 'Debug'
+d:\src\cpp\klein\src\bufferator.cpp(454): error C2065: 'Debug': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(454): error C2228: left of '.getMemoryInfo' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(454): note: type is 'unknown-type'
+d:\src\cpp\klein\src\bufferator.cpp(454): error C2065: 'dMemInf': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(456): error C2065: 'rt': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(456): error C2228: left of '.maxMemory' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(456): note: type is 'unknown-type'
+d:\src\cpp\klein\src\bufferator.cpp(457): error C2065: 'aMemInf': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(457): error C2228: left of '.threshold' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(457): note: type is 'unknown-type'
+d:\src\cpp\klein\src\bufferator.cpp(458): error C2065: 'aMemInf': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(458): error C2228: left of '.availMem' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(458): note: type is 'unknown-type'
+d:\src\cpp\klein\src\bufferator.cpp(459): error C2065: 'dMemInf': undeclared identifier
+d:\src\cpp\klein\src\bufferator.cpp(459): error C2228: left of '.getTotalPss' must have class/struct/union
+  d:\src\cpp\klein\src\bufferator.cpp(459): note: type is 'unknown-type'
+d:\src\cpp\klein\src\bufferator.cpp(466): error C2059: syntax error: ')'
+d:\src\cpp\klein\src\bufferator.cpp(474): error C2276: '&': illegal operation on bound member function expression
+d:\src\cpp\klein\src\bufferator.cpp(500): error C2039: 'lastErrorLevel': is not a member of 'SampleInfo'
+  d:\src\cpp\klein\include\bufferator.h(87): note: see declaration of 'SampleInfo'
+d:\src\cpp\klein\src\bufferator.cpp(500): error C2660: 'Bufferator::dispatchMaf': function does not take 1 arguments
+d:\src\cpp\klein\src\bufferator.cpp(508): error C3867: 'std::_Ptr_base<_Ty>::use_count': non-standard syntax; use '&' to create a pointer to member
+          with
+          [
+              _Ty=SampleInfo
+          ]
+d:\src\cpp\klein\src\bufferator.cpp(508): error C2297: '+=': illegal, right operand has type 'long (__thiscall std::_Ptr_base<_Ty>::* )(void) noexcept const'
+          with
+          [
+              _Ty=SampleInfo
+          ]
+d:\src\cpp\klein\src\bufferator.cpp(559): error C3867: 'std::_Ptr_base<_Ty>::use_count': non-standard syntax; use '&' to create a pointer to member
+          with
+          [
+              _Ty=SampleInfo
+          ]
+d:\src\cpp\klein\src\bufferator.cpp(559): error C2297: '/': illegal, right operand has type 'long (__thiscall std::_Ptr_base<_Ty>::* )(void) noexcept const'
+          with
+          [
+              _Ty=SampleInfo
+          ]
+d:\src\cpp\klein\src\bufferator.cpp(624): error C3867: 'std::_Ptr_base<_Ty>::use_count': non-standard syntax; use '&' to create a pointer to member
+          with
+          [
+              _Ty=SampleInfo
+          ]
+d:\src\cpp\klein\src\bufferator.cpp(641): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+d:\src\cpp\klein\src\bufferator.cpp(641): error C2146: syntax error: missing ';' before identifier 'getAudioFile'
+d:\src\cpp\klein\src\bufferator.cpp(641): error C3646: 'throws': unknown override specifier
+d:\src\cpp\klein\src\bufferator.cpp(641): error C3646: 'IOException': unknown override specifier
+d:\src\cpp\klein\src\bufferator.cpp(642): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+d:\src\cpp\klein\src\bufferator.cpp(643): error C2059: syntax error: 'return'
+d:\src\cpp\klein\src\bufferator.cpp(644): error C2059: syntax error: '}'
+d:\src\cpp\klein\src\bufferator.cpp(644): error C2143: syntax error: missing ';' before '}'
+d:\src\cpp\klein\src\bufferator.cpp(647): error C2143: syntax error: missing ';' before '{'
+d:\src\cpp\klein\src\bufferator.cpp(647): error C2447: '{': missing function header (old-style formal list?)
