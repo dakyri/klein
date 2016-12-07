@@ -75,6 +75,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>D:\src\cpp\sg-audio;D:\src\cpp\library\VST\vst-2.3-common;D:\src\cpp\Klein\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -113,12 +114,16 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\sg-audio\SampleFile.h" />
     <ClInclude Include="..\..\include\Bufferator.h" />
+    <ClInclude Include="..\..\include\Controller.h" />
     <ClInclude Include="..\..\include\Klein.h" />
+    <ClInclude Include="..\..\include\KleinChannel.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\sg-audio\SampleFile.cpp" />
     <ClCompile Include="..\..\src\Bufferator.cpp" />
+    <ClCompile Include="..\..\src\Controller.cpp" />
     <ClCompile Include="..\..\src\Klein.cpp" />
+    <ClCompile Include="..\..\src\KleinChannel.cpp" />
     <ClCompile Include="..\..\src\KleinMain.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

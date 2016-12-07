@@ -1,7 +1,9 @@
 
 #include <stdio.h>
 #include <string>
+#include <iostream>
 
+using namespace std;
 #undef DEBUG 
 #ifdef DEBUG
 FILE	*dbf=NULL;
@@ -78,6 +80,7 @@ KleinProgram::KleinProgram()
 
 Klein::Klein(audioMasterCallback audioMaster)
 	: AudioEffectX (audioMaster, 16, kNumParams)
+	, controller(*this)
 	, delayLine(2, 2)
 {
 //	delayLine = new SGDelayLine(2, MaxSGDelayTime, sampleRate);
@@ -546,7 +549,7 @@ void Klein::process (float **inputs, float **outputs, long nFrames)
 {
 	float	*inl= inputs[0];
 	float	*inr= inputs[1];
-	float	*outl = outputs[0],
+	float	*outl = outputs[0];
 	float	*outr = outputs[1];
 	float	cvu = vu;
 
@@ -627,7 +630,7 @@ void Klein::processReplacing (float **inputs, float **outputs, long nFrames)
 {
 	float	*inl= inputs[0];
 	float	*inr= inputs[1];
-	float	*outl = outputs[0],
+	float	*outl = outputs[0];
 	float	*outr = outputs[1];
 	float	cvu = vu;
 
@@ -707,6 +710,224 @@ void Klein::processReplacing (float **inputs, float **outputs, long nFrames)
 float
 Klein::getTempo()
 {
-	const VstTimeInfo	*t = getTimeInfo(kVstTempoValid);
+	const VstTimeInfo *t = getTimeInfo(kVstTempoValid);
 	return t->tempo;
+}
+/*
+
+const char* plugCanDos [] =
+{
+"sendVstEvents",
+"sendVstMidiEvent",
+"sendVstTimeInfo",
+"receiveVstTimeInfo",
+"offline",
+"plugAsChannelInsert",
+"plugAsSend",
+"mixDryWet",
+"noRealTime",
+"multipass",
+"metapass",
+
+#if VST_2_1_EXTENSIONS
+,
+"midiProgramNames",
+"conformsToWindowRules"		// mac: doesn't mess with grafport. general: may want
+// to call sizeWindow (). if you want to use sizeWindow (),
+// you must return true (1) in canDo ("conformsToWindowRules")
+#endif // VST_2_1_EXTENSIONS
+
+#if VST_2_3_EXTENSIONS
+,
+"bypass"
+#endif // VST_2_3_EXTENSIONS
+};
+
+*/
+long Klein::canDo(char* text)
+{
+	if (!strcmp(text, "receiveVstEvents"))
+		return 1;
+	if (!strcmp(text, "receiveVstMidiEvent"))
+		return 1;
+	if (!strcmp(text, "midiProgramNames"))
+		return 1;
+	if (!strcmp(text, "1in1out")) {
+		return 1;
+	}
+	if (!strcmp(text, "1in2out")) {
+		return -1;
+	}
+	if (!strcmp(text, "2in1out")) {
+		return -1;
+	}
+	if (!strcmp(text, "2in2out")) {
+		return -1;
+	}
+	if (!strcmp(text, "2in4out")) {
+		return -1;
+	}
+	if (!strcmp(text, "4in2out")) {
+		return -1;
+	}
+	if (!strcmp(text, "4in4out")) {
+		return -1;
+	}
+	if (!strcmp(text, "4in8out")) {	// 4:2 matrix to surround bus
+		return -1;
+	}
+	if (!strcmp(text, "8in4out")) {	// surround bus to 4:2 matrix
+		return -1;
+	}
+	if (!strcmp(text, "8in8out")) {
+		return -1;
+	}
+	return -1;	// explicitly can't do; 0 => don't know
+}
+
+void Klein::inputConnected(long index, bool state)
+{
+}
+
+void Klein::outputConnected(long index, bool state)
+{
+}
+
+
+bool Klein::getInputProperties(long index, VstPinProperties* properties)
+{
+	/*
+	if (index < kNumOutputs)
+	{
+		sprintf(properties->label, "Vstx %1d", index + 1);
+		properties->flags = kVstPinIsActive;
+		if (index < 2)
+			properties->flags |= kVstPinIsStereo;	// make channel 1+2 stereo
+		return true;
+	}*/
+		return false;
+}
+
+bool Klein::getOutputProperties(long index, VstPinProperties* properties)
+{
+	/*
+	if (index < kNumOutputs)
+	{
+	sprintf(properties->label, "Vstx %1d", index + 1);
+	properties->flags = kVstPinIsActive;
+	if (index < 2)
+	properties->flags |= kVstPinIsStereo;	// make channel 1+2 stereo
+	return true;
+	}*/
+	return false;
+}
+
+
+bool Klein::getEffectName(char* name)
+{
+	strcpy(name, "Klein");
+	return true;
+}
+
+bool Klein::getVendorString(char* text)
+{
+	strcpy(text, "Mayaswell Media Technologies");
+	return true;
+}
+
+
+bool Klein::getProductString(char* text)
+{
+	strcpy(text, "Klein Looper");
+	return true;
+}
+
+long Klein::getVendorVersion() {
+	return 1;
+}
+
+
+// midi program names:
+// as an example, GM names are used here. in fact, VstXSynth doesn't even support
+// multi-timbral operation so it's really just for demonstration.
+// a 'real' instrument would have a number of voices which use the
+// programs[channelProgram[channel]] parameters when it receives
+// a note on message.
+
+//------------------------------------------------------------------------
+long Klein::getMidiProgramName(long channel, MidiProgramName* mpn)
+{/*
+	long prg = mpn->thisProgramIndex;
+	if (prg < 0 || prg >= 128)
+		return 0;
+	fillProgram(channel, prg, mpn);
+	if (channel == 9)
+		return 1;*/
+	return 0;
+}
+
+//------------------------------------------------------------------------
+long Klein::getCurrentMidiProgram(long channel, MidiProgramName* mpn)
+{/*
+	if (channel < 0 || channel >= 16 || !mpn)
+		return -1;
+	long prg = channelPrograms[channel];
+	mpn->thisProgramIndex = prg;
+	fillProgram(channel, prg, mpn);*/
+	return 0;
+}
+
+
+//------------------------------------------------------------------------
+long Klein::getMidiProgramCategory(long channel, MidiProgramCategory* cat)
+{
+	/*
+	cat->parentCategoryIndex = -1;	// -1:no parent category
+	cat->flags = 0;					// reserved, none defined yet, zero.
+	long category = cat->thisCategoryIndex;
+	if (channel == 9)
+	{
+		strcpy(cat->name, "Drums");
+		return 1;
+	}
+	if (category >= 0 && category < kNumGmCategories)
+		strcpy(cat->name, GmCategories[category]);
+	else
+		cat->name[0] = 0;
+	return kNumGmCategories;*/
+	return 0;
+}
+
+
+//-----------------------------------------------------------------------------------------
+long Klein::processEvents(VstEvents* ev)
+{
+	cerr << "process "<< ev->numEvents <<" events in xsynth non " << endl;
+	for (long i = 0; i < ev->numEvents; i++) {
+		if (ev->events[i]->type == kVstMidiType) {
+			VstMidiEvent* event = (VstMidiEvent*)ev->events[i];
+			controller.processEvent(event);
+		}
+	}
+	return 1;	// want more
+}
+
+bool Klein::getMidiKeyName(long channel, MidiKeyName* key)
+// struct will be filled with information for 'thisProgramIndex' and 'thisKeyNumber'
+// if keyName is "" the standard name of the key will be displayed.
+// if false is returned, no MidiKeyNames defined for 'thisProgramIndex'.
+{
+	/*
+	// key->thisProgramIndex;		// >= 0. fill struct for this program index.
+	// key->thisKeyNumber;			// 0 - 127. fill struct for this key number.
+	key->keyName[0] = 0;
+	key->reserved = 0;				// zero
+	key->flags = 0;					// reserved, none defined yet, zero.*/
+	return false;
+}
+
+//------------------------------------------------------------------------
+bool Klein::hasMidiProgramsChanged(long channel)
+{
+	return false;	// updateDisplay ()
 }

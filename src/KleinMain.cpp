@@ -12,10 +12,10 @@ bool oome = false;
 extern "C" __declspec(dllexport) AEffect *main_plugin (audioMasterCallback audioMaster);
 
 #else
-AEffect *main (audioMasterCallback audioMaster);
+AEffect *VSTPluginMain (audioMasterCallback audioMaster);
 #endif
 
-AEffect *main (audioMasterCallback audioMaster)
+AEffect *VSTPluginMain(audioMasterCallback audioMaster)
 {
 	// get vst version
 	if (!audioMaster (0, audioMasterVersion, 0, 0, 0, 0))

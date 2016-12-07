@@ -3,12 +3,16 @@
 
 
 #include "audioeffectx.h"
+
 #include <string>
 #include <unordered_map>
 
 using namespace std;
 
 #include "Bufferator.h"
+#include "KleinChannel.h"
+#include "Controller.h"
+
 #include "Delay.h"
 
 #define MaxSGDelayTime	4.0
@@ -84,9 +88,15 @@ public:
 	Klein(audioMasterCallback audioMaster);
 	virtual ~Klein();
 
+
+	static const int MAX_CHANNELS = 8;
+
 /* VST callbacks */
 	virtual void process(float **inputs, float **outputs, long sampleframes);
 	virtual void processReplacing(float **inputs, float **outputs, long sampleFrames);
+	virtual long processEvents(VstEvents* events);
+
+
 	virtual void setProgram(long program);
 	virtual void setProgramName(char *name);
 	virtual void getProgramName(char *name);
@@ -98,9 +108,38 @@ public:
 	virtual float getVu();
 	virtual void suspend();
 
+	virtual long getMidiProgramName(long channel, MidiProgramName* midiProgramName);
+	virtual long getCurrentMidiProgram(long channel, MidiProgramName* currentProgram);
+	virtual long getMidiProgramCategory(long channel, MidiProgramCategory* category);
+	virtual bool hasMidiProgramsChanged(long channel);
+	virtual bool getMidiKeyName(long channel, MidiKeyName* keyName);
+
+	virtual bool getEffectName(char* name);
+	virtual bool getVendorString(char* text);
+	virtual bool getProductString(char* text);
+	virtual long getVendorVersion();
+	virtual long canDo(char* text);
+
+	virtual void inputConnected(long index, bool state);	// Input at <index> has been (dis-)connected,
+	virtual void outputConnected(long index, bool state);	// Same as input; state == true: connected
+	virtual bool getInputProperties(long index, VstPinProperties* properties);
+	virtual bool getOutputProperties(long index, VstPinProperties* properties);
+
 	char *parameterName(long index);
 
 private:
+	float getTempo();
+
+	KleinProgram *programs;
+
+	KleinChannel channels[MAX_CHANNELS];
+	Controller controller;
+
+
+
+
+
+	void LFOCheck(short which);
 	void setFilterEnabled(short i, bool en);
 	void setFilterType(short i, long t);
 	void setFrequency(short i, float f);
@@ -108,14 +147,6 @@ private:
 	void setLFDepth(short, float);
 	void setLFRate(short, float);
 	void setLFWave(short, short);
-
-	void subProcessReplacing(float *in1, float *in2, float *out1, float *out2,
-								float *dest, float *del, long sampleframes);
-	float getTempo();
-
-	void LFOCheck(short which);
-	KleinProgram *programs;
-
 	Delay delayLine;
 
 	float *tapSig[NSGDelayTap];

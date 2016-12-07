@@ -9,6 +9,7 @@ using namespace std;
 #include <thread>
 #include <memory>
 #include <mutex>
+#include <list>
 
 #include "SampleFile.h"
 
@@ -51,15 +52,13 @@ class BufferatorException extends Exception {
 class SampleChunkInfo
 {
 public:
-	int id = 0;
 	float* data;
 	int startFrame;
 	int nFrames;
 	time_t timeStamp;
 
-	SampleChunkInfo(int start, int length, int ci, float* dta)
+	SampleChunkInfo(int start, int length, float* dta)
 	{
-		id = ci;
 		startFrame = start;
 		data = dta;
 		nFrames = length;
@@ -83,6 +82,7 @@ public:
 
 const int kMaxRequestsPerCycle = 8;
 
+class SampleInfo;
 
 class Bufferator
 {
@@ -99,7 +99,9 @@ public:
 	};
 
 	static const int DEFAULT_CACHE_SIZE = 9;
-	static const int FRAMES_PER_CHUNK = 64*1024;
+	static const int FRAMES_PER_PAGE = 64 * 1024;
+	static const int MAX_REQUEST_PER_CYCLE = 12;
+	static const int MIN_BUFFER_PER_SAMPLE = 3;
 
 private:
 	static Bufferator* instance;
@@ -154,19 +156,20 @@ public:
 
 //	static void free(SampleInfo *inf); // suspect that this is not needed in c++. the weak pointers will be invalid when all shared refs are reset()
 	static SampleFile & getAudioFile(string path);
-	static int chunkStartFrame(int chunkInd);
-	static int chunk4Frame(int fr);
+	static int pageStartFrame(int chunkInd);
+	static int page4Frame(int fr);
 //	static void cleanup();
 	static bool run();
 	bool stop();
 
-	void dispatchGfxConstruct(SampleInfo tgt);
+	void dispatchGfxConstruct(SampleInfo *tgt);
 	void dispatchMafError(string txt);
 	void dispatchMafWarning(string txt);
 	void dispatchMafFatal(string txt);
 	void dispatchMaf(string txt, int severity);
 
 };
+
 class SampleInfo
 {
 public:
@@ -178,11 +181,13 @@ public:
 	SampleFile audioFile;
 	int chunkChannelCount;
 
-	vector<SampleChunkInfo*> sampleChunk;
+	mutex chunkLock;
+	list<SampleChunkInfo*> chunkList;
 
 	//	SampleGfxInfo * gfxCache = nullptr;
-	vector<int> reqChunkAuThread;
-	vector<int> reqChunkIfThread;
+	mutex requestLock;
+	vector<int> requestedChunks;
+	vector<int> requiredChunks;
 
 	static Bufferator::ErrorLevel lastErrorLevel;
 	static string lastErrorMessage;
@@ -194,32 +199,30 @@ public:
 	bool setSampleData(string _path, int _id);
 	void setError(string msg, Bufferator::ErrorLevel lvl = Bufferator::ErrorLevel::ERROR_EVENT);
 
-
 	/*
 	Observable<SampleGfxInfo> getMinMax(final int npoints);
 	*/
 
-	SampleChunkInfo *readChunk(int chunk);
-	SampleChunkInfo *getChunkFor(int currentDataFrame);
-	SampleChunkInfo * getChunk(int chunk);
+	SampleChunkInfo *readPage(int chunk);
+	SampleChunkInfo *getChunk4Frame(off_t dataFrame);
+	SampleChunkInfo * findChunk4Frame(off_t dataFrame);
+
 	string getLastErrorMessage();
-	bool requestChunk(int requestedChunk, int from);
+	bool requestPage(int page);
 	bool updateLoadedChunks();
-	bool processChunkRequests(vector<int>& reqList);
-	int trimAllocatedChunks(int fsi);
-	void checkAddOldest(SampleChunkInfo *sci, vector<SampleChunkInfo*> &  togo);
+	bool processChunkRequests();
+	int trimAllocatedChunks(int fsi, int refCount = 1);
+	void checkAddOldest(list<SampleChunkInfo*>::iterator sci, list<list<SampleChunkInfo*>::iterator> &  togo);
 	//	static SampleChunkInfo* allocateChunkBuffers(int nTotalFrames, short nChannels);
+
 	bool isRequiredChunk(int c);
-
-	vector<int> requiredChunks;
-	int nRequiredChunks = 0;
-	void clearRequiredChunks();
-
 	void addRequiredChunk(int reqdChunk);
+	void clearRequiredChunks();
 
 	/*	Observable<Path[]> getSamplePaths(final int w, final int h) ;*/
 
 	float getFrameCount();
 };
+
 
 #endif
