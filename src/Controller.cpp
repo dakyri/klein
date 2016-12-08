@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Controller.h"
 #include "Klein.h"
 
@@ -16,27 +18,69 @@ bool
 Controller::processEvent(VstMidiEvent * e)
 {
 	char* midiData = e->midiData;
-	long status = midiData[0] & 0xf0;		// ignoring channel
-	fprintf(stderr, "command %x in xsynth\n", status);
-	if (status == 0x90 || status == 0x80)	// we only look at notes
-	{
-		long note = midiData[1] & 0x7f;
-		long velocity = midiData[2] & 0x7f;
-		if (status == 0x80)
-			velocity = 0;	// note off by velocity 0
-							/*
-							if (!velocity && (note == currentNote))
-							noteOff();
-							else
-							noteOn(note, velocity, event->deltaFrames);
-							*/
+	int cmd = midiCmd(midiData);	
+	int chan = midiChan(midiData);
+//	int hash = makeIdxHash(midiData);
+	cerr << "command " << cmd << " in klein" << endl;
+	switch (cmd) {
+	case MIDI_NOTE_OFF:
+	case MIDI_NOTE_ON: {
+		vector<ControlMapping> *cmv = getMap(makeMidiHash(midiData));
+		if (cmv != nullptr) {
+			for (auto cmi : *cmv) {
+
+			}
+		}
+		break;
 	}
-	else if (status == 0xb0) {
-		/*
-		if (midiData[1] == 0x7e || midiData[1] == 0x7b)	// all notes off
-		noteOff();
-		*/
+	case MIDI_CTRL: {
+		vector<ControlMapping> *cmv = getMap(makeMidiHash(midiData));
+		if (cmv != nullptr) {
+			for (auto cmi : *cmv) {
+				
+			}
+		}
+		break;
 	}
-	e++;
+	case MIDI_PROG: {
+		vector<ControlMapping> *cmv = getMap(makeMidiHash(midiData));
+		if (cmv != nullptr) {
+			for (auto cmi : *cmv) {
+				processMapping(cmi);
+			}
+		}
+		break;
+	}
+	case MIDI_BEND:
+		break;
+	}
 	return true;
+}
+
+bool Controller::processMapping(ControlMapping & m)
+{
+	switch (m.command) {
+
+	}
+	return false;
+}
+
+/**
+ *
+ */
+vector<ControlMapping> * Controller::getMap(int hash)
+{
+	auto ci = maps.find(hash);
+	if (ci == maps.end()) {
+		return nullptr;
+	}
+
+	return &ci->second;
+}
+
+/**
+ * hash function into our unordered map. no type checking atm, assume it is a midi control with at least 2 bytes
+ */
+int Controller::makeMidiHash(char *midiData) {
+	return midiData[0] | (midiData[1] << 8);
 }

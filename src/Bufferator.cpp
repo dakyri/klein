@@ -3,6 +3,10 @@
 
 #include "Bufferator.h"
 
+Bufferator::ErrorLevel SampleInfo::lastErrorLevel;
+string SampleInfo::lastErrorMessage;
+
+
 /**
  * initially adapted from an android buffer runner.
  * planning on using this for a looper, so maybe won't be backed up by file unless the loop gets big or it gets saved for re-use.
@@ -65,6 +69,11 @@ SampleInfo::SampleInfo()
 	nChannels = 0;
 //	gfxCache = nullptr;
 	chunkChannelCount = 0;
+}
+
+void SampleInfo::setError(string msg, Bufferator::ErrorLevel level) {
+	lastErrorMessage = msg;
+	lastErrorLevel = level;
 }
 
 bool SampleInfo::setSampleData(string _path, int _id)

@@ -1,0 +1,211 @@
+Nonterminals useless in grammar
+
+   block
+   dimension_list
+
+
+Terminals unused in grammar
+
+   WORD
+   SYMBOL
+   TYPE
+   EVENT
+   IDENT
+   QUA
+   VOICE
+   POOL
+   SAMPLE
+   LAMBDA
+   CHANNEL
+   STRUCT
+   INPUT
+   OUTPUT
+   CLIP
+   TAKE
+   VST
+   VSTPARAM
+   ASSGN
+   LSQB
+   RSQB
+   LBRA
+   RBRA
+   COMMA
+   COLON
+   COLON2
+   SEMI
+   DOT
+   PLUS
+   MINUS
+   STAR
+   SLASH
+   NEWLINE
+
+
+Grammar
+
+    0 $accept: script_file "end of file"
+
+    1 script_file: atom
+
+    2 atom: LB expression RB
+    3     | LITERAL_INT
+    4     | LITERAL_FLOAT
+    5     | LITERAL_STRING
+    6     | LITERAL_TIME
+
+    7 expression: atom
+
+
+Terminals, with rules where they appear
+
+"end of file" (0) 0
+error (256)
+WORD (258)
+SYMBOL (259)
+TYPE (260)
+EVENT (261)
+IDENT (262)
+LITERAL_INT (263) 3
+LITERAL_FLOAT (264) 4
+LITERAL_TIME (265) 6
+LITERAL_STRING (266) 5
+QUA (267)
+VOICE (268)
+POOL (269)
+SAMPLE (270)
+LAMBDA (271)
+CHANNEL (272)
+STRUCT (273)
+INPUT (274)
+OUTPUT (275)
+CLIP (276)
+TAKE (277)
+VST (278)
+VSTPARAM (279)
+ASSGN (280)
+LSQB (281)
+RSQB (282)
+LBRA (283)
+RBRA (284)
+LB (285) 2
+RB (286) 2
+COMMA (287)
+COLON (288)
+COLON2 (289)
+SEMI (290)
+DOT (291)
+PLUS (292)
+MINUS (293)
+STAR (294)
+SLASH (295)
+NEWLINE (296)
+
+
+Nonterminals, with rules where they appear
+
+$accept (42)
+    on left: 0
+script_file (43)
+    on left: 1, on right: 0
+atom (44)
+    on left: 2 3 4 5 6, on right: 1 7
+expression (45)
+    on left: 7, on right: 2
+
+
+State 0
+
+    0 $accept: . script_file "end of file"
+
+    LITERAL_INT     shift, and go to state 1
+    LITERAL_FLOAT   shift, and go to state 2
+    LITERAL_TIME    shift, and go to state 3
+    LITERAL_STRING  shift, and go to state 4
+    LB              shift, and go to state 5
+
+    script_file  go to state 6
+    atom         go to state 7
+
+
+State 1
+
+    3 atom: LITERAL_INT .
+
+    $default  reduce using rule 3 (atom)
+
+
+State 2
+
+    4 atom: LITERAL_FLOAT .
+
+    $default  reduce using rule 4 (atom)
+
+
+State 3
+
+    6 atom: LITERAL_TIME .
+
+    $default  reduce using rule 6 (atom)
+
+
+State 4
+
+    5 atom: LITERAL_STRING .
+
+    $default  reduce using rule 5 (atom)
+
+
+State 5
+
+    2 atom: LB . expression RB
+
+    LITERAL_INT     shift, and go to state 1
+    LITERAL_FLOAT   shift, and go to state 2
+    LITERAL_TIME    shift, and go to state 3
+    LITERAL_STRING  shift, and go to state 4
+    LB              shift, and go to state 5
+
+    atom        go to state 8
+    expression  go to state 9
+
+
+State 6
+
+    0 $accept: script_file . "end of file"
+
+    "end of file"  shift, and go to state 10
+
+
+State 7
+
+    1 script_file: atom .
+
+    $default  reduce using rule 1 (script_file)
+
+
+State 8
+
+    7 expression: atom .
+
+    $default  reduce using rule 7 (expression)
+
+
+State 9
+
+    2 atom: LB expression . RB
+
+    RB  shift, and go to state 11
+
+
+State 10
+
+    0 $accept: script_file "end of file" .
+
+    $default  accept
+
+
+State 11
+
+    2 atom: LB expression RB .
+
+    $default  reduce using rule 2 (atom)
