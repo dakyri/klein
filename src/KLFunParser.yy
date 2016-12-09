@@ -8,6 +8,7 @@
 %code requires {
 
 	#include "Command.h"
+	#include "KLFun.h"
 	
 	namespace KLF {
 		class ParserDriver;
@@ -56,9 +57,12 @@
 
 %type <intval> atom
 %type <intval> expression
+%type <intval> statement
+%type <intval> statement_list
+%type <intval> script_item_list
 %type <intval> block
-
-
+%type <intval> simple_definition
+%type <intval> handler_definition
 
 %type <vectival> dimension_list
 
@@ -80,6 +84,9 @@
 %token <control> CONTROL
 
 %token ASSGN
+%token IF
+%token ELSE
+%token ON
 
 %token LSQB
 %token RSQB
@@ -96,10 +103,32 @@
 
 %token PLUS
 %token MINUS
-%token STAR
-%token SLASH
+%token MULT
+%token DIVIDE
+%token POWER
+
+%token LT
+%token GT
+%token LE
+%token GE
+%token EQ
+%token NE
+
+%token AND
+%token OR
+%token NOT
 
 %token NEWLINE
+
+%left OR
+%left AND
+%left NOT
+%nonassoc LT GT LE GE EQ NE
+%left PLUS MINUS
+%left MULT DIVIDE
+%left NEG
+%right POWER
+
 
 /* destructor rule for <sval> objects */
 %destructor { if ($$)  { delete ($$); ($$) = nullptr; } } <stringval>
@@ -108,13 +137,61 @@
 %%
 
 script_file
-	: atom { $$ = $1; }
+	: script_item_list { $$ = $1; }
 	;
 	
+//////////////////////////////////
+// statements and top-level defs
+//////////////////////////////////
+
+statement
+	: IDENT ASSGN expression {
+			$$ = 0;
+		}
+	| CONTROL ASSGN expression {
+			$$ = 0;
+		}
+	| COMMAND {
+			$$ = 0;
+		}
+	| LBRA statement_list RBRA {
+			$$ = 0;
+		}
+	;
+
+		
+script_item_list
+	: { $$ = 0; }
+	| script_item_list statement { $$ = 0; }
+	| script_item_list simple_definition { $$ = 0; }
+	| script_item_list handler_definition { $$ = 0; }
+	;
+
+statement_list : { $$ = 0; }
+	| statement_list statement { $$ = 0; }
+	;
+
+simple_definition
+	: TYPE IDENT { 
+			$$ = 0;
+		}
+	;
+
+handler_definition
+	: ON EVENT statement {
+			$$ = 0;
+		}
+	;
+
 ////////////////////////////
 // expressions
 ////////////////////////////
-atom : LB expression RB { $$ = $2; }
+atom : IDENT {
+			$$ = 0;
+		}
+	| CONTROL {
+			$$ = 0;
+		}
 	| LITERAL_INT {
 			$$ = 0;
 		}
@@ -129,7 +206,24 @@ atom : LB expression RB { $$ = $2; }
 		}
 	;
 	
-expression : atom { $$ = $1; }
+expression 
+	: atom { $$ = $1; }
+	| expression PLUS expression	{ $$ = $1 + $3; }
+	| expression MINUS expression	{ $$ = $1 - $3; }
+	| expression MULT expression	{ $$ = $1 * $3; }
+	| expression DIVIDE expression	{ $$ = $1 / $3; }
+	| MINUS expression %prec NEG	{ $$ = -$2; }
+	| NOT expression				{ $$ = !$2; }
+	| expression LT expression		{ $$ = $1 < $3; }
+	| expression GT expression		{ $$ = $1 < $3; }
+	| expression NE expression		{ $$ = $1 == $3; }
+	| expression EQ expression		{ $$ = $1 != $3; }
+	| expression GE expression		{ $$ = $1 >= $3; }
+	| expression LE expression		{ $$ = $1 <= $3; }
+	| expression AND expression		{ $$ = $1 && $3; }
+	| expression OR expression		{ $$ = $1 || $3; }
+	| expression POWER expression	{ $$ = $1 ^ $3; }
+	| LB expression RB				{ $$ = $2; }
 	;
 
 

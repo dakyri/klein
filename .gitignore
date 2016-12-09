@@ -1,3 +1,14 @@
 windows/Klein.VC.VC.opendb
 windwos/Klein.VC.db
 windows/Klein/Debug
+
+windows/Klein.VC.db
+windows/.vs/Klein/v14/.suo
+.gitignore
+windows/.vs/Klein/v14/.suo
+windows/Debug/Klein.exe
+windows/Debug/Klein.exp
+windows/Debug/Klein.ilk
+windows/Debug/Klein.lib
+windows/Debug/Klein.pdb
+src/KLFunParser.output

@@ -60,7 +60,20 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 	return token::LITERAL_STRING;
 }
 
+"on" { return token::ON; }
+"if" { return token::IF; }
+"else" { return token::ELSE; }
+"int" { yylval->intval = KLFType::INTEGER; return token::TYPE; }
+"float" { yylval->intval = KLFType::FLOAT; return token::TYPE; }
+"bool" { yylval->intval = KLFType::BOOLEAN; return token::TYPE; }
 
+"true" { yylval->intval = 1; return token::LITERAL_INT; }
+"false" { yylval->intval = 0; return token::LITERAL_INT; }
+
+"click" { yylval->intval = KLFEvent::CLICK; return token::EVENT; }
+"endClick" { yylval->intval = KLFEvent::END_CLICK; return token::EVENT; }
+"sustain" { yylval->intval = KLFEvent::SUSTAIN; return token::EVENT; }
+"endSustain" { yylval->intval = KLFEvent::END_SUSTAIN; return token::EVENT; }
 
 {IDENT} {
 	Command *cmd = Command::find(yytext);
@@ -94,9 +107,19 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 
 "+" { return token::PLUS; }
 "-" { return token::MINUS; }
-"*" { return token::STAR; }
-"/" { return token::SLASH; }
+"*" { return token::MULT; }
+"/" { return token::DIVIDE; }
 
+"<" { return token::LT; }
+">" { return token::GT; }
+"<=" { return token::LE; }
+">=" { return token::GE; }
+"==" { return token::EQ; }
+"!=" { return token::NE; }
+
+"&&" { return token::AND; }
+"||" { return token::OR; }
+"!" { return token::NOT; }
 
 
 [ \t] {

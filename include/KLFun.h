@@ -1,5 +1,18 @@
 #pragma once
 
+enum KLFType {
+	INTEGER,
+	FLOAT,
+	BOOLEAN
+};
+
+enum KLFEvent {
+	CLICK,
+	END_CLICK,
+	SUSTAIN,
+	END_SUSTAIN
+};
+
 /**
  * a piece of KLF
  */
