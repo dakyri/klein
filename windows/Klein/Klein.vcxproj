@@ -25,13 +25,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -77,6 +77,9 @@
       <AdditionalIncludeDirectories>D:\src\cpp\sg-audio;D:\src\cpp\library\VST\vst-2.3-common;D:\src\cpp\Klein\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <ModuleDefinitionFile>Linker.def</ModuleDefinitionFile>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -96,6 +99,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>Linker.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -115,16 +119,51 @@
     <ClInclude Include="..\..\..\sg-audio\SampleFile.h" />
     <ClInclude Include="..\..\include\Bufferator.h" />
     <ClInclude Include="..\..\include\Controller.h" />
+    <ClInclude Include="..\..\include\Command.h" />
     <ClInclude Include="..\..\include\Klein.h" />
     <ClInclude Include="..\..\include\KleinChannel.h" />
+    <ClInclude Include="..\..\include\MidiDefs.h" />
+    <ClInclude Include="..\..\include\KLFun.h" />
+    <ClInclude Include="..\..\include\KLFunLexer.h" />
+    <ClInclude Include="..\..\include\ParserDriver.h" />
+    <ClInclude Include="..\..\src\KLFunParser.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\library\VST\vst-2.3-common\AudioEffect.cpp" />
+    <ClCompile Include="..\..\..\library\VST\vst-2.3-common\audioeffectx.cpp" />
     <ClCompile Include="..\..\..\sg-audio\SampleFile.cpp" />
     <ClCompile Include="..\..\src\Bufferator.cpp" />
     <ClCompile Include="..\..\src\Controller.cpp" />
     <ClCompile Include="..\..\src\Klein.cpp" />
     <ClCompile Include="..\..\src\KleinChannel.cpp" />
     <ClCompile Include="..\..\src\KleinMain.cpp" />
+    <ClCompile Include="..\..\src\KLFun.cpp" />
+    <ClCompile Include="..\..\src\KLFunLexer.cpp" />
+    <ClCompile Include="..\..\src\KLFunParser.cpp" />
+    <ClCompile Include="..\..\src\ParserDriver.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\src\KLFunLexer.l">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">flex --outfile=%(RootDir)%(Directory)KLFunLexer.cpp %(FullPath)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">flex lex</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">KLFunLexer.cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">flex --outfile=%(RootDir)%(Directory)KLFunLexer.cpp %(FullPath)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">flex lex</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">KLFunLexer.cpp</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\KLFunParser.yy">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">bison -d -v --output=%(RootDir)%(Directory)KLFunParser.cpp  %(FullPath)</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Bisonning away on the input script</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">KLFunParser.cpp;KLFunParser.hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">bison -d -v --output=%(RootDir)%(Directory)KLFunParser.cpp  %(FullPath)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">KLFunParser.cpp;KLFunParser.hpp</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Bisonning away on the input script</Message>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

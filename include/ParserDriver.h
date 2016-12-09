@@ -2,10 +2,10 @@
 #define __MCDRIVER_HPP__ 1
 
 #include <string>
-#include "MScriptLexer.h"
-#include "MScriptParser.hpp"
+#include "KLFunLexer.h"
+#include "KLFunParser.hpp"
 
-namespace MSParse {
+namespace KLF {
 
 class ParserDriver{
 public:
@@ -16,11 +16,11 @@ public:
 
 	std::ostream& print(std::ostream &stream);
 private:
-	MSParse::MScriptLexer scanner;
-	MSParse::MScriptParser parser;
+	KLF::KLFunLexer scanner;
+	KLF::KLFunParser parser;
 
 protected:
-	friend MSParse::MScriptParser;
+	friend KLF::KLFunParser;
 
 // global variables for passing more complex values around while parsing
 	/*

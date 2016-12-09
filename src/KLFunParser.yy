@@ -2,21 +2,21 @@
 %require  "3.0"
 %debug 
 %defines 
-%define api.namespace {MSParse}
-%define parser_class_name {MScriptParser}
+%define api.namespace {KLF}
+%define parser_class_name {KLFunParser}
 
 %code requires {
 
-/* ****************** include files ***************************** */
+	#include "Command.h"
 	
-	namespace MSParse {
+	namespace KLF {
 		class ParserDriver;
- 		class MScriptLexer;
+ 		class KLFunLexer;
 	}
 }
 
-%lex-param { MScriptLexer &scanner }
-%parse-param { MScriptLexer &scanner }
+%lex-param { KLFunLexer &scanner }
+%parse-param { KLFunLexer &scanner }
 
 %lex-param { ParserDriver &driver }
 %parse-param { ParserDriver &driver }
@@ -33,9 +33,9 @@
 	#include "ParserDriver.h"
   
    /* this is silly, but I can't figure out a way around */
-	static int yylex(MSParse::MScriptParser::semantic_type *yylval,
-					MSParse::MScriptLexer &scanner,
-					MSParse::ParserDriver &driver);
+	static int yylex(KLF::KLFunParser::semantic_type *yylval,
+					KLF::KLFunLexer &scanner,
+					KLF::ParserDriver &driver);
 
 }
 
@@ -43,6 +43,9 @@
 %union {
 	std::string *stringval;
 	std::vector<int> *vectival;
+
+	Command *command;
+	Control *control;
 	
 	int intval;
 	float floatval;
@@ -70,24 +73,11 @@
 
 %token <intval> LITERAL_INT
 %token <doubleval> LITERAL_FLOAT
-%token <intval> LITERAL_TIME
+%token <vectival> LITERAL_TIME
 %token <stringval> LITERAL_STRING
 
-%token QUA
-%token VOICE
-%token POOL
-%token SAMPLE
-%token LAMBDA
-%token CHANNEL
-%token STRUCT
-%token INPUT
-%token OUTPUT
-%token CLIP
-%token TAKE
-%token VST
-%token VSTPARAM
-
-
+%token <command> COMMAND
+%token <control> CONTROL
 
 %token ASSGN
 
@@ -126,16 +116,16 @@ script_file
 ////////////////////////////
 atom : LB expression RB { $$ = $2; }
 	| LITERAL_INT {
-			$$ = $1;
+			$$ = 0;
 		}
 	| LITERAL_FLOAT {
-			$$ = $1;
+			$$ = 0;
 		}
 	| LITERAL_STRING {
 			$$ = 0;
 		}
 	| LITERAL_TIME {
-			$$ = $1;
+			$$ = 0;
 		}
 	;
 	
@@ -147,18 +137,18 @@ expression : atom { $$ = $1; }
  
 
 void 
-MSParse::MScriptParser::error( const std::string &err_message )
+KLF::KLFunParser::error( const std::string &err_message )
 {
    std::cerr << "Error: " << err_message << ", near line " << scanner.lineno() << "\n"; 
 }
 
 
 /* include for access to scanner.yylex */
-#include "MScriptLexer.h"
+#include "KLFunLexer.h"
 static int 
-yylex( MSParse::MScriptParser::semantic_type *yylval,
-	   MSParse::MScriptLexer &scanner,
-	   MSParse::ParserDriver &driver )
+yylex( KLF::KLFunParser::semantic_type *yylval,
+	   KLF::KLFunLexer &scanner,
+	   KLF::ParserDriver &driver )
 {
    return( scanner.yylex(yylval) );
 }

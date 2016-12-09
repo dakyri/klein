@@ -31,26 +31,26 @@
 // version 2.2 of Bison.
 
 /**
- ** \file D:\src\cpp\Klein\src\MScriptParser.hpp
- ** Define the MSParse::parser class.
+ ** \file D:\src\cpp\Klein\src\KLFunParser.hpp
+ ** Define the KLF::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-#ifndef YY_YY_D_SRC_CPP_KLEIN_SRC_MSCRIPTPARSER_HPP_INCLUDED
-# define YY_YY_D_SRC_CPP_KLEIN_SRC_MSCRIPTPARSER_HPP_INCLUDED
+#ifndef YY_YY_D_SRC_CPP_KLEIN_SRC_KLFUNPARSER_HPP_INCLUDED
+# define YY_YY_D_SRC_CPP_KLEIN_SRC_KLFUNPARSER_HPP_INCLUDED
 // //                    "%code requires" blocks.
-#line 8 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:377
+#line 8 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:377
 
 
-/* ****************** include files ***************************** */
+	#include "Command.h"
 	
-	namespace MSParse {
+	namespace KLF {
 		class ParserDriver;
- 		class MScriptLexer;
+ 		class KLFunLexer;
 	}
 
-#line 54 "D:\\src\\cpp\\Klein\\src\\MScriptParser.hpp" // lalr1.cc:377
+#line 54 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
 
 
 # include <cstdlib> // std::abort
@@ -120,32 +120,35 @@
 # define YYDEBUG 1
 #endif
 
-#line 5 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:377
-namespace MSParse {
-#line 126 "D:\\src\\cpp\\Klein\\src\\MScriptParser.hpp" // lalr1.cc:377
+#line 5 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:377
+namespace KLF {
+#line 126 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
 
 
 
 
 
   /// A Bison parser.
-  class MScriptParser
+  class KLFunParser
   {
   public:
 #ifndef YYSTYPE
     /// Symbol semantic values.
     union semantic_type
     {
-    #line 43 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:377
+    #line 43 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:377
 
 	std::string *stringval;
 	std::vector<int> *vectival;
+
+	Command *command;
+	Control *control;
 	
 	int intval;
 	float floatval;
 	double doubleval;
 
-#line 149 "D:\\src\\cpp\\Klein\\src\\MScriptParser.hpp" // lalr1.cc:377
+#line 152 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
     };
 #else
     typedef YYSTYPE semantic_type;
@@ -172,36 +175,25 @@ namespace MSParse {
         LITERAL_FLOAT = 264,
         LITERAL_TIME = 265,
         LITERAL_STRING = 266,
-        QUA = 267,
-        VOICE = 268,
-        POOL = 269,
-        SAMPLE = 270,
-        LAMBDA = 271,
-        CHANNEL = 272,
-        STRUCT = 273,
-        INPUT = 274,
-        OUTPUT = 275,
-        CLIP = 276,
-        TAKE = 277,
-        VST = 278,
-        VSTPARAM = 279,
-        ASSGN = 280,
-        LSQB = 281,
-        RSQB = 282,
-        LBRA = 283,
-        RBRA = 284,
-        LB = 285,
-        RB = 286,
-        COMMA = 287,
-        COLON = 288,
-        COLON2 = 289,
-        SEMI = 290,
-        DOT = 291,
-        PLUS = 292,
-        MINUS = 293,
-        STAR = 294,
-        SLASH = 295,
-        NEWLINE = 296
+        COMMAND = 267,
+        CONTROL = 268,
+        ASSGN = 269,
+        LSQB = 270,
+        RSQB = 271,
+        LBRA = 272,
+        RBRA = 273,
+        LB = 274,
+        RB = 275,
+        COMMA = 276,
+        COLON = 277,
+        COLON2 = 278,
+        SEMI = 279,
+        DOT = 280,
+        PLUS = 281,
+        MINUS = 282,
+        STAR = 283,
+        SLASH = 284,
+        NEWLINE = 285
       };
     };
 
@@ -301,8 +293,8 @@ namespace MSParse {
 
 
     /// Build a parser object.
-    MScriptParser (MScriptLexer &scanner_yyarg, ParserDriver &driver_yyarg);
-    virtual ~MScriptParser ();
+    KLFunParser (KLFunLexer &scanner_yyarg, ParserDriver &driver_yyarg);
+    virtual ~KLFunParser ();
 
     /// Parse.
     /// \returns  0 iff parsing succeeded.
@@ -331,8 +323,8 @@ namespace MSParse {
 
   private:
     /// This class is not copyable.
-    MScriptParser (const MScriptParser&);
-    MScriptParser& operator= (const MScriptParser&);
+    KLFunParser (const KLFunParser&);
+    KLFunParser& operator= (const KLFunParser&);
 
     /// State numbers.
     typedef int state_type;
@@ -500,26 +492,26 @@ namespace MSParse {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 22,     ///< Last index in yytable_.
+      yylast_ = 11,     ///< Last index in yytable_.
       yynnts_ = 4,  ///< Number of nonterminal symbols.
       yyfinal_ = 10, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 42  ///< Number of tokens.
+      yyntokens_ = 31  ///< Number of tokens.
     };
 
 
     // User arguments.
-    MScriptLexer &scanner;
+    KLFunLexer &scanner;
     ParserDriver &driver;
   };
 
 
-#line 5 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:377
-} // MSParse
-#line 521 "D:\\src\\cpp\\Klein\\src\\MScriptParser.hpp" // lalr1.cc:377
+#line 5 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:377
+} // KLF
+#line 513 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
 
 
 
 
-#endif // !YY_YY_D_SRC_CPP_KLEIN_SRC_MSCRIPTPARSER_HPP_INCLUDED
+#endif // !YY_YY_D_SRC_CPP_KLEIN_SRC_KLFUNPARSER_HPP_INCLUDED

@@ -32,7 +32,7 @@
 
 /**
  ** \file D:\src\cpp\Klein\src\stack.hh
- ** Define the MSParse::stack class.
+ ** Define the KLF::stack class.
  */
 
 #ifndef YY_YY_D_SRC_CPP_KLEIN_SRC_STACK_HH_INCLUDED
@@ -40,8 +40,8 @@
 
 # include <vector>
 
-#line 5 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // stack.hh:132
-namespace MSParse {
+#line 5 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // stack.hh:132
+namespace KLF {
 #line 46 "D:\\src\\cpp\\Klein\\src\\stack.hh" // stack.hh:132
   template <class T, class S = std::vector<T> >
   class stack
@@ -150,8 +150,8 @@ namespace MSParse {
     unsigned int range_;
   };
 
-#line 5 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // stack.hh:132
-} // MSParse
+#line 5 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // stack.hh:132
+} // KLF
 #line 156 "D:\\src\\cpp\\Klein\\src\\stack.hh" // stack.hh:132
 
 #endif // !YY_YY_D_SRC_CPP_KLEIN_SRC_STACK_HH_INCLUDED

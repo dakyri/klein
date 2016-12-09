@@ -6,16 +6,16 @@
 
 using namespace std;
 
-MSParse::ParserDriver::ParserDriver()
+KLF::ParserDriver::ParserDriver()
 	: scanner(&cin)
 	, parser(scanner, *this) {
 }
 
-MSParse::ParserDriver::~ParserDriver() {
+KLF::ParserDriver::~ParserDriver() {
 }
 
 void 
-MSParse::ParserDriver::parse(std::istream& inStream)
+KLF::ParserDriver::parse(std::istream& inStream)
 {
 	/*
 	vstplugins.clear();
@@ -30,7 +30,7 @@ MSParse::ParserDriver::parse(std::istream& inStream)
 }
 
 std::ostream& 
-MSParse::ParserDriver::print( std::ostream &stream )
+KLF::ParserDriver::print( std::ostream &stream )
 {
 	return(stream);
 }

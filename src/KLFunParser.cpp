@@ -33,7 +33,7 @@
 
 // First part of user declarations.
 
-#line 37 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:404
+#line 37 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:404
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -43,13 +43,13 @@
 #  endif
 # endif
 
-#include "MScriptParser.hpp"
+#include "KLFunParser.hpp"
 
 // User implementation prologue.
 
-#line 51 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:412
+#line 51 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:412
 // Unqualified %code blocks.
-#line 24 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:413
+#line 24 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:413
 
 	#include <iostream>
 	#include <cstdlib>
@@ -62,12 +62,12 @@
 	#include "ParserDriver.h"
   
    /* this is silly, but I can't figure out a way around */
-	static int yylex(MSParse::MScriptParser::semantic_type *yylval,
-					MSParse::MScriptLexer &scanner,
-					MSParse::ParserDriver &driver);
+	static int yylex(KLF::KLFunParser::semantic_type *yylval,
+					KLF::KLFunLexer &scanner,
+					KLF::ParserDriver &driver);
 
 
-#line 71 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:413
+#line 71 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:413
 
 
 #ifndef YY_
@@ -132,12 +132,12 @@
 #define YYERROR         goto yyerrorlab
 #define YYRECOVERING()  (!!yyerrstatus_)
 
-#line 5 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:479
-namespace MSParse {
-#line 138 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:479
+#line 5 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:479
+namespace KLF {
+#line 138 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:479
 
   /// Build a parser object.
-  MScriptParser::MScriptParser (MScriptLexer &scanner_yyarg, ParserDriver &driver_yyarg)
+  KLFunParser::KLFunParser (KLFunLexer &scanner_yyarg, ParserDriver &driver_yyarg)
     :
 #if YYDEBUG
       yydebug_ (false),
@@ -147,7 +147,7 @@ namespace MSParse {
       driver (driver_yyarg)
   {}
 
-  MScriptParser::~MScriptParser ()
+  KLFunParser::~KLFunParser ()
   {}
 
 
@@ -156,20 +156,20 @@ namespace MSParse {
   `---------------*/
 
   inline
-  MScriptParser::syntax_error::syntax_error (const std::string& m)
+  KLFunParser::syntax_error::syntax_error (const std::string& m)
     : std::runtime_error (m)
   {}
 
   // basic_symbol.
   template <typename Base>
   inline
-  MScriptParser::basic_symbol<Base>::basic_symbol ()
+  KLFunParser::basic_symbol<Base>::basic_symbol ()
     : value ()
   {}
 
   template <typename Base>
   inline
-  MScriptParser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
+  KLFunParser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
     : Base (other)
     , value ()
   {
@@ -179,7 +179,7 @@ namespace MSParse {
 
   template <typename Base>
   inline
-  MScriptParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v)
+  KLFunParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v)
     : Base (t)
     , value (v)
   {}
@@ -188,14 +188,14 @@ namespace MSParse {
   /// Constructor for valueless symbols.
   template <typename Base>
   inline
-  MScriptParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t)
+  KLFunParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t)
     : Base (t)
     , value ()
   {}
 
   template <typename Base>
   inline
-  MScriptParser::basic_symbol<Base>::~basic_symbol ()
+  KLFunParser::basic_symbol<Base>::~basic_symbol ()
   {
     clear ();
   }
@@ -203,7 +203,7 @@ namespace MSParse {
   template <typename Base>
   inline
   void
-  MScriptParser::basic_symbol<Base>::clear ()
+  KLFunParser::basic_symbol<Base>::clear ()
   {
     Base::clear ();
   }
@@ -211,7 +211,7 @@ namespace MSParse {
   template <typename Base>
   inline
   bool
-  MScriptParser::basic_symbol<Base>::empty () const
+  KLFunParser::basic_symbol<Base>::empty () const
   {
     return Base::type_get () == empty_symbol;
   }
@@ -219,7 +219,7 @@ namespace MSParse {
   template <typename Base>
   inline
   void
-  MScriptParser::basic_symbol<Base>::move (basic_symbol& s)
+  KLFunParser::basic_symbol<Base>::move (basic_symbol& s)
   {
     super_type::move(s);
     value = s.value;
@@ -227,30 +227,30 @@ namespace MSParse {
 
   // by_type.
   inline
-  MScriptParser::by_type::by_type ()
+  KLFunParser::by_type::by_type ()
     : type (empty_symbol)
   {}
 
   inline
-  MScriptParser::by_type::by_type (const by_type& other)
+  KLFunParser::by_type::by_type (const by_type& other)
     : type (other.type)
   {}
 
   inline
-  MScriptParser::by_type::by_type (token_type t)
+  KLFunParser::by_type::by_type (token_type t)
     : type (yytranslate_ (t))
   {}
 
   inline
   void
-  MScriptParser::by_type::clear ()
+  KLFunParser::by_type::clear ()
   {
     type = empty_symbol;
   }
 
   inline
   void
-  MScriptParser::by_type::move (by_type& that)
+  KLFunParser::by_type::move (by_type& that)
   {
     type = that.type;
     that.clear ();
@@ -258,7 +258,7 @@ namespace MSParse {
 
   inline
   int
-  MScriptParser::by_type::type_get () const
+  KLFunParser::by_type::type_get () const
   {
     return type;
   }
@@ -266,38 +266,38 @@ namespace MSParse {
 
   // by_state.
   inline
-  MScriptParser::by_state::by_state ()
+  KLFunParser::by_state::by_state ()
     : state (empty_state)
   {}
 
   inline
-  MScriptParser::by_state::by_state (const by_state& other)
+  KLFunParser::by_state::by_state (const by_state& other)
     : state (other.state)
   {}
 
   inline
   void
-  MScriptParser::by_state::clear ()
+  KLFunParser::by_state::clear ()
   {
     state = empty_state;
   }
 
   inline
   void
-  MScriptParser::by_state::move (by_state& that)
+  KLFunParser::by_state::move (by_state& that)
   {
     state = that.state;
     that.clear ();
   }
 
   inline
-  MScriptParser::by_state::by_state (state_type s)
+  KLFunParser::by_state::by_state (state_type s)
     : state (s)
   {}
 
   inline
-  MScriptParser::symbol_number_type
-  MScriptParser::by_state::type_get () const
+  KLFunParser::symbol_number_type
+  KLFunParser::by_state::type_get () const
   {
     if (state == empty_state)
       return empty_symbol;
@@ -306,12 +306,12 @@ namespace MSParse {
   }
 
   inline
-  MScriptParser::stack_symbol_type::stack_symbol_type ()
+  KLFunParser::stack_symbol_type::stack_symbol_type ()
   {}
 
 
   inline
-  MScriptParser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
+  KLFunParser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
     : super_type (s)
   {
     value = that.value;
@@ -320,8 +320,8 @@ namespace MSParse {
   }
 
   inline
-  MScriptParser::stack_symbol_type&
-  MScriptParser::stack_symbol_type::operator= (const stack_symbol_type& that)
+  KLFunParser::stack_symbol_type&
+  KLFunParser::stack_symbol_type::operator= (const stack_symbol_type& that)
   {
     state = that.state;
     value = that.value;
@@ -332,7 +332,7 @@ namespace MSParse {
   template <typename Base>
   inline
   void
-  MScriptParser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
+  KLFunParser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
   {
     if (yymsg)
       YY_SYMBOL_PRINT (yymsg, yysym);
@@ -342,30 +342,37 @@ namespace MSParse {
     {
             case 3: // WORD
 
-#line 115 "D:\src\cpp\Klein\src\MScriptParser.yy" // lalr1.cc:614
+#line 105 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
         { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
-#line 348 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:614
+#line 348 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
         break;
 
       case 4: // SYMBOL
 
-#line 115 "D:\src\cpp\Klein\src\MScriptParser.yy" // lalr1.cc:614
+#line 105 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
         { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
-#line 355 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:614
+#line 355 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
         break;
 
       case 7: // IDENT
 
-#line 115 "D:\src\cpp\Klein\src\MScriptParser.yy" // lalr1.cc:614
+#line 105 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
         { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
-#line 362 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:614
+#line 362 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
+        break;
+
+      case 10: // LITERAL_TIME
+
+#line 106 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
+        { if ((yysym.value.vectival))  { delete ((yysym.value.vectival)); ((yysym.value.vectival)) = nullptr; } }
+#line 369 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
         break;
 
       case 11: // LITERAL_STRING
 
-#line 115 "D:\src\cpp\Klein\src\MScriptParser.yy" // lalr1.cc:614
+#line 105 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
         { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
-#line 369 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:614
+#line 376 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
         break;
 
 
@@ -377,7 +384,7 @@ namespace MSParse {
 #if YYDEBUG
   template <typename Base>
   void
-  MScriptParser::yy_print_ (std::ostream& yyo,
+  KLFunParser::yy_print_ (std::ostream& yyo,
                                      const basic_symbol<Base>& yysym) const
   {
     std::ostream& yyoutput = yyo;
@@ -396,7 +403,7 @@ namespace MSParse {
 
   inline
   void
-  MScriptParser::yypush_ (const char* m, state_type s, symbol_type& sym)
+  KLFunParser::yypush_ (const char* m, state_type s, symbol_type& sym)
   {
     stack_symbol_type t (s, sym);
     yypush_ (m, t);
@@ -404,7 +411,7 @@ namespace MSParse {
 
   inline
   void
-  MScriptParser::yypush_ (const char* m, stack_symbol_type& s)
+  KLFunParser::yypush_ (const char* m, stack_symbol_type& s)
   {
     if (m)
       YY_SYMBOL_PRINT (m, s);
@@ -413,40 +420,40 @@ namespace MSParse {
 
   inline
   void
-  MScriptParser::yypop_ (unsigned int n)
+  KLFunParser::yypop_ (unsigned int n)
   {
     yystack_.pop (n);
   }
 
 #if YYDEBUG
   std::ostream&
-  MScriptParser::debug_stream () const
+  KLFunParser::debug_stream () const
   {
     return *yycdebug_;
   }
 
   void
-  MScriptParser::set_debug_stream (std::ostream& o)
+  KLFunParser::set_debug_stream (std::ostream& o)
   {
     yycdebug_ = &o;
   }
 
 
-  MScriptParser::debug_level_type
-  MScriptParser::debug_level () const
+  KLFunParser::debug_level_type
+  KLFunParser::debug_level () const
   {
     return yydebug_;
   }
 
   void
-  MScriptParser::set_debug_level (debug_level_type l)
+  KLFunParser::set_debug_level (debug_level_type l)
   {
     yydebug_ = l;
   }
 #endif // YYDEBUG
 
-  inline MScriptParser::state_type
-  MScriptParser::yy_lr_goto_state_ (state_type yystate, int yysym)
+  inline KLFunParser::state_type
+  KLFunParser::yy_lr_goto_state_ (state_type yystate, int yysym)
   {
     int yyr = yypgoto_[yysym - yyntokens_] + yystate;
     if (0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
@@ -456,19 +463,19 @@ namespace MSParse {
   }
 
   inline bool
-  MScriptParser::yy_pact_value_is_default_ (int yyvalue)
+  KLFunParser::yy_pact_value_is_default_ (int yyvalue)
   {
     return yyvalue == yypact_ninf_;
   }
 
   inline bool
-  MScriptParser::yy_table_value_is_error_ (int yyvalue)
+  KLFunParser::yy_table_value_is_error_ (int yyvalue)
   {
     return yyvalue == yytable_ninf_;
   }
 
   int
-  MScriptParser::parse ()
+  KLFunParser::parse ()
   {
     // State.
     int yyn;
@@ -593,57 +600,57 @@ namespace MSParse {
           switch (yyn)
             {
   case 2:
-#line 121 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:859
+#line 111 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.intval) = (yystack_[0].value.intval); }
-#line 599 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:859
+#line 606 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 3:
-#line 127 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:859
+#line 117 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.intval) = (yystack_[1].value.intval); }
-#line 605 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:859
+#line 612 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 4:
-#line 128 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:859
-    {
-			(yylhs.value.intval) = (yystack_[0].value.intval);
-		}
-#line 613 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:859
-    break;
-
-  case 5:
-#line 131 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:859
-    {
-			(yylhs.value.intval) = (yystack_[0].value.doubleval);
-		}
-#line 621 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:859
-    break;
-
-  case 6:
-#line 134 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:859
+#line 118 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yylhs.value.intval) = 0;
 		}
-#line 629 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:859
+#line 620 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
+  case 5:
+#line 121 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			(yylhs.value.intval) = 0;
+		}
+#line 628 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
+  case 6:
+#line 124 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			(yylhs.value.intval) = 0;
+		}
+#line 636 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 7:
-#line 137 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:859
+#line 127 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
-			(yylhs.value.intval) = (yystack_[0].value.intval);
+			(yylhs.value.intval) = 0;
 		}
-#line 637 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:859
+#line 644 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 8:
-#line 142 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:859
+#line 132 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.intval) = (yystack_[0].value.intval); }
-#line 643 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:859
+#line 650 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
 
-#line 647 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:859
+#line 654 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
             default:
               break;
             }
@@ -791,80 +798,78 @@ namespace MSParse {
   }
 
   void
-  MScriptParser::error (const syntax_error& yyexc)
+  KLFunParser::error (const syntax_error& yyexc)
   {
     error (yyexc.what());
   }
 
   // Generate an error message.
   std::string
-  MScriptParser::yysyntax_error_ (state_type, const symbol_type&) const
+  KLFunParser::yysyntax_error_ (state_type, const symbol_type&) const
   {
     return YY_("syntax error");
   }
 
 
-  const signed char MScriptParser::yypact_ninf_ = -27;
+  const signed char KLFunParser::yypact_ninf_ = -16;
 
-  const signed char MScriptParser::yytable_ninf_ = -1;
+  const signed char KLFunParser::yytable_ninf_ = -1;
 
   const signed char
-  MScriptParser::yypact_[] =
+  KLFunParser::yypact_[] =
   {
-      -8,   -27,   -27,   -27,   -27,    -8,     4,   -27,   -27,   -26,
-     -27,   -27
+      -8,   -16,   -16,   -16,   -16,    -8,     4,   -16,   -16,   -15,
+     -16,   -16
   };
 
   const unsigned char
-  MScriptParser::yydefact_[] =
+  KLFunParser::yydefact_[] =
   {
        0,     4,     5,     7,     6,     0,     0,     2,     8,     0,
        1,     3
   };
 
   const signed char
-  MScriptParser::yypgoto_[] =
+  KLFunParser::yypgoto_[] =
   {
-     -27,   -27,     1,   -27
+     -16,   -16,     1,   -16
   };
 
   const signed char
-  MScriptParser::yydefgoto_[] =
+  KLFunParser::yydefgoto_[] =
   {
       -1,     6,     7,     9
   };
 
   const unsigned char
-  MScriptParser::yytable_[] =
+  KLFunParser::yytable_[] =
   {
        1,     2,     3,     4,    10,    11,     8,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     5
+       0,     5
   };
 
   const signed char
-  MScriptParser::yycheck_[] =
+  KLFunParser::yycheck_[] =
   {
-       8,     9,    10,    11,     0,    31,     5,    -1,    -1,    -1,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-      -1,    -1,    30
+       8,     9,    10,    11,     0,    20,     5,    -1,    -1,    -1,
+      -1,    19
   };
 
   const unsigned char
-  MScriptParser::yystos_[] =
+  KLFunParser::yystos_[] =
   {
-       0,     8,     9,    10,    11,    30,    43,    44,    44,    45,
-       0,    31
+       0,     8,     9,    10,    11,    19,    32,    33,    33,    34,
+       0,    20
   };
 
   const unsigned char
-  MScriptParser::yyr1_[] =
+  KLFunParser::yyr1_[] =
   {
-       0,    42,    43,    44,    44,    44,    44,    44,    45
+       0,    31,    32,    33,    33,    33,    33,    33,    34
   };
 
   const unsigned char
-  MScriptParser::yyr2_[] =
+  KLFunParser::yyr2_[] =
   {
        0,     2,     1,     3,     1,     1,     1,     1,     1
   };
@@ -874,27 +879,26 @@ namespace MSParse {
   // YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
   // First, the terminals, then, starting at \a yyntokens_, nonterminals.
   const char*
-  const MScriptParser::yytname_[] =
+  const KLFunParser::yytname_[] =
   {
   "\"end of file\"", "error", "$undefined", "WORD", "SYMBOL", "TYPE",
   "EVENT", "IDENT", "LITERAL_INT", "LITERAL_FLOAT", "LITERAL_TIME",
-  "LITERAL_STRING", "QUA", "VOICE", "POOL", "SAMPLE", "LAMBDA", "CHANNEL",
-  "STRUCT", "INPUT", "OUTPUT", "CLIP", "TAKE", "VST", "VSTPARAM", "ASSGN",
-  "LSQB", "RSQB", "LBRA", "RBRA", "LB", "RB", "COMMA", "COLON", "COLON2",
-  "SEMI", "DOT", "PLUS", "MINUS", "STAR", "SLASH", "NEWLINE", "$accept",
-  "script_file", "atom", "expression", YY_NULLPTR
+  "LITERAL_STRING", "COMMAND", "CONTROL", "ASSGN", "LSQB", "RSQB", "LBRA",
+  "RBRA", "LB", "RB", "COMMA", "COLON", "COLON2", "SEMI", "DOT", "PLUS",
+  "MINUS", "STAR", "SLASH", "NEWLINE", "$accept", "script_file", "atom",
+  "expression", YY_NULLPTR
   };
 
 
   const unsigned char
-  MScriptParser::yyrline_[] =
+  KLFunParser::yyrline_[] =
   {
-       0,   121,   121,   127,   128,   131,   134,   137,   142
+       0,   111,   111,   117,   118,   121,   124,   127,   132
   };
 
   // Print the state stack on the debug stream.
   void
-  MScriptParser::yystack_print_ ()
+  KLFunParser::yystack_print_ ()
   {
     *yycdebug_ << "Stack now";
     for (stack_type::const_iterator
@@ -907,7 +911,7 @@ namespace MSParse {
 
   // Report on the debug stream that the rule \a yyrule is going to be reduced.
   void
-  MScriptParser::yy_reduce_print_ (int yyrule)
+  KLFunParser::yy_reduce_print_ (int yyrule)
   {
     unsigned int yylno = yyrline_[yyrule];
     int yynrhs = yyr2_[yyrule];
@@ -923,8 +927,8 @@ namespace MSParse {
 
   // Symbol number corresponding to token number t.
   inline
-  MScriptParser::token_number_type
-  MScriptParser::yytranslate_ (int t)
+  KLFunParser::token_number_type
+  KLFunParser::yytranslate_ (int t)
   {
     static
     const token_number_type
@@ -958,10 +962,9 @@ namespace MSParse {
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    37,    38,    39,    40,    41
+      25,    26,    27,    28,    29,    30
     };
-    const unsigned int user_token_number_max_ = 296;
+    const unsigned int user_token_number_max_ = 285;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int>(t) <= yyeof_)
@@ -972,26 +975,26 @@ namespace MSParse {
       return undef_token_;
   }
 
-#line 5 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:1167
-} // MSParse
-#line 978 "D:\\src\\cpp\\Klein\\src\\MScriptParser.cpp" // lalr1.cc:1167
-#line 146 "D:\\src\\cpp\\Klein\\src\\MScriptParser.yy" // lalr1.cc:1168
+#line 5 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:1167
+} // KLF
+#line 981 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:1167
+#line 136 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:1168
 
  
 
 void 
-MSParse::MScriptParser::error( const std::string &err_message )
+KLF::KLFunParser::error( const std::string &err_message )
 {
    std::cerr << "Error: " << err_message << ", near line " << scanner.lineno() << "\n"; 
 }
 
 
 /* include for access to scanner.yylex */
-#include "MScriptLexer.h"
+#include "KLFunLexer.h"
 static int 
-yylex( MSParse::MScriptParser::semantic_type *yylval,
-	   MSParse::MScriptLexer &scanner,
-	   MSParse::ParserDriver &driver )
+yylex( KLF::KLFunParser::semantic_type *yylval,
+	   KLF::KLFunLexer &scanner,
+	   KLF::ParserDriver &driver )
 {
    return( scanner.yylex(yylval) );
 }

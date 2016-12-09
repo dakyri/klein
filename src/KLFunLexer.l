@@ -2,10 +2,10 @@
 /* C++ string header, for string ops below */
 #include <string>
 /* Implementation of yyFlexScanner */ 
-#include "MScriptLexer.h"
+#include "KLFunLexer.h"
 
 /* typedef to make the returns for the tokens shorter */
-typedef MSParse::MScriptParser::token token;
+typedef KLF::KLFunParser::token token;
 
 /* define yyterminate as this instead of NULL */
 #define yyterminate() return( token::END )
@@ -19,7 +19,7 @@ typedef MSParse::MScriptParser::token token;
  
 %option debug 
 %option nodefault 
-%option yyclass="MSciptLexer" 
+%option yyclass="KLFunLexer" 
 %option noyywrap 
 %option yylineno
 %option c++
@@ -60,33 +60,19 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 	return token::LITERAL_STRING;
 }
 
-"qua" { return token::QUA; }
-"voice" { return token::VOICE; }
-"pool" { return token::POOL; }
-"sample" { return token::SAMPLE; }
-"channel" { return token::CHANNEL; }
-"function" { return token::LAMBDA; }
-"lambda" { return token::LAMBDA; }
-"struct" { return token::STRUCT; }
-"input" { return token::INPUT; }
-"output" { return token::OUTPUT; }
-"take" { return token::TAKE; }
-"clip" { return token::CLIP; }
-"vst" { return token::VST; }
-"vstparam" { return token::VST; }
+
 
 {IDENT} {
-/*
-	int type_id = findType(yytext);
-	if (type_id != TypedValue::S_UNKNOWN) {
-		yylval->intval = 0;
-		return token::TYPE;
+	Command *cmd = Command::find(yytext);
+	if (cmd != nullptr) {
+		yylval->command = cmd;
+		return token::COMMAND;
 	}
-	type_id = findDfltEventType(yytext);
-	if (type_id != TypedValue::S_UNKNOWN) {
-		yylval->inval = 0;
-		return token::EVENT;
-	}*/
+	Control *ctrl = Control::find(yytext);
+	if (ctrl != nullptr) {
+		yylval->control = ctrl;
+		return token::CONTROL;
+	}
 	yylval->stringval = new std::string(yytext);
 	return token::IDENT;
 }

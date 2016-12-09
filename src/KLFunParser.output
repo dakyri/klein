@@ -11,19 +11,8 @@ Terminals unused in grammar
    TYPE
    EVENT
    IDENT
-   QUA
-   VOICE
-   POOL
-   SAMPLE
-   LAMBDA
-   CHANNEL
-   STRUCT
-   INPUT
-   OUTPUT
-   CLIP
-   TAKE
-   VST
-   VSTPARAM
+   COMMAND
+   CONTROL
    ASSGN
    LSQB
    RSQB
@@ -69,47 +58,36 @@ LITERAL_INT (263) 3
 LITERAL_FLOAT (264) 4
 LITERAL_TIME (265) 6
 LITERAL_STRING (266) 5
-QUA (267)
-VOICE (268)
-POOL (269)
-SAMPLE (270)
-LAMBDA (271)
-CHANNEL (272)
-STRUCT (273)
-INPUT (274)
-OUTPUT (275)
-CLIP (276)
-TAKE (277)
-VST (278)
-VSTPARAM (279)
-ASSGN (280)
-LSQB (281)
-RSQB (282)
-LBRA (283)
-RBRA (284)
-LB (285) 2
-RB (286) 2
-COMMA (287)
-COLON (288)
-COLON2 (289)
-SEMI (290)
-DOT (291)
-PLUS (292)
-MINUS (293)
-STAR (294)
-SLASH (295)
-NEWLINE (296)
+COMMAND (267)
+CONTROL (268)
+ASSGN (269)
+LSQB (270)
+RSQB (271)
+LBRA (272)
+RBRA (273)
+LB (274) 2
+RB (275) 2
+COMMA (276)
+COLON (277)
+COLON2 (278)
+SEMI (279)
+DOT (280)
+PLUS (281)
+MINUS (282)
+STAR (283)
+SLASH (284)
+NEWLINE (285)
 
 
 Nonterminals, with rules where they appear
 
-$accept (42)
+$accept (31)
     on left: 0
-script_file (43)
+script_file (32)
     on left: 1, on right: 0
-atom (44)
+atom (33)
     on left: 2 3 4 5 6, on right: 1 7
-expression (45)
+expression (34)
     on left: 7, on right: 2
 
 

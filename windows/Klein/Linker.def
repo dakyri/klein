@@ -1,0 +1,3 @@
+    LIBRARY     Klein
+    EXPORTS     main=VSTPluginMain
+    VSTPluginMain
