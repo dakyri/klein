@@ -197,18 +197,19 @@ namespace KLF {
         MINUS = 285,
         MULT = 286,
         DIVIDE = 287,
-        POWER = 288,
-        LT = 289,
-        GT = 290,
-        LE = 291,
-        GE = 292,
-        EQ = 293,
-        NE = 294,
-        AND = 295,
-        OR = 296,
-        NOT = 297,
-        NEWLINE = 298,
-        NEG = 299
+        MOD = 288,
+        POWER = 289,
+        LT = 290,
+        GT = 291,
+        LE = 292,
+        GE = 293,
+        EQ = 294,
+        NE = 295,
+        AND = 296,
+        OR = 297,
+        NOT = 298,
+        NEWLINE = 299,
+        NEG = 300
       };
     };
 
@@ -507,12 +508,12 @@ namespace KLF {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 131,     ///< Last index in yytable_.
+      yylast_ = 150,     ///< Last index in yytable_.
       yynnts_ = 9,  ///< Number of nonterminal symbols.
       yyfinal_ = 3, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 45  ///< Number of tokens.
+      yyntokens_ = 46  ///< Number of tokens.
     };
 
 
@@ -524,7 +525,7 @@ namespace KLF {
 
 #line 5 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:377
 } // KLF
-#line 528 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
+#line 529 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
 
 
 

@@ -122,6 +122,7 @@
     <ClInclude Include="..\..\include\Command.h" />
     <ClInclude Include="..\..\include\Klein.h" />
     <ClInclude Include="..\..\include\KleinChannel.h" />
+    <ClInclude Include="..\..\include\KLFunValue.h" />
     <ClInclude Include="..\..\include\MidiDefs.h" />
     <ClInclude Include="..\..\include\KLFun.h" />
     <ClInclude Include="..\..\include\KLFunLexer.h" />

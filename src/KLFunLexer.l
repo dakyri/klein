@@ -109,6 +109,7 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 "-" { return token::MINUS; }
 "*" { return token::MULT; }
 "/" { return token::DIVIDE; }
+"%" { return token::MOD; }
 
 "<" { return token::LT; }
 ">" { return token::GT; }

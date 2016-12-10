@@ -51,6 +51,9 @@
     <ClInclude Include="..\..\src\KLFunParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\KLFunValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Klein.cpp">

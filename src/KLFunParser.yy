@@ -105,6 +105,7 @@
 %token MINUS
 %token MULT
 %token DIVIDE
+%token MOD
 %token POWER
 
 %token LT
@@ -125,7 +126,7 @@
 %left NOT
 %nonassoc LT GT LE GE EQ NE
 %left PLUS MINUS
-%left MULT DIVIDE
+%left MULT DIVIDE MOD
 %left NEG
 %right POWER
 
@@ -211,6 +212,7 @@ expression
 	| expression PLUS expression	{ $$ = $1 + $3; }
 	| expression MINUS expression	{ $$ = $1 - $3; }
 	| expression MULT expression	{ $$ = $1 * $3; }
+	| expression MOD expression		{ $$ = $1 % $3; }
 	| expression DIVIDE expression	{ $$ = $1 / $3; }
 	| MINUS expression %prec NEG	{ $$ = -$2; }
 	| NOT expression				{ $$ = !$2; }

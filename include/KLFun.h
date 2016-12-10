@@ -1,10 +1,11 @@
 #pragma once
 
-enum KLFType {
-	INTEGER,
-	FLOAT,
-	BOOLEAN
-};
+/**
+ * The Klein Looper Functional language. KLF script.
+ * Keep is simple stupid and get looping working before you go to town on this
+ */
+
+#include "KLFunValue.h"
 
 enum KLFEvent {
 	CLICK,
@@ -20,8 +21,36 @@ class KBlock {
 public:
 	KBlock();
 	virtual ~KBlock();
+
+	int virtual run() { return 0; }
+	KLFValue virtual evaluate() { return KLFValue(); }
 };
 
+class KIfBlock : public KBlock {
+public:
+	KIfBlock();
+	virtual ~KIfBlock();
+
+	int virtual run();
+
+protected:
+	KBlock *expression;
+	KBlock *ifBranch;
+	KBlock *elseBranch;
+};
+
+class KAssBlock : public KBlock {
+public:
+	KAssBlock();
+	virtual ~KAssBlock();
+
+	int virtual run();
+
+protected:
+	KBlock *expression;
+	KBlock *ifBranch;
+	KBlock *elseBranch;
+};
 /**
 * a compiled and loaded KLF
 *
@@ -33,6 +62,8 @@ class KLFun
 public:
 	KLFun();
 	virtual ~KLFun();
+
+	bool run();
 
 protected:
 	KBlock *main;
