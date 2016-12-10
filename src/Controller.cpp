@@ -233,3 +233,27 @@ vector<ControlMapping> * Controller::getMidiMap(int hash)
 int Controller::makeMidiHash(char *midiData) {
 	return midiData[0] | (midiData[1] << 8);
 }
+
+int makeMidiHash(int cmd, int chan, int which) {
+	return (cmd << 12) | (chan << 8) | which
+}
+
+void Controller::addNoteMapping(ControlMapping & mapping, int channel, int which)
+{
+	midiMap[makeMidiHash(MIDI_NOTE_ON, channel, which)].push_back(mapping);
+}
+
+void Controller::addCtrlMapping(ControlMapping & mapping, int channel, int which)
+{
+	midiMap[makeMidiHash(MIDI_CTRL, channel, which)].push_back(mapping);
+}
+
+void Controller::addProgMapping(ControlMapping & mapping, int channel, int which)
+{
+	midiMap[makeMidiHash(MIDI_PROG, channel, which)].push_back(mapping);
+}
+
+status_t Controller::loadScript(const char * id, const char * src)
+{
+	return ERR_OK;
+}

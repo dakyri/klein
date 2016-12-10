@@ -121,12 +121,14 @@
     <ClInclude Include="..\..\include\Controller.h" />
     <ClInclude Include="..\..\include\Command.h" />
     <ClInclude Include="..\..\include\Klein.h" />
-    <ClInclude Include="..\..\include\KleinChannel.h" />
+    <ClInclude Include="..\..\include\KleinTrack.h" />
     <ClInclude Include="..\..\include\KLFunValue.h" />
     <ClInclude Include="..\..\include\MidiDefs.h" />
     <ClInclude Include="..\..\include\KLFun.h" />
     <ClInclude Include="..\..\include\KLFunLexer.h" />
+    <ClInclude Include="..\..\include\mwdefs.h" />
     <ClInclude Include="..\..\include\ParserDriver.h" />
+    <ClInclude Include="..\..\include\tinyxml2.h" />
     <ClInclude Include="..\..\src\KLFunParser.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -136,12 +138,13 @@
     <ClCompile Include="..\..\src\Bufferator.cpp" />
     <ClCompile Include="..\..\src\Controller.cpp" />
     <ClCompile Include="..\..\src\Klein.cpp" />
-    <ClCompile Include="..\..\src\KleinChannel.cpp" />
+    <ClCompile Include="..\..\src\KleinTrack.cpp" />
     <ClCompile Include="..\..\src\KleinMain.cpp" />
     <ClCompile Include="..\..\src\KLFun.cpp" />
     <ClCompile Include="..\..\src\KLFunLexer.cpp" />
     <ClCompile Include="..\..\src\KLFunParser.cpp" />
     <ClCompile Include="..\..\src\ParserDriver.cpp" />
+    <ClCompile Include="..\..\src\tinyxml2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\KLFunLexer.l">

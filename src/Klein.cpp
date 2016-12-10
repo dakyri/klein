@@ -2,13 +2,16 @@
 #include <stdio.h>
 #include <string>
 #include <iostream>
-
+#include <fstream>
 using namespace std;
-#undef DEBUG 
-#ifdef DEBUG
-FILE	*dbf=NULL;
+
+#undef KLEIN_DEBUG 11
+#ifdef KLEIN_DEBUG
+ofstream dbf;
+
 #endif
 
+#include "tinyxml2.h"
 
 #include "Klein.h"
 #include "AEffEditor.hpp"
@@ -83,6 +86,15 @@ Klein::Klein(audioMasterCallback audioMaster)
 	, controller(*this)
 	, delayLine(2, 2)
 {
+	tracksSetupDone = false;
+	loadConfig("config.xml");
+	if (!tracksSetupDone) {
+	}
+	programs = new KleinProgram[numPrograms];
+
+
+
+
 //	delayLine = new SGDelayLine(2, MaxSGDelayTime, sampleRate);
 	short	i;
 	for (i=0; i<NSGDelayTap; i++) {
@@ -92,7 +104,6 @@ Klein::Klein(audioMasterCallback audioMaster)
 		lFilterin[i] = new float[SGDelayChunkFrames];
 		rFilterin[i] = new float[SGDelayChunkFrames];
 	}
-	programs = new KleinProgram[numPrograms];
 
 	nChunkFrames = 0;
 	nChunkFrameRemaining = 0;
@@ -118,16 +129,13 @@ Klein::Klein(audioMasterCallback audioMaster)
 	fLFOTarget[0] = kFilter1Frequency;
 
 	if (programs) {
-		setProgram (0);
+		setProgram(0);
 	}
 
 	vu = 0;
 
-#ifdef DEBUG
-	if (!dbf) {
-		dbf = fopen("debug", "w");
-		setbuf(dbf, NULL);
-	}
+#ifdef KLEIN_DEBUG
+	dbf.open("debug.out");
 #endif
 	
 //	SGLFO::InitializeDefaultWavetables();
@@ -138,20 +146,14 @@ Klein::Klein(audioMasterCallback audioMaster)
 	setUniqueID ('KLYN');
 
 	suspend ();		// flush buffer
-#ifdef DEBUG
-	fprintf(dbf, "Built the fucking thing %d %g\n", blockSize, sampleRate);
+#ifdef KLEIN_DEBUG
+	dbf << "Built the thing " << blockSize << " " << sampleRate << endl;
 #endif
 }
 
 //------------------------------------------------------------------------
 Klein::~Klein()
 {
-#ifdef DEBUG
-	if (dbf) {
-		fclose(dbf);
-		dbf = NULL;
-	}
-#endif
 	short	i;
 	if (programs)
 		delete[] programs;
@@ -309,8 +311,8 @@ void Klein::setParameter (long index, float value)
 {
 	KleinProgram * ap = &programs[curProgram];
 
-#ifdef DEBUG
-	fprintf(dbf, "set p %d %g\n", index, value);
+#ifdef KLEIN_DEBUG
+	dbf << "set p " <<  index << ", " << value << endl;
 #endif
 	switch (index)
 	{
@@ -544,7 +546,10 @@ Klein::LFOCheck(short which)
 	}
 }
 
-//------------------------------------------------------------------------
+/**************************************************************************************
+ * VST HOOKS
+ *************************************************************************************/
+
 void Klein::process (float **inputs, float **outputs, long nFrames)
 {
 	float	*inl= inputs[0];
@@ -570,10 +575,9 @@ void Klein::process (float **inputs, float **outputs, long nFrames)
 	}
 	feedback = fFeedback;
 	
-#if (DEBUG >= 10)
-		fprintf(dbf, "process replacing nf %d %d %d flt %d %d gain %g %g\n",
-				nFrames, SGDelayChunkFrames, nFrames/SGDelayChunkFrames,
-				lfilt[0].type, rfilt[0].type, lGain[0], rGain[0]);
+#if (KLEIN_DEBUG >= 10)
+	dbf << "process replacing nf " << nFrames << " " << SGDelayChunkFrames << " " << (nFrames / SGDelayChunkFrames) << " flt " << 
+			" gain " << lGain[0] << " " << rGain[0] << endl; 
 #endif
 	long	outFrame = 0;
 
@@ -652,10 +656,9 @@ void Klein::processReplacing (float **inputs, float **outputs, long nFrames)
 
 	feedback = fFeedback;
 	
-#if (DEBUG >= 10)
-		fprintf(dbf, "process replacing nf %d %d %d flt %d %d gain %g %g\n",
-				nFrames, SGDelayChunkFrames, nFrames/SGDelayChunkFrames,
-				lfilt[0].type, rfilt[0].type, lGain[0], rGain[0]);
+#if (KLEIN_DEBUG >= 10)
+	dbf << "process replacing nf " << nFrames << " " << SGDelayChunkFrames << " " << (nFrames / SGDelayChunkFrames) << " flt " <<
+		" gain " << lGain[0] << " " << rGain[0] << endl;
 #endif
 	long	outFrame = 0;
 
@@ -930,4 +933,130 @@ bool Klein::getMidiKeyName(long channel, MidiKeyName* key)
 bool Klein::hasMidiProgramsChanged(long channel)
 {
 	return false;	// updateDisplay ()
+}
+
+/**************************************************************************************
+* CONFIGURATION
+*************************************************************************************/
+string configLoadErrorStr = "";
+
+using namespace tinyxml2;
+
+status_t
+Klein::loadConfig(const char *path)
+{
+	XMLDocument doc;
+
+	XMLError err = doc.LoadFile(path);
+	if (err != XML_NO_ERROR) {
+		configLoadErrorStr = doc.GetErrorStr1();
+		return err;
+	}
+	XMLElement* root = doc.RootElement();
+
+	string namestr = root->Value();
+	if (namestr == "klein") {
+		const char *inputPortAttrVal = root->Attribute("nInputPort");
+		const char *outputPortAttrVal = root->Attribute("nOutputPort");
+		XMLElement *childElement = root->FirstChildElement();
+		while (childElement != nullptr) {
+			std::string childName = childElement->Value();
+			if (childName == "tracks") {
+				err = loadTrackConfig(childElement);
+			} else if (childName == "scripts") {
+				err = loadScriptConfig(childElement);
+			} else if (childName == "midiMap") {
+				err = loadMidiMapConfig(childElement);
+			}
+			if (err != XML_NO_ERROR) {
+				configLoadErrorStr = doc.GetErrorStr1();
+				return err;
+			}
+			childElement = childElement->NextSiblingElement();
+		}
+
+	} else {
+		configLoadErrorStr = "Expected 'klein' as root element";
+		return KF_ERROR;
+	}
+	return KF_OK;
+}
+
+XMLError Klein::loadTrackConfig(tinyxml2::XMLElement *element) {
+	const char *inputPortAttrVal = element->Attribute("nTracks");
+	XMLElement *childElement = element->FirstChildElement();
+	while (childElement != nullptr) {
+		std::string childName = childElement->Value();
+		if (childName == "track") {
+			const char *idAttrVal = childElement->Attribute("id");
+			const char *inPortAttrVal = childElement->Attribute("inPort");
+			const char *outPortAttrVal = childElement->Attribute("outPort");
+		}
+		childElement = childElement->NextSiblingElement();
+	}
+	return XML_NO_ERROR;
+}
+
+XMLError Klein::loadScriptConfig(tinyxml2::XMLElement *element) {
+	XMLElement *childElement = element->FirstChildElement();
+	while (childElement != nullptr) {
+		std::string childName = childElement->Value();
+		const char *idAttrVal = childElement->Attribute("id");
+		const char *srcAttrVal = childElement->Attribute("src");
+
+		if (idAttrVal && srcAttrVal) {
+			status_t err = controller.loadScript(idAttrVal, srcAttrVal);
+			if (err != ERR_OK) {
+
+			}
+		}
+
+		childElement = childElement->NextSiblingElement();
+	}
+	return XML_NO_ERROR;
+}
+
+XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element) {
+	XMLElement *childElement = element->FirstChildElement();
+	while (childElement != nullptr) {
+		std::string childName = childElement->Value();
+		const char *channelAttrVal = childElement->Attribute("channel");
+		const char *whichAttrVal = childElement->Attribute("which");
+		const char *contextAttrVal = childElement->Attribute("context");
+
+		const char *functionAttrVal = childElement->Attribute("function");
+		const char *controlAttrVal = childElement->Attribute("control");
+		const char *scriptAttrVal = childElement->Attribute("script");
+
+		int channel = channelAttrVal ? atoi(channelAttrVal) : 0;
+		int which = whichAttrVal ? atoi(whichAttrVal): 0;
+
+		ControlMapping mapping;
+		bool hasMapping = false;
+		if (functionAttrVal) {
+			hasMapping = true;
+		}
+		else if (controlAttrVal) {
+			hasMapping = true;
+		}
+		else if (scriptAttrVal) {
+			hasMapping = true;
+		}
+
+		if (hasMapping) {
+			if (childName == "note") {
+				controller.addNoteMapping(mapping, channel, which);
+			}
+			else if (childName == "ctrl") {
+				controller.addCtrlMapping(mapping, channel, which);
+			}
+			else if (childName == "prog") {
+				controller.addProgMapping(mapping, channel, which);
+			}
+		}
+
+		childElement = childElement->NextSiblingElement();
+	}
+	return XML_NO_ERROR;
+
 }

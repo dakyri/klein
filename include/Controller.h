@@ -7,6 +7,8 @@ using namespace std;
 
 #include "audioeffectx.h"
 
+#include "mwdefs.h"
+
 #include "MidiDefs.h"
 #include "Command.h"
 #include "ParserDriver.h"
@@ -57,12 +59,18 @@ public:
 
 	bool processEvent(VstMidiEvent *e);
 
+	void addNoteMapping(ControlMapping & mapping, int channel, int which);
+	void addCtrlMapping(ControlMapping & mapping, int channel, int which);
+	void addProgMapping(ControlMapping & mapping, int channel, int which);
+	status_t loadScript(const char *id, const char *src);
+
 protected:
 	Klein &klein;
 	unordered_map<int, vector<ControlMapping>> midiMap;
 
 	vector<ControlMapping> * getMidiMap(int);
 	int makeMidiHash(char *midiData);
+	int makeMidiHash(int cmd, int chan, int which);
 	bool processMapping(ControlMapping &m);
 };
 

@@ -1,6 +1,7 @@
 #ifndef _KLEIN_H
 #define _KLEIN_H
 
+#include "tinyxml2.h"
 
 #include "audioeffectx.h"
 
@@ -10,7 +11,7 @@
 using namespace std;
 
 #include "Bufferator.h"
-#include "KleinChannel.h"
+#include "KleinTrack.h"
 #include "Controller.h"
 
 #include "Delay.h"
@@ -85,6 +86,12 @@ private:
 class Klein : public AudioEffectX
 {
 public:
+
+	enum {
+		KF_OK = 0,
+		KF_ERROR = 200,
+	};
+
 	Klein(audioMasterCallback audioMaster);
 	virtual ~Klein();
 
@@ -131,11 +138,15 @@ private:
 	float getTempo();
 
 	KleinProgram *programs;
+	bool tracksSetupDone;
 
 	KleinChannel channels[MAX_CHANNELS];
 	Controller controller;
 
-
+	status_t loadConfig(const char *path);
+	tinyxml2::XMLError loadTrackConfig(tinyxml2::XMLElement *element);
+	tinyxml2::XMLError loadScriptConfig(tinyxml2::XMLElement *element);
+	tinyxml2::XMLError loadMidiMapConfig(tinyxml2::XMLElement *element);
 
 
 

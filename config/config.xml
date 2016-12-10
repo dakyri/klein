@@ -1,0 +1,16 @@
+<klein nInputPort="1" nOutputPort="4">
+	<tracks nTracks="4">
+		<track id="0" inPort="0" outPort="0" />
+		<track id="1" inPort="0" outPort="1" />
+		<track id="2" inPort="0" outPort="2" />
+		<track id="3" inPort="0" outPort="3" />
+	</tracks>
+	<scripts>
+		<script id="some id" src="path"/>
+	</script>
+	<midiMap>
+		<note channel="1" which="1" script="some script" context="1" />
+		<ctrl channel="1" which="1" control="some control" context="2"/>
+		<prog channel="1" which="1" function="some function" context="global"/>
+	</midiMap>
+</klein>
