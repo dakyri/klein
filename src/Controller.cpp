@@ -234,8 +234,8 @@ int Controller::makeMidiHash(char *midiData) {
 	return midiData[0] | (midiData[1] << 8);
 }
 
-int makeMidiHash(int cmd, int chan, int which) {
-	return (cmd << 12) | (chan << 8) | which
+int Controller::makeMidiHash(int cmd, int chan, int which) {
+	return (cmd << 12) | (chan << 8) | which;
 }
 
 void Controller::addNoteMapping(ControlMapping & mapping, int channel, int which)

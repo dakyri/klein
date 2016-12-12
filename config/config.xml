@@ -1,9 +1,9 @@
 <klein nInputPort="1" nOutputPort="4">
-	<tracks nTracks="4">
-		<track id="0" inPort="0" outPort="0" />
-		<track id="1" inPort="0" outPort="1" />
-		<track id="2" inPort="0" outPort="2" />
-		<track id="3" inPort="0" outPort="3" />
+	<tracks nTracks="4" nLoopsPerTrack="4">
+		<track id="0" inPort="0" outPort="0" syncSrc="host" syncUnit="loop" />
+		<track id="1" inPort="0" outPort="1" syncSrc="host" syncUnit="loop" />
+		<track id="2" inPort="0" outPort="2" syncSrc="host" syncUnit="loop" />
+		<track id="3" inPort="0" outPort="3" syncSrc="host" syncUnit="loop" />
 	</tracks>
 	<scripts>
 		<script id="some id" src="path"/>

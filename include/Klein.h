@@ -16,36 +16,7 @@ using namespace std;
 
 #include "Delay.h"
 
-#define MaxSGDelayTime	4.0
-#define MinSGDelayBeats	0.0
-#define MaxSGDelayBeats	8.0
-#define MinSGDelayLFRate	0.1
-#define MaxSGDelayLFRate	64.0
-#define MaxTapGain	2.0
-
-#define NSGDelayLFO	1
-#define NSGDelayFilter	1
-#define NSGDelayTap	1
-
-#define SGDelayChunkFrames	64
-
-enum
-{
-	kTap1Delay,
-	kTap1Level,
-	kTap1Pan,
-	kTap1ChannelSwap,
-	kTap1SendDest,
-	kFeedback,
-	kFilter1Type,
-	kFilter1Frequency,
-	kFilter1Resonance,
-	kFilter1Enable,
-	kLFO1Rate,
-	kLFO1Depth,
-	kLFO1Type,
-	kLFO1Target,
-
+enum {
 	kOut,
 	kDirectLevel,
 	kDirectPan,
@@ -62,23 +33,9 @@ public:
 	KleinProgram();
 	~KleinProgram() {}
 private:
-	float fTapDelay[NSGDelayTap];
-	float fTapLevel[NSGDelayTap];
-	float fTapPan[NSGDelayTap];
-	float fFeedback;
-	float fFilterFrequency[NSGDelayFilter];
-	float fFilterResonance[NSGDelayFilter];
 	float fOut;
 	float fDirectLevel;
 	float fDirectPan;
-	long fFilterType[NSGDelayFilter];
-	float fLFORate[NSGDelayLFO];
-	float fLFODepth[NSGDelayLFO];
-	long fLFOType[NSGDelayLFO];
-	long fLFOTarget[NSGDelayLFO];
-	bool fFilterEnable[NSGDelayFilter];
-	bool fTapChannelSwap[NSGDelayTap];
-	short fTapSendDest[NSGDelayTap];
 	char name[24];
 };
 
@@ -140,7 +97,12 @@ private:
 	KleinProgram *programs;
 	bool tracksSetupDone;
 
-	KleinChannel channels[MAX_CHANNELS];
+	int nTracks;
+	int nLoopsPerTrack;
+	int nInputPort;
+	int nOutputPort;
+
+	vector<KleinTrack> track;
 	Controller controller;
 
 	status_t loadConfig(const char *path);
@@ -148,45 +110,8 @@ private:
 	tinyxml2::XMLError loadScriptConfig(tinyxml2::XMLElement *element);
 	tinyxml2::XMLError loadMidiMapConfig(tinyxml2::XMLElement *element);
 
-
-
-	void LFOCheck(short which);
-	void setFilterEnabled(short i, bool en);
-	void setFilterType(short i, long t);
-	void setFrequency(short i, float f);
-	void setResonance(short i, float rez);
-	void setLFDepth(short, float);
-	void setLFRate(short, float);
-	void setLFWave(short, short);
-	Delay delayLine;
-
-	float *tapSig[NSGDelayTap];
-
-	float			fTapDelay[NSGDelayTap];
-	float			fTapLevel[NSGDelayTap];
-	float			fTapPan[NSGDelayTap];
-	bool			fTapChannelSwap[NSGDelayTap];
-	short			fTapSendDest[NSGDelayTap];
-
-//	SGFilter		lfilt[NSGDelayFilter];
-//	SGFilter		rfilt[NSGDelayFilter];
-
-	float			*lFilterin[NSGDelayFilter];
-	float			*rFilterin[NSGDelayFilter];
-
-	float			fFilterResonance[NSGDelayFilter];
-	float			fFilterFrequency[NSGDelayFilter];
-	long			fFilterType[NSGDelayFilter];
-	bool			fFilterEnable[NSGDelayFilter];
-
-//	SGLFO			lfo[NSGDelayLFO];
-
-	float			fLFORate[NSGDelayLFO];
-	float			fLFODepth[NSGDelayLFO];
-	long			fLFOType[NSGDelayLFO];
-	long			fLFOTarget[NSGDelayLFO];
-
-	float			fFeedback;
+	void setNTracks(int n);
+	void setNLoopsPerTrack(int n);
 
 	float			fOut;
 	float			fDirectLevel;
@@ -198,12 +123,8 @@ private:
 	float			vu;
 private:
 	float			beatT;
-	float			delayT[NSGDelayTap];// delay in secs
-	float			lGain[NSGDelayTap];
-	float			rGain[NSGDelayTap];
 	float			feedback;
 	float			directL, directR;
-	float			lfd[NSGDelayLFO];
 };
 
 extern unordered_map<string, int> kvFilterIdx;
