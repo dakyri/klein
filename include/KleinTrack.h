@@ -6,6 +6,7 @@
 
 #include "Bufferator.h"
 #include "aeffectx.h"
+#include "KLFunValue.h"
 
 enum SyncSource {
 	DFLT_SRC,
@@ -21,12 +22,33 @@ enum SyncUnit {
 	SYNC_SUBCYCLE
 };
 
+enum PlayState {
+	PLAY_STOP,
+	PLAY_PEND,
+	PLAY_PAUSE,
+	PLAY_PLAY,
+	PLAY_DEAD
+};
+
+enum RecordState {
+	REC_STOP,
+	REC_PEND,
+	REC_REC,
+	REC_DUB,
+	REC_DEAD
+};
+
+RecordState recState4(string s);
+string recState4(RecordState s);
+PlayState playState4(string s);
+string playState4(PlayState s);
 SyncSource syncSrc4(string s);
-SyncUnit syncUnit4(string s);
 string syncSrc4(SyncSource s);
+SyncUnit syncUnit4(string s);
 string syncUnit4(SyncUnit s);
 
 class SampleLoop {
+public:
 	shared_ptr<SampleInfo> sampleInfo;
 };
 
@@ -58,17 +80,48 @@ public:
 
 	void setSyncSrc(const SyncSource ss);
 	void setSyncUnit(const SyncUnit su);
+	
+	void recordStart(const ktime_t &at);
+	void recordStop(const ktime_t &at);
+	void overdubStart();
+	void overdubStop();
 
-	float processAdding(float ** const inputs, float ** const  outputs, const long startOffset, const long sampleFrames);
+	float getVu();
+
+	long processAdding(float ** const inputs, float ** const  outputs, const long startOffset, const long sampleFrames);
 	long boringFrames(const VstTimeInfo * const t, const long startOffset);
+	bool isPlaying();
 
+
+	static const unsigned int framesPerControlCycle = 64;
+	static const unsigned int nOutChannels = 2;
 protected:
+	int playChunk(
+		float *buffL, float *buffR, int nRequestedFrames, int currentDataFrame,
+		float *chunkData, int chunkStartFrame, int chunkNFrames, float nextBufferStartL, float nextBufferStartR, bool directionFwd);
+	void calculateControlsStereo(float &l, float &r);
+	void loopEnd();
+	long getTotalCurrentSampleFrames();
+
 	int id;
 	int inPortId;
 	int outPortId;
 
+	SampleLoop *currentSampleLoop;
+	int loopStartFrame;
+	int loopLengthFrames;
+
+	int currentLoopFrame;
+	int controlFrame;
+	bool currentDirectionFwd;
+
+	float vu;
+
 	SyncSource syncSrc;
 	SyncUnit syncUnit;
+
+	PlayState playState;
+	RecordState recordState;
 
 	bool mute;
 
@@ -82,5 +135,14 @@ protected:
 	float timeStretch;
 
 	vector<SampleLoop> loops;
-};
 
+	float lAmp;
+	float rAmp;
+	float tune; /** ???? probably not the way we're going to do this. placeholder for more useful pitch and timestretch */
+	float psi;
+	float lastFraction;
+	int nextDataFrame;
+
+	float *leftCycleBuffer;
+	float *rightCycleBuffer;
+};

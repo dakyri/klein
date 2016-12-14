@@ -250,7 +250,8 @@ void Klein::process (float **inputs, float **outputs, long nFrames)
 			}
 		}
 		for (auto ti = track.begin(); ti != track.end(); ++ti) {
-			float tvu = ti->processAdding(inputs, outputs, currentOutFrame, nFrames);
+			const long framesHandled = ti->processAdding(inputs, outputs, currentOutFrame, nFrames);
+			float tvu = ti->getVu();
 			if (tvu > cvu) {
 				cvu = tvu;
 			}
@@ -280,7 +281,8 @@ void Klein::processReplacing (float **inputs, float **outputs, long nFrames)
 			}
 		}
 		for (auto ti = track.begin(); ti != track.end(); ++ti) {
-			float tvu = ti->processAdding(inputs, outputs, currentOutFrame, nFrames);
+			const long framesHandled = ti->processAdding(inputs, outputs, currentOutFrame, nFrames);
+			float tvu = ti->getVu();
 			if (tvu > cvu) {
 				cvu = tvu;
 			}

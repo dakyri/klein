@@ -60,15 +60,16 @@ milliseconds now() {
 	return duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 }
 */
+SampleInfo::SampleInfo(string _path, int _fileType, int _nChannels, int _sampleFormat, int _sampleRate)
+	: path(_path), id(-1), nChannels(_nChannels), nTotalFrames(0), chunkChannelCount(0)
+	, audioFile(SampleFile::WAVE_TYPE, nChannels, _sampleFormat, _sampleRate)
+{
+}
 
 SampleInfo::SampleInfo()
+	: path(""), id(-1), nChannels(0), nTotalFrames(0), chunkChannelCount(0)
 {
-	path = "";
-	id = -1;
-	nTotalFrames = 0;
-	nChannels = 0;
 //	gfxCache = nullptr;
-	chunkChannelCount = 0;
 }
 
 void SampleInfo::setError(string msg, Bufferator::ErrorLevel level) {
@@ -76,7 +77,10 @@ void SampleInfo::setError(string msg, Bufferator::ErrorLevel level) {
 	lastErrorLevel = level;
 }
 
-bool SampleInfo::setSampleData(string _path, int _id)
+/**
+ * open our connected audio file, which is presumed to already exist
+ */
+bool SampleInfo::openAudioFile(string _path, int _id)
 {
 	if (path == "") {
 		return false;
@@ -101,12 +105,30 @@ bool SampleInfo::setSampleData(string _path, int _id)
 
 	requestPage(0); // request start chunks from the interface request list
 	requestPage(1);
-	//				for (int i=0; i<sampleChunk.length; i++) {
-	//					sampleChunk[i] = readChunk(i);
-	//				}
 	return true;
 }
 
+/**
+* create our connected audio file, which is presumed to not exist. out data is going there eventually maybe
+*/
+bool SampleInfo::createAudioFile(string _path, int _id)
+{
+	if (_path == "") {
+		return false;
+	}
+	path = _path;
+	id = _id;
+	nTotalFrames = 0;
+	status_t err;
+	if ((err = audioFile.setTo(path, O_RDWR | O_CREAT)) != ERR_OK) {
+		setError("Catastrophe! Some kind of IO exception, while opening " + path);
+		return false;
+
+	}
+	cerr << "set to " << path << " " << nChannels << " chan " << nTotalFrames << " frame" << endl;
+
+	return true;
+}
 /*
 Observable<SampleGfxInfo> SampleInfo::getMinMax(final int npoints) {
 	return Observable.create(new Observable.OnSubscribe<SampleGfxInfo>() {
@@ -193,11 +215,12 @@ SampleChunkInfo * SampleInfo::readPage(int pageno)
 	if (!audioFile()) {
 		return nullptr;
 	}
-	float * buffer = new float[Bufferator::FRAMES_PER_PAGE*nChannels];
+	int bufferLen = Bufferator::FRAMES_PER_PAGE*nChannels;
+	float * buffer = new float[bufferLen];
 	int csf = Bufferator::pageStartFrame(pageno);
 	audioFile.seekToFrame(csf);
 	int framesRead = audioFile.plonk(buffer, Bufferator::FRAMES_PER_PAGE);
-	SampleChunkInfo * sci = new SampleChunkInfo(csf, framesRead, buffer);
+	SampleChunkInfo * sci = new SampleChunkInfo(csf, framesRead, bufferLen, buffer);
 	return sci;
 }
 
@@ -642,19 +665,34 @@ bool Bufferator::runner()
 * @param mxi
 * @return
 */
-shared_ptr<SampleInfo> Bufferator:: allocateInfoBlock(string path, int mxi)
+shared_ptr<SampleInfo> Bufferator::allocateInfoBlock(string path, int mxi)
 {
 	auto p = make_shared<SampleInfo>();
-	if (!p->setSampleData(path, mxi)) {
+	if (!p->openAudioFile(path, mxi)) {
 		return nullptr;
 	}
-	int i = 0;
 	cacheLock.lock();
 	cache.push_back(p);
 	cacheLock.lock();
 	return p;
 }
 
+shared_ptr<SampleInfo> Bufferator::allocateInfoBlock(string path, int mxi, int nChannels, int format, int type)
+{
+	auto p = make_shared<SampleInfo>();
+	if (!p->createAudioFile(path, mxi)) {
+		return nullptr;
+	}
+	cacheLock.lock();
+	cache.push_back(p);
+	cacheLock.lock();
+
+}
+
+/**
+ * allocate a SampleInfo for buffering. if the file is already loaded, return the existent buffer
+ * group ... then open the file and get ready for requests
+ */
 shared_ptr<SampleInfo> Bufferator::load(string path)
 {
 	if (path == "") {
@@ -684,6 +722,32 @@ shared_ptr<SampleInfo> Bufferator::load(string path)
 	else {
 		cerr << "fnd is nullptr at end of load" << endl;
 	}
+	return fnd;
+}
+
+/**
+ * allocate a SampleInfo with a new clean buffer, create a sample file to use to back the data on this
+ */
+shared_ptr<SampleInfo> Bufferator::create(string path, int nChannels, int format, int type)
+{
+	int mxi = 1;
+	shared_ptr<SampleInfo> fnd = nullptr;
+	for (auto wci : cache) {
+		auto sci = wci.lock();
+		if (sci) {
+			if (sci->path == path) {
+				fnd = sci;
+				break;
+			}
+			if (sci->id > mxi) {
+				mxi = sci->id + 1;
+			}
+		}
+	}
+	if (fnd != nullptr) {
+		return nullptr;
+	}
+	fnd = allocateInfoBlock(path, mxi, nChannels, format, type);
 	return fnd;
 }
 

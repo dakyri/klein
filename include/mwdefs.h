@@ -6,3 +6,10 @@ enum {
 
 
 typedef long status_t;
+
+
+inline float
+interpolate(float d1, float d2, float p)
+{
+	return d1 + p*(d2 - d1);
+}

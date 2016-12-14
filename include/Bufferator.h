@@ -55,14 +55,18 @@ public:
 	float* data;
 	int startFrame;
 	int nFrames;
+	int length;
 	time_t timeStamp;
+	bool dirty;
 
-	SampleChunkInfo(int start, int length, float* dta)
+	SampleChunkInfo(int start, int _nFrames, int _length, float* dta)
 	{
 		startFrame = start;
 		data = dta;
-		nFrames = length;
+		nFrames = _nFrames;
+		length = _length;
 		timeStamp = time(nullptr);
+		dirty = false;
 	}
 
 	virtual ~SampleChunkInfo() {
@@ -152,7 +156,9 @@ public:
 	bool start();
 	bool runner();
 	shared_ptr<SampleInfo> load(string path);
+	shared_ptr<SampleInfo> create(string path, int nChannels, int format, int type);
 	shared_ptr<SampleInfo> allocateInfoBlock(string path, int mxi);
+	shared_ptr<SampleInfo> allocateInfoBlock(string path, int mxi, int nChannels, int format, int type);
 
 //	static void free(SampleInfo *inf); // suspect that this is not needed in c++. the weak pointers will be invalid when all shared refs are reset()
 	static SampleFile & getAudioFile(string path);
@@ -193,10 +199,12 @@ public:
 	static string lastErrorMessage;
 
 public:
+	SampleInfo(string path, int _fileType, int _nChannels, int _sampleFormat, int _sampleRate);
 	SampleInfo();
 	virtual ~SampleInfo();
 
-	bool setSampleData(string _path, int _id);
+	bool openAudioFile(string _path, int _id);
+	bool createAudioFile(string _path, int _id);
 	void setError(string msg, Bufferator::ErrorLevel lvl = Bufferator::ErrorLevel::ERROR_EVENT);
 
 	/*
@@ -205,7 +213,7 @@ public:
 
 	SampleChunkInfo *readPage(int chunk);
 	SampleChunkInfo *getChunk4Frame(off_t dataFrame);
-	SampleChunkInfo * findChunk4Frame(off_t dataFrame);
+	SampleChunkInfo *findChunk4Frame(off_t dataFrame);
 
 	string getLastErrorMessage();
 	bool requestPage(int page);
