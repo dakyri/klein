@@ -25,50 +25,31 @@ unordered_map<string, SyncUnit> syncUnit{
 };
 
 
-unordered_map<string, PlayState> playState {
-	{ "stop", PLAY_STOP },
-	{ "pending", PLAY_PEND },
-	{ "pause", PLAY_PAUSE },
-	{ "play", PLAY_PLAY }
+unordered_map<string, TrackMode> trackMode {
+	{ "stop", TRAK_STOP },
+	{ "pending", TRAK_PEND },
+	{ "pause", TRAK_PAUSE },
+	{ "play", TRAK_PLAY },
+	{ "record", TRAK_REC },
+	{ "dub", TRAK_DUB },
+	{ "insert", TRAK_INSERT },
+	{ "delete", TRAK_DELETE },
+	{ "play", TRAK_PLAY }
 };
 
-unordered_map<string, RecordState> recState{
-	{ "stop", REC_STOP },
-	{ "pending", REC_PEND },
-	{ "record", REC_REC },
-	{ "dub", REC_DUB }
-};
 
-
-RecordState recState4(string s) {
-	auto p = recState.find(s);
-	if (p != recState.end()) {
+TrackMode trackMode4(string s) {
+	auto p = trackMode.find(s);
+	if (p != trackMode.end()) {
 		return p->second;
 	}
-	return REC_DEAD;
+	return TRAK_DEAD;
 }
 
 
-string recState4(RecordState s) {
-	auto p = find_if(playState.begin(), playState.end(), [s](pair<string, PlayState> t) { return t.second == s; });
-	if (p != playState.end()) {
-		return p->first;
-	}
-	return "";
-}
-
-PlayState playState4(string s) {
-	auto p = playState.find(s);
-	if (p != playState.end()) {
-		return p->second;
-	}
-	return PLAY_DEAD;
-}
-
-
-string playState4(PlayState s) {
-	auto p = find_if(playState.begin(), playState.end(), [s](pair<string, PlayState> t) { return t.second == s; });
-	if (p != playState.end()) {
+string trackMode4(TrackMode s) {
+	auto p = find_if(trackMode.begin(), trackMode.end(), [s](pair<string, TrackMode> t) { return t.second == s; });
+	if (p != trackMode.end()) {
 		return p->first;
 	}
 	return "";
@@ -118,7 +99,7 @@ KleinTrack::KleinTrack(int _trackId, int _inPortId, int _outPortId, int nLoops, 
 	, outPortId(_outPortId)
 	, syncSrc(_syncSrc)
 	, syncUnit(_syncUnit)
-	, currentSampleLoop(nullptr)
+	, currentSampleLoop(loops.begin())
 	, currentDirectionFwd(true)
 	, psi(1)
 	, lAmp(1)
@@ -242,6 +223,18 @@ void KleinTrack::overdubStop()
 {
 }
 
+void KleinTrack::selectLoop(int i)
+{
+}
+
+void KleinTrack::nextLoop()
+{
+}
+
+void KleinTrack::prevLoop()
+{
+}
+
 /**
  * process a slice up until the point something interesting happens
  */
@@ -265,10 +258,21 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 	float lvu = 0;
 	long nFramesOut = 0;
 
+	/*
+	if selected
+
+	if mode = record
+
+	else if mode = overdub
+		(gain * input) into interleaved buffer
+
+	
+	*/
+
 	if (!isPlaying()) {
 		return 0;
 	}
-	if (currentSampleLoop == nullptr) {
+	if (currentSampleLoop == loops.end()) {
 		return 0;
 	}
 	shared_ptr<SampleInfo> csf = currentSampleLoop->sampleInfo;
@@ -290,6 +294,10 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 		//			Log.d("player", String.format("pad %d loop frame %d dir %d to make %d %d %d %d tune is %g", id, currentLoopFrame, currentDirection, nFrames, nFramesOut, nFramesRemaining, nIterFrames, state.tune));
 		if (nIterFrames > 0) {
 			int currentDataFrame = currentLoopFrame + sf;
+
+
+
+
 			int scistart = 0;
 			int scilength = 0;
 			float* scidata = nullptr;
@@ -347,6 +355,13 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 					csf->requestPage(cpageid - 2);
 				}
 			}
+
+
+
+
+
+
+
 			buffInd += nOutChannels*nIterOutFrames;
 			currentLoopFrame = nextDataFrame - sf;
 			nFramesOut += nIterOutFrames;
@@ -478,7 +493,7 @@ void KleinTrack::loopEnd() {
 
 long KleinTrack::getTotalCurrentSampleFrames()
 {
-	if (currentSampleLoop == nullptr) {
+	if (currentSampleLoop == loops.end()) {
 		return 0;
 	}
 	shared_ptr<SampleInfo> csf = currentSampleLoop->sampleInfo;

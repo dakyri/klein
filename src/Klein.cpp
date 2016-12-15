@@ -101,8 +101,8 @@ Klein::Klein(audioMasterCallback audioMaster)
 	hasVu ();
 	canProcessReplacing ();
 	setUniqueID ('KLYN');
-
 	suspend ();		// flush buffer
+	updateBlockSize(); // forces call to our override of setBlockSize which will allocate buffers
 #ifdef KLEIN_DEBUG
 	dbf << "Built the thing " << blockSize << " " << sampleRate << endl;
 #endif
@@ -298,6 +298,11 @@ Klein::getTempo()
 	const VstTimeInfo *t = getTimeInfo(kVstTempoValid);
 	return t->tempo;
 }
+
+void Klein::allocateBuffers(long blockSize)
+{
+}
+
 /*
 
 const char* plugCanDos [] =
@@ -687,4 +692,9 @@ void Klein::setNLoopsPerTrack(int n)
 	for (auto it = track.begin(); it != track.end(); ++it) {
 		it->setNLoops(n);
 	}
+}
+
+void Klein::setBlockSize(long blocksize) {
+	AudioEffectX::setBlockSize(blocksize);
+	allocateBuffers(blocksize);
 }

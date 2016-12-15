@@ -89,10 +89,13 @@ public:
 	virtual bool getInputProperties(long index, VstPinProperties* properties);
 	virtual bool getOutputProperties(long index, VstPinProperties* properties);
 
+	virtual void setBlockSize(long blockSize) override;
+
 	char *parameterName(long index);
 
 private:
 	float getTempo();
+	void allocateBuffers(long blockSize);
 
 	KleinProgram *programs;
 	bool tracksSetupDone;

@@ -3,6 +3,8 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <list>
+#include <mutex>
 
 #include "Bufferator.h"
 #include "aeffectx.h"
@@ -22,26 +24,21 @@ enum SyncUnit {
 	SYNC_SUBCYCLE
 };
 
-enum PlayState {
-	PLAY_STOP,
-	PLAY_PEND,
-	PLAY_PAUSE,
-	PLAY_PLAY,
-	PLAY_DEAD
+enum TrackMode {
+	TRAK_STOP,
+	TRAK_PEND,
+	TRAK_PAUSE,
+	TRAK_PLAY,
+	TRAK_DEAD,
+	TRAK_REC,
+	TRAK_DUB,
+	TRAK_INSERT,
+	TRAK_DELETE,
+	TRAK_DEAD
 };
 
-enum RecordState {
-	REC_STOP,
-	REC_PEND,
-	REC_REC,
-	REC_DUB,
-	REC_DEAD
-};
-
-RecordState recState4(string s);
-string recState4(RecordState s);
-PlayState playState4(string s);
-string playState4(PlayState s);
+TrackMode trackMode4(string s);
+string trackMode4(TrackMode s);
 SyncSource syncSrc4(string s);
 string syncSrc4(SyncSource s);
 SyncUnit syncUnit4(string s);
@@ -86,12 +83,15 @@ public:
 	void overdubStart();
 	void overdubStop();
 
+	void selectLoop(int i);
+	void nextLoop();
+	void prevLoop();
+
 	float getVu();
 
 	long processAdding(float ** const inputs, float ** const  outputs, const long startOffset, const long sampleFrames);
 	long boringFrames(const VstTimeInfo * const t, const long startOffset);
 	bool isPlaying();
-
 
 	static const unsigned int framesPerControlCycle = 64;
 	static const unsigned int nOutChannels = 2;
@@ -107,7 +107,7 @@ protected:
 	int inPortId;
 	int outPortId;
 
-	SampleLoop *currentSampleLoop;
+	vector<SampleLoop>::iterator currentSampleLoop;
 	int loopStartFrame;
 	int loopLengthFrames;
 
@@ -120,8 +120,7 @@ protected:
 	SyncSource syncSrc;
 	SyncUnit syncUnit;
 
-	PlayState playState;
-	RecordState recordState;
+	TrackMode trackMode;
 
 	bool mute;
 
