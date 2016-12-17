@@ -38,6 +38,13 @@ unordered_map<string, TrackMode> trackMode {
 };
 
 
+unordered_map<string, PlayDirection> playDir{
+	{ "fwd", PLAY_FWD },
+	{ "back", PLAY_BAK },
+	{ "bakfwd", PLAY_FWDBAK },
+	{ "fwdbak", PLAY_BAKFWD }
+};
+
 TrackMode trackMode4(string s) {
 	auto p = trackMode.find(s);
 	if (p != trackMode.end()) {
@@ -63,14 +70,6 @@ SyncSource syncSrc4(string s) {
 	return DFLT_SRC;
 }
 
-SyncUnit syncUnit4(string s) {
-	auto p = syncUnit.find(s);
-	if (p != syncUnit.end()) {
-		return p->second;
-	}
-	return DFLT_UNIT;
-}
-
 string syncSrc4(SyncSource s) {
 	auto p = find_if(syncSrc.begin(), syncSrc.end(), [s](pair<string, SyncSource> t) { return t.second == s; });
 	if (p != syncSrc.end()) {
@@ -79,12 +78,36 @@ string syncSrc4(SyncSource s) {
 	return "default";
 }
 
+SyncUnit syncUnit4(string s) {
+	auto p = syncUnit.find(s);
+	if (p != syncUnit.end()) {
+		return p->second;
+	}
+	return DFLT_UNIT;
+}
+
 string syncUnit4(SyncUnit s) {
 	auto p = find_if(syncUnit.begin(), syncUnit.end(), [s](pair<string, SyncUnit> t) { return t.second == s; });
 	if (p != syncUnit.end()) {
 		return p->first;
 	}
 	return "default";
+}
+
+PlayDirection playDir4(string s) {
+	auto p = playDir.find(s);
+	if (p != playDir.end()) {
+		return p->second;
+	}
+	return PLAY_FWD;
+}
+
+string playDir4(PlayDirection s) {
+	auto p = find_if(playDir.begin(), playDir.end(), [s](pair<string, PlayDirection> t) { return t.second == s; });
+	if (p != playDir.end()) {
+		return p->first;
+	}
+	return "";
 }
 
 
@@ -97,8 +120,10 @@ KleinTrack::KleinTrack(int _trackId, int _inPortId, int _outPortId, int nLoops, 
 	: id(_trackId)
 	, inPortId(_inPortId)
 	, outPortId(_outPortId)
+	, selected(true)
 	, syncSrc(_syncSrc)
 	, syncUnit(_syncUnit)
+	, playDirection(PLAY_FWD)
 	, currentSampleLoop(loops.begin())
 	, currentDirectionFwd(true)
 	, psi(1)
@@ -107,6 +132,11 @@ KleinTrack::KleinTrack(int _trackId, int _inPortId, int _outPortId, int nLoops, 
 	, tune(0)
 	, lastFraction(0)
 	, nextDataFrame(0)
+	, loopOutBuf(nullptr)
+	, loopRawBuf(nullptr)
+	, recordBuffer(nullptr)
+	, recordBufferLen(Bufferator::FRAMES_PER_PAGE)
+	, nFramesRecorded(0)
 {
 	leftCycleBuffer = new float[framesPerControlCycle];
 	rightCycleBuffer = new float[framesPerControlCycle];
@@ -117,6 +147,10 @@ KleinTrack::KleinTrack(int _trackId, int _inPortId, int _outPortId, int nLoops, 
 
 KleinTrack::~KleinTrack()
 {
+	if (loopOutBuf != nullptr) delete[] loopOutBuf;
+	if (loopRawBuf != nullptr) delete[] loopRawBuf;
+	if (leftCycleBuffer != nullptr) delete[] leftCycleBuffer;
+	if (rightCycleBuffer != nullptr) delete[] rightCycleBuffer;
 }
 
 void
@@ -205,6 +239,11 @@ void KleinTrack::setSyncUnit(const SyncUnit su) {
 	syncUnit = su;
 }
 
+void KleinTrack::setPlayDirection(const PlayDirection p)
+{
+	playDirection = p;
+}
+
 
 
 void KleinTrack::recordStart(const ktime_t & at)
@@ -252,243 +291,158 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 	const int ii = inPortId * 2;
 	const int oi = outPortId * 2;
 	float * const inl = inputs[ii] + startOffset;
-	float * const inr = inputs[ii +1] + startOffset;
+	float * const inr = inputs[ii + 1] + startOffset;
 	float * const outl = outputs[oi] + startOffset;
-	float * const outr = outputs[oi+1] + startOffset;
+	float * const outr = outputs[oi + 1] + startOffset;
 	float lvu = 0;
 	long nFramesOut = 0;
 
-	/*
-	if selected
-
-	if mode = record
-
-	else if mode = overdub
-		(gain * input) into interleaved buffer
-
-	
-	*/
-
-	if (!isPlaying()) {
-		return 0;
-	}
 	if (currentSampleLoop == loops.end()) {
 		return 0;
 	}
 	shared_ptr<SampleInfo> csf = currentSampleLoop->sampleInfo;
+
+	bool playLoop = false;
+	switch (trackMode) {
+		case TRAK_PLAY: 
+		case TRAK_DUB: {
+			playLoop = true;
+			break;
+		}
+
+		case TRAK_STOP:
+		case TRAK_PAUSE: {
+			return 0;
+		}
+
+		case TRAK_REC: {
+			if (!csf) {
+				csf = allocateSampleInfo();
+			}
+			break;
+		}
+	}	
+
 	if (!csf) {
 		return 0;
 	}
 
 	nFramesOut = 0;
-	int ll = loopLengthFrames;
-	if (ll < 2) ll = 2;
-	int sf = loopStartFrame;
-	int buffInd = 0;
-	//		Log.d("player", String.format("pad %d to play %d %d", id, nFrames, nOutChannels));
-	while (nFramesOut < nFrames) {
-		int nFramesRemaining = nFrames - nFramesOut;
-		int nIterFrames = currentDirectionFwd ?
-			((nFramesRemaining > ll - currentLoopFrame) ? (ll - currentLoopFrame) : nFramesRemaining) :
-			((nFramesRemaining > currentLoopFrame) ? currentLoopFrame : nFramesRemaining);
-		//			Log.d("player", String.format("pad %d loop frame %d dir %d to make %d %d %d %d tune is %g", id, currentLoopFrame, currentDirection, nFrames, nFramesOut, nFramesRemaining, nIterFrames, state.tune));
-		if (nIterFrames > 0) {
-			int currentDataFrame = currentLoopFrame + sf;
 
-
-
-
-			int scistart = 0;
-			int scilength = 0;
-			float* scidata = nullptr;
-			SampleChunkInfo *sci = csf->getChunk4Frame(currentDataFrame);
-			float nextL = 0;
-			float nextR = 0;
-			int cpageid = Bufferator::page4Frame(currentDataFrame);
-			if (sci != nullptr) {
-				scilength = sci->nFrames;
-				scidata = sci->data;
-				scistart = sci->startFrame;
-				if (tune != 0) { // setup buffer endpoints if we're interpolating TODO or we are tuning it with lfo!!!!
-					if (currentDirectionFwd) {
-						SampleChunkInfo *scnxt = nullptr;
-						if (sci->nextChunkStartFrame() >= sf + ll) { // next chunk is start of loop
-							scnxt = csf->getChunk4Frame(sf);
-						}
-						else {
-							scnxt = csf->getChunk4Frame(sci->nextChunkStartFrame());
-						}
-						if (scnxt != nullptr) {
-							nextL = scnxt->data[0];
-							nextR = scnxt->data[1];
-						}
-					} else { // backwards .
-						SampleChunkInfo *scnxt = nullptr;
-						if (sci->prevChunkEndFrame() < sf) { // next chunk is start of loop
-							scnxt = csf->getChunk4Frame(sf);
-						}
-						else {
-							scnxt = csf->getChunk4Frame(sci->prevChunkEndFrame());
-						}
-						if (scnxt != nullptr) {
-							nextL = scnxt->data[scnxt->nFrames - 2];
-							nextR = scnxt->data[scnxt->nFrames - 1];
-						}
-					}
-				}
-				cerr << "player got " << currentDataFrame << " chunk  " << " len " << scilength << "@  " << scistart
-					<< " data[0]  " << scidata[0] << " path  " << csf->path << endl;
-			} else {
-				cerr << "player failed to find " << currentDataFrame << " chunk " << cpageid << " path " << csf->path << endl;
+	if (playLoop) {
+		const int ll = loopLengthFrames < 2 ? 2 : loopLengthFrames;
+		const int sf = loopStartFrame;
+		int buffInd = 0;
+		//		Log.d("player", String.format("pad %d to play %d %d", id, nFrames, nOutChannels));
+		while (nFramesOut < nFrames) {
+			const int nFramesRemaining = nFrames - nFramesOut;
+			const int nIterFrames = currentDirectionFwd ?
+				((nFramesRemaining > ll - currentLoopFrame) ? (ll - currentLoopFrame) : nFramesRemaining) :
+				((nFramesRemaining > currentLoopFrame) ? currentLoopFrame : nFramesRemaining);
+			//			Log.d("player", String.format("pad %d loop frame %d dir %d to make %d %d %d %d tune is %g", id, currentLoopFrame, currentDirection, nFrames, nFramesOut, nFramesRemaining, nIterFrames, state.tune));
+			if (nIterFrames > 0) {
+				const int currentDataFrame = currentLoopFrame + sf;
+				// wtf we should get the one buffer hey
+				const int nIterOutFrames = playChunk(csf, loopOutBuf + buffInd, loopRawBuf + buffInd, nIterFrames, currentDataFrame, currentDirectionFwd);
+				buffInd += nOutChannels*nIterOutFrames; // >>>>>>>>>>>>>>>><<<<<<<<<<<<< >>>>>> wtf buffind here is for interleaved
+				currentLoopFrame = nextDataFrame - sf;
+				nFramesOut += nIterOutFrames;
+				//				Log.d("player", String.format("pad %d played %d %d requested %d loop %d data %d end %d", id, nIterOutFrames, nFramesOut, nIterFrames, currentLoopFrame, getNextDataFrame(cPadPointer), ll));
 			}
-			int nIterOutFrames = playChunk(
-						outl+ buffInd, outr+buffInd, nIterFrames, currentDataFrame,
-						scidata, scistart, scilength, nextL, nextR, currentDirectionFwd);
-			if (cpageid >= 0) {
-				csf->requestPage(cpageid); // will already be loaded, but we'll make sure it's there
+			else {
+				if (!isPlaying()) {
+					break;
+				}
+			}
+			if (currentLoopFrame >= ll) {
 				if (currentDirectionFwd) {
-					csf->requestPage(cpageid + 1);
-					csf->requestPage(cpageid + 2);
+					loopEnd(csf);
 				}
 				else {
-					csf->requestPage(cpageid - 1);
-					csf->requestPage(cpageid - 2);
+					currentLoopFrame = ll;
 				}
 			}
-
-
-
-
-
-
-
-			buffInd += nOutChannels*nIterOutFrames;
-			currentLoopFrame = nextDataFrame - sf;
-			nFramesOut += nIterOutFrames;
-			//				Log.d("player", String.format("pad %d played %d %d requested %d loop %d data %d end %d", id, nIterOutFrames, nFramesOut, nIterFrames, currentLoopFrame, getNextDataFrame(cPadPointer), ll));
-		}
-		else {
-			if (!isPlaying()) {
-				break;
-			}
-		}
-		if (currentLoopFrame >= ll) {
-			if (currentDirectionFwd) {
-				loopEnd();
-			}
-			else {
-				currentLoopFrame = ll;
-			}
-		}
-		else if (currentLoopFrame <= 0) {
-			if (currentDirectionFwd) {
-				currentLoopFrame = 0;
-			}
-			else {
-				loopEnd();
+			else if (currentLoopFrame <= 0) {
+				if (currentDirectionFwd) {
+					currentLoopFrame = 0;
+				}
+				else {
+					loopEnd(csf);
+				}
 			}
 		}
 	}
 
-	/*
-
-	beatT = 60/getTempo();
-	if (fTapLevel[0] > 0) {
-	delayT[0] = beatT * fTapDelay[0];// delay in secs
-	lGain[0] = fTapLevel[0]*(1-fTapPan[0]);
-	rGain[0] = fTapLevel[0]*(1+fTapPan[0]);
-	} else {
-	lGain[0] = rGain[0] = 0;
-	}
-	directL = fDirectLevel*(1-fDirectPan);
-	directR = fDirectLevel*(1+fDirectPan);
-
-
-	for (short i=0; i<NSGDelayLFO; i++) {
-	lfd[i] = fLFODepth[i];
+	if (selected) {
+		addToBuffer(inputGain, inl, outl, nFrames);
+		addToBuffer(inputGain, inr, outr, nFrames);
 	}
 
-	feedback = fFeedback;
-
-	#if (KLEIN_DEBUG >= 10)
-	dbf << "process replacing nf " << nFrames << " " << SGDelayChunkFrames << " " << (nFrames / SGDelayChunkFrames) << " flt " <<
-	" gain " << lGain[0] << " " << rGain[0] << endl;
-	#endif
-	long	outFrame = 0;
-
-	while (outFrame < nFrames) {
-
-	short j;
-	if (nChunkFrameRemaining == 0) {
-	LFOCheck(0);
-	nChunkFrames = nFrames - outFrame;
-	if (nChunkFrames > SGDelayChunkFrames) {
-	nChunkFrames = SGDelayChunkFrames;
+	if (trackMode == TRAK_REC) {
+		addToRecordBuffer(csf, inputGain, inl, inr, nFrames);
 	}
-	nChunkFrameRemaining = SGDelayChunkFrames;
-	} else {
-	nChunkFrames = nChunkFrameRemaining;
+	else if (trackMode == TRAK_DUB) {
+		addToRecordBuffer(csf, inputGain, inl, inr, nFrames, false);
+		addToRecordBuffer(csf, feedback, loopRawBuf, nFrames);
+		addToBuffer(feedback, loopOutBuf, outl, outr, nFrames);
 	}
-
-	//		delayLine->Write(inl, inr, nChunkFrames, 1-feedback, false);
-
-
-	//		delayLine->Read(tapSig[0], nChunkFrames, delayT[0]);
-	float	*pl, *pr;
-	if (fTapChannelSwap[0]) {
-	pr = tapSig[0];
-	pl = tapSig[0]+1;
-	} else {
-	pl = tapSig[0];
-	pr = tapSig[0]+1;
+	else if (trackMode == TRAK_INSERT) {
+		//add (gain * input) into currentLoop buffer
 	}
-	for (j=0; j<nChunkFrames; j++) {
-	//			outl[j] = inl[j] + lfilt[0](*pl)*lGain[0];
-	//			outr[j] = inr[j] + rfilt[0](*pr)*rGain[0];
-	if (outl[j] > cvu) cvu = outl[j];
-	if (outr[j] > cvu) cvu = outr[j];
-	pl+=2;pr+=2;
+	else if (trackMode == TRAK_DELETE) {
+		//add(gain * input) into currentLoop buffer
+	}
+	else if (trackMode == TRAK_PLAY) {
+		addToBuffer(feedback, loopOutBuf, outl, outr, nFrames);
+		if (feedback < 1.0) {
+			addToRecordBuffer(csf, feedback, loopRawBuf, nFrames);
+		}
 	}
 
-	//		delayLine->Overdub(outl, outr, nChunkFrames, feedback, true);
-
-	outFrame += nChunkFrames;
-	outl += nChunkFrames;
-	outr += nChunkFrames;
-	inl += nChunkFrames;
-	inr += nChunkFrames;
-
-	nChunkFrameRemaining -= nChunkFrames;
-	}
-
-	*/
 	vu = lvu;
 	return nFrames;
 }
-void KleinTrack::loopEnd() {
-	/*
-	//		Log.d("player", "end of the loop "+currentLoopFrame + " ... "+ state.loopDirection);
-	if (state.loopCount > 0 && ++currentLoopCount >= state.loopCount) {
-		stop(true);
+
+
+void
+KleinTrack::loopEnd(const shared_ptr<SampleInfo>& csf) {
+	if (playDirection == PLAY_FWDBAK || playDirection == PLAY_BAKFWD) {
+		currentDirectionFwd = !currentDirectionFwd;
 	}
-	if (state.loopDirection == Direction.FWDBACK || state.loopDirection == Direction.BACKFWD) {
-		currentDirection = -currentDirection;
-	}
-	if (currentDirection >= 0) {
-		int lsb = Bufferator.chunk4Frame((int)state.loopStart);
-		currentSampleInfo.requestChunk(lsb, 1);
-		currentSampleInfo.requestChunk(lsb + 1, 1);
+	if (currentDirectionFwd) {
+		int lsb = Bufferator::page4Frame((int)loopStartFrame);
+		csf->requestPage(lsb);
+		csf->requestPage(lsb + 1);
 		currentLoopFrame = 0;
 	}
 	else {
-		int ll1 = (int)(state.loopLength - 1);
-		int lsb = Bufferator.chunk4Frame((int)(state.loopStart + ll1));
-		currentSampleInfo.requestChunk(lsb, 1);
-		currentSampleInfo.requestChunk(lsb - 1, 1);
+		int ll1 = (int)(loopLengthFrames- 1);
+		int lsb = Bufferator::page4Frame((int)(loopStartFrame + ll1));
+		csf->requestPage(lsb);
+		csf->requestPage(lsb - 1);
 		currentLoopFrame = ll1;
 	}
-	reloopCPad(cPadPointer);
-	doSync();*/
+
+//	reloopCPad(cPadPointer);
+	// just resets the lfos in C
+	doSync();
+}
+
+void KleinTrack::doSync() {
+	/*
+	int i = 0;
+	PadSample p;
+	while ((p = ((PadSample)manager.getSamplePlayer(i++))) != null) {
+		if (p != this && p.state.syncMasterId == id && (p.isPlaying() || p.isPaused())) {
+			if (p.isPaused()) {
+				manager.startSamplePlayer(p, false);
+				if (listener != null) listener.playStarted(p);
+			}
+			else {
+				manager.startSamplePlayer(p, true);
+			}
+		}
+	}*/
 }
 
 long KleinTrack::getTotalCurrentSampleFrames()
@@ -503,26 +457,139 @@ long KleinTrack::getTotalCurrentSampleFrames()
 	return csf->nTotalFrames;
 }
 
+int KleinTrack::addToRecordBuffer(const shared_ptr<SampleInfo> & csf, const float gain, float * const inl, float * const inr, const int nFrames, bool inc)
+{
+	int nr = 0;
+	int nf = nFrames;
+	float *b = recordBuffer + 2*nFramesRecorded;
+	while (nf > 0) {
+		nf = recordBufferLen - nFramesRecorded;
+		if (nf > nFrames) {
+			nf = nFrames;
+		}
+		for (int i = 0; i < nf; i++) {
+			*b++ += gain * inl[i];
+			*b++ += gain * inr[i];
+		}
+		nr += nf;
+		if (inc) { // if we're incrementing the buffer pointer we're done overdubbing so we check to see if we dump this
+			nFramesRecorded += nf;
+			if (nFramesRecorded >= recordBufferLen) {
+				finalizeRecord(csf);
+			}
+		}
+	}
+	return nr;
+}
+
+int KleinTrack::addToRecordBuffer(const shared_ptr<SampleInfo> & csf, const float gain, float * const ins, const int nFrames, bool inc)
+{
+	int nr = 0;
+	int nf = nFrames;
+	float *b = recordBuffer + 2 * nFramesRecorded;
+	while (nf > 0) {
+		nf = recordBufferLen - nFramesRecorded;
+		if (nf > nFrames) {
+			nf = nFrames;
+		}
+		for (int i = 0; i < 2*nf; i+=2) {
+			*b++ += gain * ins[i];
+			*b++ += gain * ins[i+1];
+		}
+		nr += nf;
+		if (inc) { // if we're incrementing the buffer pointer we're done overdubbing so we check to see if we dump this
+			nFramesRecorded += nf;
+			if (nFramesRecorded >= recordBufferLen) {
+				finalizeRecord(csf);
+			}
+		}
+	}
+	return nr;
+
+}
+
+void KleinTrack::startRecordBuffer(const shared_ptr<SampleInfo> & csf, const int startFrame)
+{
+	if (nFramesRecorded != 0) {
+		finalizeRecord(csf);
+	}
+	recordStartFrame = startFrame;
+	nFramesRecorded = 0;
+	memset(recordBuffer, 0, recordBufferLen * sizeof(float) * nOutChannels);
+}
+
+void KleinTrack::finalizeRecord(const shared_ptr<SampleInfo> & csf)
+{
+	csf->addChunk(recordStartFrame, nFramesRecorded, recordBuffer);
+	nFramesRecorded = 0;
+}
+
 
 /**
 * process a given buffer of output. pulled from android CPadSample.cpp
-* can probably be further simplified
+* processes a single chunk worth at most, in a single direction, not looping
 *
-* @param buff output buffer
+* can probably be further simplified.
+* ??? need to change the simple tune stuff to a lenght preserving pitch shift.
+* ??? possibly also a pitch preserving time stretch
+*
+* @param buff output buffer, stereo interleaved
 * @param nRequestedFrames optimal number of frames to play.
-* @param chunkData data etc for the chunk
-* @param chunkStartFrame
-* @param chunkNFrames
-* @param nextBufferStartL start of 'next' buffer
-* @param nextBufferStartR
 * @param direction >= 0 for forwards, else backwards
 */
 
 int
 KleinTrack::playChunk(
-	float *buffL, float *buffR, int nRequestedFrames, int currentDataFrame,
-	float *chunkData, int chunkStartFrame, int chunkNFrames, float nextBufferStartL, float nextBufferStartR, bool directionFwd)
+	const shared_ptr<SampleInfo>& csf, float *const outBuf, float *const rawBuf, const int nRequestedFrames, const int currentDataFrame, const bool directionFwd)
 {
+	int chunkStartFrame = 0;
+	int chunkNFrames = 0;
+	float* chunkData = nullptr;
+	SampleChunkInfo *sci = csf->getChunk4Frame(currentDataFrame);
+	float nextBufferStartL = 0;
+	float nextBufferStartR = 0;
+	int cpageid = Bufferator::page4Frame(currentDataFrame);
+	if (sci != nullptr) {
+		chunkNFrames = sci->nFrames;
+		chunkData = sci->data;
+		chunkStartFrame = sci->startFrame;
+		if (tune != 0) { // setup buffer endpoints if we're interpolating TODO or we are tuning it with lfo!!!!
+			const int ll = loopLengthFrames<2 ? 2 : loopLengthFrames;
+			const int sf = loopStartFrame;
+			if (currentDirectionFwd) {
+				SampleChunkInfo *scnxt = nullptr;
+				if (sci->nextChunkStartFrame() >= sf + ll) { // next chunk is start of loop
+					scnxt = csf->getChunk4Frame(sf);
+				}
+				else {
+					scnxt = csf->getChunk4Frame(sci->nextChunkStartFrame());
+				}
+				if (scnxt != nullptr) {
+					nextBufferStartL = scnxt->data[0];
+					nextBufferStartR = scnxt->data[1];
+				}
+			}
+			else { // backwards .
+				SampleChunkInfo *scnxt = nullptr;
+				if (sci->prevChunkEndFrame() < sf) { // next chunk is start of loop
+					scnxt = csf->getChunk4Frame(sf);
+				}
+				else {
+					scnxt = csf->getChunk4Frame(sci->prevChunkEndFrame());
+				}
+				if (scnxt != nullptr) {
+					nextBufferStartL = scnxt->data[scnxt->nFrames - 2];
+					nextBufferStartR = scnxt->data[scnxt->nFrames - 1];
+				}
+			}
+		}
+		cerr << "player got " << currentDataFrame << " chunk  " << " len " << chunkNFrames << "@  " << chunkStartFrame
+			<< " data[0]  " << chunkData[0] << " path  " << csf->path << endl;
+	}
+	else {
+		cerr << "player failed to find " << currentDataFrame << " chunk " << cpageid << " path " << csf->path << endl;
+	}
+
 	const int nDataChannels = 2;
 	int currentBufferOffset = 0;
 	int nDataFramesAvailable = 0;
@@ -654,9 +721,11 @@ KleinTrack::playChunk(
 			}
 //			lFilter.apply(lSig, nControlChunkFrames);
 //			rFilter.apply(rSig, nControlChunkFrames);
-			for (unsigned int i = 0; i<nControlChunkFrames; i++, buffI ++) {
-				buffL[buffI] += clAmp*lSig[i];
-				buffR[buffI] += crAmp*rSig[i];
+			for (unsigned int i = 0; i<nControlChunkFrames; i++, buffI += 2) {
+				rawBuf[buffI] = lSig[i];
+				rawBuf[buffI + 1] = rSig[i];
+				outBuf[buffI] = clAmp*lSig[i];
+				outBuf[buffI+1] = crAmp*rSig[i];
 			}
 			if ((controlFrame += nControlChunkFrames) >= framesPerControlCycle) {
 				controlFrame = 0;
@@ -677,9 +746,11 @@ KleinTrack::playChunk(
 				memset(lSig, 0, nControlChunkFrames * sizeof(float));
 //				lFilter.apply(lSig, nControlChunkFrames);
 //				rFilter.apply(rSig, nControlChunkFrames);
-				for (unsigned int i = 0; i<nControlChunkFrames; i++, buffI ++) {
-					buffL[buffI] += clAmp*lSig[i];
-					buffR[buffI] += crAmp*rSig[i];
+				for (unsigned int i = 0; i<nControlChunkFrames; i++, buffI +=2) {
+					rawBuf[buffI] = lSig[i];
+					rawBuf[buffI + 1] = rSig[i];
+					outBuf[buffI] = clAmp*lSig[i];
+					outBuf[buffI + 1] = crAmp*rSig[i];
 				}
 				if ((controlFrame += nControlChunkFrames) >= framesPerControlCycle) {
 					controlFrame = 0;
@@ -770,9 +841,11 @@ KleinTrack::playChunk(
 				}
 			}
 //			lFilter.apply(lSig, nControlChunkFrames);
-			for (unsigned int i = 0; i<nControlChunkFrames; i++, buffI ++) {
-				buffL[buffI] += clAmp*lSig[i];
-				buffR[buffI] += crAmp*lSig[i];
+			for (unsigned int i = 0; i<nControlChunkFrames; i++, buffI +=2) {
+				rawBuf[buffI] = lSig[i];
+				rawBuf[buffI + 1] = rSig[i];
+				outBuf[buffI] = clAmp*lSig[i];
+				outBuf[buffI + 1] = crAmp*lSig[i];
 			}
 			if ((controlFrame += nControlChunkFrames) >= framesPerControlCycle) {
 				controlFrame = 0; // -= framesPerControlCycle ... if it's > we have a mess where control cycle is skipped. so line above, nControlChunkFrames = .... etc
@@ -791,9 +864,11 @@ KleinTrack::playChunk(
 				nControlChunkFrames = (controlFrame + nCycleFrames > framesPerControlCycle) ? (framesPerControlCycle - controlFrame) : nCycleFrames;
 				memset(lSig, 0, nControlChunkFrames * sizeof(float));
 	//			lFilter.apply(lSig, nControlChunkFrames);
-				for (unsigned int i = 0; i<nControlChunkFrames; i++, buffI ++) {
-					buffL[buffI] += clAmp*lSig[i];
-					buffR[buffI] += crAmp*lSig[i];
+				for (unsigned int i = 0; i<nControlChunkFrames; i++, buffI += 2) {
+					rawBuf[buffI] = lSig[i];
+					rawBuf[buffI + 1] = rSig[i];
+					outBuf[buffI] = clAmp*lSig[i];
+					outBuf[buffI + 1] = crAmp*lSig[i];
 				}
 				if ((controlFrame += nControlChunkFrames) >= framesPerControlCycle) {
 					controlFrame = 0;
@@ -813,6 +888,21 @@ KleinTrack::playChunk(
 		nextDataFrame = floor(phs);
 		lastFraction = phs - nextDataFrame;
 	}
+
+
+
+	if (cpageid >= 0) {
+		csf->requestPage(cpageid); // will already be loaded, but we'll make sure it's there
+		if (currentDirectionFwd) {
+			csf->requestPage(cpageid + 1);
+			csf->requestPage(cpageid + 2);
+		}
+		else {
+			csf->requestPage(cpageid - 1);
+			csf->requestPage(cpageid - 2);
+		}
+	}
+
 	return nOutputFrames;
 }
 
@@ -845,4 +935,18 @@ long KleinTrack::boringFrames(const VstTimeInfo * const t, const long startOffse
 bool KleinTrack::isPlaying()
 {
 	return true;
+}
+
+void KleinTrack::allocateBuffers(long blocksize)
+{
+	if (loopOutBuf != nullptr) delete[] loopOutBuf;
+	loopOutBuf = new float[nOutChannels * blocksize];
+	if (loopRawBuf != nullptr) delete[] loopRawBuf;
+	loopRawBuf = new float[nOutChannels * blocksize];
+	if (recordBuffer != nullptr) delete[] recordBuffer;
+	recordBufferLen = Bufferator::FRAMES_PER_PAGE;
+	if (recordBufferLen < blocksize) {
+		recordBufferLen = blocksize;
+	}
+	recordBuffer = new float[nOutChannels * recordBufferLen];
 }

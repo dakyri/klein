@@ -77,6 +77,11 @@ void SampleInfo::setError(string msg, Bufferator::ErrorLevel level) {
 	lastErrorLevel = level;
 }
 
+bool SampleInfo::addChunk(long startFrame, long nFrames, float * buffer)
+{
+	return false;
+}
+
 /**
  * open our connected audio file, which is presumed to already exist
  */
@@ -255,6 +260,78 @@ SampleChunkInfo *SampleInfo::findChunk4Frame(off_t dataFrame) {
 }
 
 /**
+ * insert the chunk in the chunk list, adjusting the surrounding chunks so that we have no range overlap
+ */
+bool SampleInfo::insertChunk(SampleChunkInfo * sci)
+{
+	chunkLock.lock();
+	auto cli = chunkList.begin();
+	bool doInsert = true;
+	while (cli != chunkList.end()) {
+		if (sci->startFrame <= (*cli)->startFrame) { // first position that fits. here we just do a straight insert and adjust
+			break;
+		}
+		else if (sci->startFrame > (*cli)->startFrame && sci->startFrame < (*cli)->startFrame + (*cli)->nFrames) { // overlap with this buffer
+			// split this buffer at sci->startFrame, insert the new buffer and set this to be cli 
+			const int noc = 2;
+			const long nf = (*cli)->nFrames - sci->startFrame;
+			float *ndta = new float[nf*noc];
+			memcpy(ndta, sci->data + noc*sci->startFrame, noc * nf);
+			SampleChunkInfo *scj = new SampleChunkInfo(sci->startFrame, nf, nf*noc, ndta);
+			(*cli)->nFrames = sci->startFrame - (*cli)->startFrame; // this isn't dirty
+			++cli; // cli now points to the successor of this buffer we're splitting
+			cli = chunkList.insert(cli, scj); // cli now points to the inserted buffer
+			break;
+		}
+		++cli;
+	}
+	if (doInsert) { 
+		chunkList.insert(cli, sci);
+		while (cli != chunkList.end()) {
+			(*cli)->startFrame += sci->length;
+			(*cli)->dirty = true; // all the moved bits are dirty ... if we ever write to file
+		}
+		chunkChannelCount += nChannels;
+	}
+	chunkLock.unlock();
+	return true;
+}
+
+/**
+* insert the chunk in the chunk list, splitting and moving surrounding chunks so that there is no range overlap
+*/
+bool SampleInfo::placeChunk(SampleChunkInfo * sci)
+{
+	chunkLock.lock();
+	auto cli = chunkList.begin();
+	bool doInsert = true;
+	while (cli != chunkList.end()) {
+		if (sci->startFrame < (*cli)->startFrame) { // first position that fits
+			if (sci->startFrame + sci->nFrames >(*cli)->startFrame) { // prevent overlap with buffer we're inserting it before
+				sci->nFrames = (*cli)->startFrame - sci->startFrame;
+			}
+			break;
+		}
+		else if (sci->startFrame >= (*cli)->startFrame && sci->startFrame < (*cli)->startFrame + (*cli)->nFrames) { // overlap with this buffer
+			if (sci->startFrame + sci->nFrames <= (*cli)->startFrame + (*cli)->nFrames) { // full overlap. skip the buffer just read
+				doInsert = false;
+				break;
+			}
+			else { // trim to prevent overlap. we should drop out of loop to insert on the next iteration
+				(*cli)->nFrames = sci->startFrame - (*cli)->startFrame;
+			}
+		}
+		++cli;
+	}
+	if (doInsert) {
+		chunkList.insert(cli, sci);
+		chunkChannelCount += nChannels;
+	}
+	chunkLock.unlock();
+	return true;
+}
+
+/**
  *  gets a reference to the buffer for the requested chunk ... at the moment, assume we are being called by the
  *  audio thread, which is the only place at the moment where it is called from. if not found, we will try to
  *  request it
@@ -307,30 +384,6 @@ bool SampleInfo::processChunkRequests()
 		if (pageno >= 0 && Bufferator::pageStartFrame(pageno) < audioFile.nFrames) {
 			cerr << "process " << reqList.size() << " requests " << pageno << " " << path << endl;
 			SampleChunkInfo *sci = readPage(pageno);
-			chunkLock.lock();
-			auto cli = chunkList.begin();
-			bool doInsert = true;
-			while (cli != chunkList.end()) {
-				if (sci->startFrame < (*cli)->startFrame) { // first position that fits
-					if (sci->startFrame + sci->nFrames > (*cli)->startFrame) { // prevent overlap with buffer we're inserting it before
-						sci->nFrames = (*cli)->startFrame - sci->startFrame;
-					}
-					break;
-				} else if (sci->startFrame >= (*cli)->startFrame && sci->startFrame < (*cli)->startFrame + (*cli)->nFrames) { // overlap with this buffer
-					if (sci->startFrame + sci->nFrames <= (*cli)->startFrame + (*cli)->nFrames) { // full overlap. skip the buffer just read
-						doInsert = false;
-						break;
-					} else { // trim to prevent overlap. we should drop out of loop to insert on the next iteration
-						(*cli)->nFrames = sci->startFrame - (*cli)->startFrame;
-					}
-				}
-				++cli;
-			}
-			if (doInsert) {
-				chunkList.insert(cli, sci);
-				chunkChannelCount += nChannels;
-			}
-			chunkLock.unlock();
 		}
 	}
 	return true;

@@ -207,6 +207,8 @@ public:
 	bool createAudioFile(string _path, int _id);
 	void setError(string msg, Bufferator::ErrorLevel lvl = Bufferator::ErrorLevel::ERROR_EVENT);
 
+	bool addChunk(long startFrame, long nFrames, float *buffer);
+
 	/*
 	Observable<SampleGfxInfo> getMinMax(final int npoints);
 	*/
@@ -223,6 +225,10 @@ public:
 	void checkAddOldest(list<SampleChunkInfo*>::iterator sci, list<list<SampleChunkInfo*>::iterator> &  togo);
 	//	static SampleChunkInfo* allocateChunkBuffers(int nTotalFrames, short nChannels);
 
+protected:
+	bool placeChunk(SampleChunkInfo *sci);
+	bool insertChunk(SampleChunkInfo * sci);
+
 	bool isRequiredChunk(int c);
 	void addRequiredChunk(int reqdChunk);
 	void clearRequiredChunks();
@@ -230,6 +236,8 @@ public:
 	/*	Observable<Path[]> getSamplePaths(final int w, final int h) ;*/
 
 	float getFrameCount();
+
+	friend Bufferator;
 };
 
 

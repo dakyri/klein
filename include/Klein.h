@@ -89,7 +89,7 @@ public:
 	virtual bool getInputProperties(long index, VstPinProperties* properties);
 	virtual bool getOutputProperties(long index, VstPinProperties* properties);
 
-	virtual void setBlockSize(long blockSize) override;
+	virtual void allocateBuffers(long blockSize) override;
 
 	char *parameterName(long index);
 

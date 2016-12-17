@@ -37,12 +37,21 @@ enum TrackMode {
 	TRAK_DEAD
 };
 
+enum PlayDirection {
+	PLAY_FWD,
+	PLAY_BAK,
+	PLAY_FWDBAK,
+	PLAY_BAKFWD
+};
+
 TrackMode trackMode4(string s);
 string trackMode4(TrackMode s);
 SyncSource syncSrc4(string s);
 string syncSrc4(SyncSource s);
 SyncUnit syncUnit4(string s);
 string syncUnit4(SyncUnit s);
+PlayDirection playDir4(string s);
+string playDir4(PlayDirection s);
 
 class SampleLoop {
 public:
@@ -77,6 +86,7 @@ public:
 
 	void setSyncSrc(const SyncSource ss);
 	void setSyncUnit(const SyncUnit su);
+	void setPlayDirection(const PlayDirection p);
 	
 	void recordStart(const ktime_t &at);
 	void recordStop(const ktime_t &at);
@@ -93,19 +103,27 @@ public:
 	long boringFrames(const VstTimeInfo * const t, const long startOffset);
 	bool isPlaying();
 
+	void allocateBuffers(long blocksize);
+
 	static const unsigned int framesPerControlCycle = 64;
 	static const unsigned int nOutChannels = 2;
 protected:
 	int playChunk(
-		float *buffL, float *buffR, int nRequestedFrames, int currentDataFrame,
-		float *chunkData, int chunkStartFrame, int chunkNFrames, float nextBufferStartL, float nextBufferStartR, bool directionFwd);
+		const shared_ptr<SampleInfo>& csf, float * const loopOutBuf, float * const loopRawBuf, const int nRequestedFrames, const int currentDataFrame, const bool directionFwd);
 	void calculateControlsStereo(float &l, float &r);
-	void loopEnd();
+	void loopEnd(const shared_ptr<SampleInfo>& csf);
+	void doSync();
 	long getTotalCurrentSampleFrames();
-
+	int addToRecordBuffer(const shared_ptr<SampleInfo> & csf, const float gain, float * const inl, float * const inr, const int nFrames, bool inc = true);
+	int addToRecordBuffer(const shared_ptr<SampleInfo> & csf, const float gain, float * const ins, const int nFrames, bool inc = true);
+	void startRecordBuffer(const shared_ptr<SampleInfo> & csf, const int startFrame);
+	void finalizeRecord(const shared_ptr<SampleInfo> & csf);
+	shared_ptr<SampleInfo> allocateSampleInfo();
+ 
 	int id;
 	int inPortId;
 	int outPortId;
+	bool selected;
 
 	vector<SampleLoop>::iterator currentSampleLoop;
 	int loopStartFrame;
@@ -119,7 +137,7 @@ protected:
 
 	SyncSource syncSrc;
 	SyncUnit syncUnit;
-
+	PlayDirection playDirection;
 	TrackMode trackMode;
 
 	bool mute;
@@ -133,6 +151,16 @@ protected:
 	float speedBend;
 	float timeStretch;
 
+	float *loopOutBuf;
+	float *loopRawBuf;
+	float *leftCycleBuffer;
+	float *rightCycleBuffer;
+
+	float *recordBuffer;
+	int recordBufferLen;
+	int nFramesRecorded;
+	int recordStartFrame;
+
 	vector<SampleLoop> loops;
 
 	float lAmp;
@@ -142,6 +170,7 @@ protected:
 	float lastFraction;
 	int nextDataFrame;
 
-	float *leftCycleBuffer;
-	float *rightCycleBuffer;
 };
+
+void addToBuffer(const float gain, float * const inl, float * const outl, const int nFrames);
+void addToBuffer(const float gain, float * const ins, float * const outl, float * const outr, const int nFrames);

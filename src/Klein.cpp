@@ -301,6 +301,9 @@ Klein::getTempo()
 
 void Klein::allocateBuffers(long blockSize)
 {
+	for (KleinTrack & i: track) {
+		i.allocateBuffers(blockSize);
+	}
 }
 
 /*
@@ -694,7 +697,7 @@ void Klein::setNLoopsPerTrack(int n)
 	}
 }
 
-void Klein::setBlockSize(long blocksize) {
-	AudioEffectX::setBlockSize(blocksize);
+void Klein::allocateBuffers(long blocksize) {
+	AudioEffectX::allocateBuffers(blocksize);
 	allocateBuffers(blocksize);
 }
