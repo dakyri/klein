@@ -5,6 +5,11 @@
 #include "Klein.h"
 
 /**
+ * central controller, handles midi processing, perhaps eventually keyboard and OSC processing
+ * maps these various inputs onto global and track specific functions
+ */
+
+/**
  * sorted list of commands. we can search in here via binary search
  */
 vector<Command> commands {
@@ -55,6 +60,7 @@ vector<Command> commands {
 	{ Command::PREVIOUS_LOOP, "PreviousLoop", "Previous Loop" },
 	{ Command::PREVIOUS_TRACK, "PreviousTrack", "Previous Track" },
 	{ Command::REALIGN,		"Realign", "Realign" },
+	{ Command::RECORD,		"Record", "Record" },
 	{ Command::REDO,		"Redo", "Redo" },
 	{ Command::REHEARSE,	"Rehearse", "Rehearse" },
 	{ Command::RELOAD_SCRIPTS, "ReloadScripts", "Reload Scripts" },
@@ -85,9 +91,9 @@ vector<Command> commands {
 	{ Command::SPEED_TOGGLE, "SpeedToggle", "Speed Toggle" },
 	{ Command::SPEED_UP,	"SpeedUp", "Speed Up" },
 	{ Command::START_AUDIO_RECORDING,	"StartAudioRecording", "Start Audio Recording" },
-	{ Command::STOP_AUDIO_RECORDING,	"StopAudioRecording", "Stop Audio Recording" },
 	{ Command::START_POINT, "StartPoint", "Start Point" },
 	{ Command::STATUS,		"Status", "Status" },
+	{ Command::STOP_AUDIO_RECORDING,	"StopAudioRecording", "Stop Audio Recording" },
 	{ Command::STUTTER,		"Stutter", "Stutter" },
 	{ Command::SUBSTITUTE,	"Substitute", "Substitute" },
 	{ Command::SUSTAIN_,	"Sustain", "Sustain" },
@@ -132,6 +138,8 @@ vector<Control> controls {
 	{ Control::TIME_STRETCH,	"TimeStretch", "Time Stretch" }
 };
 
+Command doNothing(Command::NOTHING, "", "");
+
 Control *
 Control::find(string nm) {
 	auto f = std::lower_bound(controls.begin(), controls.end(), nm,
@@ -171,11 +179,14 @@ Controller::processEvent(VstMidiEvent * e)
 	int chan = midiChan(midiData);
 //	int hash = makeIdxHash(midiData);
 	cerr << "command " << cmd << " in klein" << endl;
+	vector<CommandMapping> *cmv;
+	vector<ControlMapping> *dmv;
+	vector<ScriptMapping> *smv;
+
 	switch (cmd) {
 	case MIDI_NOTE_OFF:
 	case MIDI_NOTE_ON: {
-		vector<ControlMapping> *cmv = getMidiMap(makeMidiHash(midiData));
-		if (cmv != nullptr) {
+		if ((cmv = getCommandMap(makeMidiHash(midiData))) != nullptr) {
 			for (auto cmi : *cmv) {
 
 			}
@@ -183,8 +194,7 @@ Controller::processEvent(VstMidiEvent * e)
 		break;
 	}
 	case MIDI_CTRL: {
-		vector<ControlMapping> *cmv = getMidiMap(makeMidiHash(midiData));
-		if (cmv != nullptr) {
+		if ((cmv = getCommandMap(makeMidiHash(midiData))) != nullptr) {
 			for (auto cmi : *cmv) {
 				
 			}
@@ -192,8 +202,7 @@ Controller::processEvent(VstMidiEvent * e)
 		break;
 	}
 	case MIDI_PROG: {
-		vector<ControlMapping> *cmv = getMidiMap(makeMidiHash(midiData));
-		if (cmv != nullptr) {
+		if ((cmv = getCommandMap(makeMidiHash(midiData))) != nullptr) {
 			for (auto cmi : *cmv) {
 				processMapping(cmi);
 			}
@@ -206,9 +215,118 @@ Controller::processEvent(VstMidiEvent * e)
 	return true;
 }
 
-bool Controller::processMapping(ControlMapping & m)
+bool Controller::processMapping(CommandMapping & m)
 {
+	KleinTrack &t = klein.getTrack(m.target);
 	switch (m.command) {
+		case Command::AUTO_RECORD: return true;
+		case Command::BACKWARD: return true;
+		case Command::BOUNCE: return true;
+		case Command::CHECKPOINT: return true;
+		case Command::CLEAR: return true;
+		case Command::CONFIRM: return true;
+		case Command::FOCUS_LOCK: return true;
+		case Command::FORWARD: return true;
+		case Command::GLOBAL_MUTE: return klein.globalMute();
+		case Command::GLOBAL_PAUSE: return klein.globalPause();
+		case Command::GLOBAL_RESET: return klein.globalReset();
+		case Command::HALF_SPEED: return true;
+		case Command::INSERT: return true;
+		case Command::INSERT_DIVIDE: return true;
+		case Command::INSERT_DIVIDE_3: return true;
+		case Command::INSERT_DIVIDE_4: return true;
+		case Command::INSERT_MULTIPLY: return true;
+		case Command::INSERT_MULTIPLY_3: return true;
+		case Command::INSERT_MULTIPLY_4: return true;
+		case Command::LOOP1: return t.doLoop(1);
+		case Command::LOOP2: return t.doLoop(2);
+		case Command::LOOP3: return t.doLoop(3);
+		case Command::LOOP4: return t.doLoop(4);
+		case Command::LOOP5: return t.doLoop(5);
+		case Command::LOOP6: return t.doLoop(6);
+		case Command::LOOP7: return t.doLoop(7);
+		case Command::LOOP8: return t.doLoop(8);
+		case Command::MIDI_START: return false;
+		case Command::MIDI_STOP: return false;
+		case Command::MULTIPLY: return true;
+		case Command::MUTE: return t.doMute();
+		case Command::MUTE_MIDI_START: return true;
+		case Command::MUTE_REALIGN: return true;
+		case Command::NEXT_LOOP: return true;
+		case Command::NEXT_TRACK: return true;
+		case Command::OVERDUB: return t.overdub();
+		case Command::PAUSE: return t.pause();
+		case Command::PITCH_CANCEL: return true;
+		case Command::PITCH_DOWN: return true;
+		case Command::PITCH_NEXT: return true;
+		case Command::PITCH_PREVIOUS: return true;
+		case Command::PITCH_STEP: return true;
+		case Command::PITCH_UP: return true;
+		case Command::PLAY: return t.play();
+		case Command::PREVIOUS_LOOP: return true;
+		case Command::PREVIOUS_TRACK: return true;
+		case Command::REALIGN: return true;
+		case Command::RECORD: return t.record();
+		case Command::REDO: return true;
+		case Command::REHEARSE: return true;
+		case Command::RELOAD_SCRIPTS: return true;
+		case Command::REPLACE: return true;
+		case Command::RESET: return true;
+		case Command::RESTART: return true;
+		case Command::RESTART_ONCE: return true;
+		case Command::REVERSE: return true;
+		case Command::SAMPLE_2: return true;
+		case Command::SAMPLE_3: return true;
+		case Command::SAMPLE_4: return true;
+		case Command::SAMPLE_5: return true;
+		case Command::SAMPLE_6: return true;
+		case Command::SAMPLE_7: return true;
+		case Command::SAMPLE_8: return true;
+		case Command::SAMPLE_9: return true;
+		case Command::SAVE_AUDIO_RECORDING: return true;
+		case Command::SAVE_LOOP: return true;
+		case Command::SHUFFLE: return true;
+		case Command::SLIP_BACKWARD: return true;
+		case Command::SLIP_FORWARD: return true;
+		case Command::SOLO: return true;
+		case Command::SPEED_CANCEL: return true;
+		case Command::SPEED_DOWN: return true;
+		case Command::SPEED_NEXT: return true;
+		case Command::SPEED_PREV: return true;
+		case Command::SPEED_STEP: return true;
+		case Command::SPEED_TOGGLE: return true;
+		case Command::SPEED_UP: return true;
+		case Command::START_AUDIO_RECORDING: return true;
+		case Command::STOP_AUDIO_RECORDING: return true;
+		case Command::START_POINT: return true;
+		case Command::STATUS: return true;
+		case Command::STUTTER: return true;
+		case Command::SUBSTITUTE: return true;
+		case Command::SUSTAIN_: return true;
+		case Command::SYNC_MASTER_TRACK: return true;
+		case Command::SYNC_START_POINT: return true;
+		case Command::TRACK_1: return klein.selectTrack(1);
+		case Command::TRACK_2: return klein.selectTrack(2);
+		case Command::TRACK_3: return klein.selectTrack(3);
+		case Command::TRACK_4: return klein.selectTrack(4);
+		case Command::TRACK_5: return klein.selectTrack(5);
+		case Command::TRACK_6: return klein.selectTrack(6);
+		case Command::TRACK_7: return klein.selectTrack(7);
+		case Command::TRACK_8: return klein.selectTrack(8);
+		case Command::TRACK_COPY: return true;
+		case Command::TRACK_COPY_TIMING: return true;
+		case Command::TRACK_GROUP: return true;
+		case Command::TRACK_RESET: return true;
+		case Command::TRIM_END: return true;
+		case Command::TRIM_START: return true;
+		case Command::UI_: return true;
+		case Command::UNDO: return true;
+		case Command::WINDOW_BACKWARD: return true;
+		case Command::WINDOW_FORWARD: return true;
+		case Command::WINDOW_START_BACKWARD: return true;
+		case Command::WINDOW_START_FORWARD: return true;
+		case Command::WINDOW_END_BACKWARD: return true;
+		case Command::WINDOW_END_FORWARD: return true;
 
 	}
 	return false;
@@ -217,10 +335,30 @@ bool Controller::processMapping(ControlMapping & m)
 /**
  *
  */
-vector<ControlMapping> * Controller::getMidiMap(int hash)
+vector<CommandMapping> * Controller::getCommandMap(int hash)
 {
-	auto ci = midiMap.find(hash);
-	if (ci == midiMap.end()) {
+	auto ci = cmdMap.find(hash);
+	if (ci == cmdMap.end()) {
+		return nullptr;
+	}
+
+	return &ci->second;
+}
+
+vector<ControlMapping> * Controller::getControlMap(int hash)
+{
+	auto ci = ctlMap.find(hash);
+	if (ci == ctlMap.end()) {
+		return nullptr;
+	}
+
+	return &ci->second;
+}
+
+vector<ScriptMapping> * Controller::getScriptMap(int hash)
+{
+	auto ci = klfMap.find(hash);
+	if (ci == klfMap.end()) {
 		return nullptr;
 	}
 
@@ -238,20 +376,31 @@ int Controller::makeMidiHash(int cmd, int chan, int which) {
 	return (cmd << 12) | (chan << 8) | which;
 }
 
-void Controller::addNoteMapping(ControlMapping & mapping, int channel, int which)
+/**
+ * @param mdicmd MIDI_NOTE_ON, MIDI_CTRL, or MIDI_PROG
+ */
+void Controller::addCommandMapping(CommandMapping & mapping, int mdicmd, int channel, int which)
 {
-	midiMap[makeMidiHash(MIDI_NOTE_ON, channel, which)].push_back(mapping);
+	cmdMap[makeMidiHash(mdicmd, channel, which)].push_back(mapping);
 }
 
-void Controller::addCtrlMapping(ControlMapping & mapping, int channel, int which)
+
+/**
+* @param mdicmd MIDI_NOTE_ON, MIDI_CTRL, or MIDI_PROG
+*/
+void Controller::addControlMapping(ControlMapping & mapping, int mdicmd, int channel, int which)
 {
-	midiMap[makeMidiHash(MIDI_CTRL, channel, which)].push_back(mapping);
+	ctlMap[makeMidiHash(mdicmd, channel, which)].push_back(mapping);
 }
 
-void Controller::addProgMapping(ControlMapping & mapping, int channel, int which)
+/**
+* @param mdicmd MIDI_NOTE_ON, MIDI_CTRL, or MIDI_PROG
+*/
+void Controller::addScriptMapping(ScriptMapping & mapping, int mdicmd, int channel, int which)
 {
-	midiMap[makeMidiHash(MIDI_PROG, channel, which)].push_back(mapping);
+	klfMap[makeMidiHash(mdicmd, channel, which)].push_back(mapping);
 }
+
 
 status_t Controller::loadScript(const char * id, const char * src)
 {

@@ -6,6 +6,13 @@
  */
 
 #include "KLFunValue.h"
+#include "KLFContext.h"
+
+#include <string>
+#include <vector>
+
+using namespace std;
+struct Control;
 
 enum KLFEvent {
 	CLICK,
@@ -13,6 +20,8 @@ enum KLFEvent {
 	SUSTAIN,
 	END_SUSTAIN
 };
+
+typedef int op_id_t;
 
 /**
  * a piece of KLF
@@ -22,8 +31,8 @@ public:
 	KBlock();
 	virtual ~KBlock();
 
-	int virtual run() { return 0; }
-	KLFValue virtual evaluate() { return KLFValue(); }
+	int virtual doStart() { return 0; }
+	KLFValue virtual evaluate(KLFContext &c) { return KLFValue(); }
 };
 
 class KIfBlock : public KBlock {
@@ -31,7 +40,7 @@ public:
 	KIfBlock();
 	virtual ~KIfBlock();
 
-	int virtual run();
+	int virtual doStart();
 
 protected:
 	KBlock *expression;
@@ -41,16 +50,95 @@ protected:
 
 class KAssBlock : public KBlock {
 public:
-	KAssBlock();
-	virtual ~KAssBlock();
+	KAssBlock(KBlock *lv, KBlock *e)
+		: lvalue(lv), expression(e) {} 
+	virtual ~KAssBlock() {
+		if (lvalue) delete lvalue;
+		if (expression) delete expression;
+	}
 
-	int virtual run();
+	int virtual doStart();
 
 protected:
+	KBlock *lvalue;
 	KBlock *expression;
-	KBlock *ifBranch;
-	KBlock *elseBranch;
 };
+
+
+class KBinop : public KBlock {
+public:
+	KBinop(op_id_t t, KBlock *l, KBlock *r)
+		: cmd(t), left(l), right(r) {}
+	virtual ~KBinop() {
+		if (left != nullptr) delete left;
+		if (right != nullptr) delete right;
+	}
+
+	KLFValue virtual evaluate(KLFContext &c) override;
+
+protected:
+	op_id_t cmd;
+
+	KBlock *left;
+	KBlock *right;
+};
+
+class KUnop : public KBlock {
+public:
+	KUnop(op_id_t t, KBlock *o)
+		: cmd(t), op(o) {}
+	virtual ~KUnop() {
+		if (op != nullptr) delete op;
+	}
+
+	KLFValue virtual evaluate(KLFContext &c) override;
+
+protected:
+	op_id_t cmd;
+
+	KBlock *op;
+};
+
+class KConstant : public KBlock {
+public:
+	KConstant(int i) {}
+	KConstant(float f) {}
+	KConstant(double d) {}
+	KConstant(string *s) {}
+	KConstant(vector<int> *s) {}
+
+	virtual ~KConstant() {
+	}
+
+	KLFValue virtual evaluate(KLFContext &c) override;
+
+protected:
+};
+
+class KRValue : public KBlock {
+public:
+	KRValue(string *) {}
+	KRValue() {}
+
+	virtual ~KRValue() {
+	}
+
+	KLFValue virtual evaluate(KLFContext &c) override;
+
+protected:
+};
+
+class KControl : public KBlock {
+public:
+	KControl(Control *) {}
+	virtual ~KControl() {
+	}
+
+	KLFValue virtual evaluate(KLFContext &c) override;
+
+protected:
+};
+
 /**
 * a compiled and loaded KLF
 *
@@ -63,7 +151,7 @@ public:
 	KLFun();
 	virtual ~KLFun();
 
-	bool run();
+	bool doStart();
 
 protected:
 	KBlock *main;

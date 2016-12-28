@@ -8,6 +8,7 @@ using namespace std;
  */
 struct Command {
 	enum {
+		NOTHING = 0,
 		AUTO_RECORD,
 		BACKWARD,
 		BOUNCE,
@@ -55,6 +56,7 @@ struct Command {
 		PREVIOUS_LOOP,
 		PREVIOUS_TRACK,
 		REALIGN,
+		RECORD,
 		REDO,
 		REHEARSE,
 		RELOAD_SCRIPTS,
@@ -85,9 +87,9 @@ struct Command {
 		SPEED_TOGGLE,
 		SPEED_UP,
 		START_AUDIO_RECORDING,
-		STOP_AUDIO_RECORDING,
 		START_POINT,
 		STATUS,
+		STOP_AUDIO_RECORDING, 
 		STUTTER,
 		SUBSTITUTE,
 		SUSTAIN_,
@@ -124,6 +126,18 @@ struct Command {
 	string displayName;
 
 	static Command *find(string nm);
+};
+
+extern Command doNothing;
+
+struct CommandStackItem {
+	CommandStackItem()
+		: CommandStackItem(doNothing) { }
+
+	CommandStackItem(Command & c)
+		: command(c) { }
+
+	Command &command;
 };
 
 /*

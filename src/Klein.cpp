@@ -205,6 +205,32 @@ Klein::parameterName(long index)
 	return "";
 }
 
+KleinTrack & Klein::getTrack(int which)
+{
+	// TODO: insert return statement here
+	return *track[0];
+}
+
+bool Klein::selectTrack(int which)
+{
+	return false;
+}
+
+bool Klein::globalMute()
+{
+	return false;
+}
+
+bool Klein::globalPause()
+{
+	return false;
+}
+
+bool Klein::globalReset()
+{
+	return false;
+}
+
 void Klein::getParameterName (long index, char *label)
 {
 	sprintf(label, " %10s", parameterName(index));
@@ -243,13 +269,13 @@ void Klein::process (float **inputs, float **outputs, long nFrames)
 	while (currentOutFrame < nFrames) {
 		const VstTimeInfo *t = getTimeInfo(kVstTempoValid);
 		long framesThisChunk = nFrames - currentOutFrame;
-		for (auto ti = track.begin(); ti != track.end(); ++ti) {
+		for (unique_ptr<KleinTrack> &ti : track) {
 			long l = ti->boringFrames(t, currentOutFrame);
 			if (l > 0 && l < framesThisChunk) {
 				framesThisChunk = l;
 			}
 		}
-		for (auto ti = track.begin(); ti != track.end(); ++ti) {
+		for (unique_ptr<KleinTrack> &ti : track) {
 			const long framesHandled = ti->processAdding(inputs, outputs, currentOutFrame, nFrames);
 			float tvu = ti->getVu();
 			if (tvu > cvu) {
@@ -274,13 +300,13 @@ void Klein::processReplacing (float **inputs, float **outputs, long nFrames)
 	while (currentOutFrame < nFrames) {
 		const VstTimeInfo *t = getTimeInfo(kVstTempoValid);
 		long framesThisChunk = nFrames-currentOutFrame;
-		for (auto ti = track.begin(); ti != track.end(); ++ti) {
+		for (unique_ptr<KleinTrack> &ti: track) {
 			long l = ti->boringFrames(t, currentOutFrame);
 			if (l > 0 && l < framesThisChunk) {
 				framesThisChunk = l;
 			}
 		}
-		for (auto ti = track.begin(); ti != track.end(); ++ti) {
+		for (unique_ptr<KleinTrack> &ti : track) {
 			const long framesHandled = ti->processAdding(inputs, outputs, currentOutFrame, nFrames);
 			float tvu = ti->getVu();
 			if (tvu > cvu) {
@@ -299,10 +325,10 @@ Klein::getTempo()
 	return t->tempo;
 }
 
-void Klein::allocateBuffers(long blockSize)
+void Klein::allocateChildBuffers(long blockSize)
 {
-	for (KleinTrack & i: track) {
-		i.allocateBuffers(blockSize);
+	for (unique_ptr<KleinTrack> & i: track) {
+		i->allocateBuffers(blockSize);
 	}
 }
 
@@ -580,6 +606,8 @@ Klein::loadConfig(const char *path)
 }
 
 XMLError Klein::loadTrackConfig(tinyxml2::XMLElement *element) {
+	
+
 	const char *trackAttrVal = element->Attribute("nTracks");
 	const char *loopAttrVal = element->Attribute("nLoopsPerTracks");
 	XMLElement *childElement = element->FirstChildElement();
@@ -605,11 +633,11 @@ XMLError Klein::loadTrackConfig(tinyxml2::XMLElement *element) {
 
 			if (i <= trackId) i = trackId + 1;
 
-			track.push_back(KleinTrack(trackId, inPortId, outPortId, nLoopsPerTrack, ss, su));
+			track.push_back(make_unique<KleinTrack>(trackId, inPortId, outPortId, nLoopsPerTrack, ss, su));
 			++nTrackAdded;
 		}
 		while (nTrackAdded < nTracks) {
-			track.push_back(KleinTrack(i++, 0, 0, nLoopsPerTrack, SYNC_HOST, SYNC_LOOP));
+			track.push_back(make_unique<KleinTrack>(i++, 0, 0, nLoopsPerTrack, SYNC_HOST, SYNC_LOOP));
 		}
 		childElement = childElement->NextSiblingElement();
 	}
@@ -650,30 +678,44 @@ XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element) {
 		int channel = channelAttrVal ? atoi(channelAttrVal) : 0;
 		int which = whichAttrVal ? atoi(whichAttrVal): 0;
 
-		ControlMapping mapping;
-		bool hasMapping = false;
-		if (functionAttrVal) {
-			hasMapping = true;
-		}
-		else if (controlAttrVal) {
-			hasMapping = true;
-		}
-		else if (scriptAttrVal) {
-			hasMapping = true;
-		}
+		// TODO XXXX FIXME ???? map function/control/script here into mapping
 
-		if (hasMapping) {
+		if (functionAttrVal) {
+			CommandMapping mapping; // <<<<<<<<<<<<<<<<<<<<<< ?????
 			if (childName == "note") {
-				controller.addNoteMapping(mapping, channel, which);
+				controller.addCommandMapping(mapping, MIDI_NOTE_ON, channel, which);
 			}
 			else if (childName == "ctrl") {
-				controller.addCtrlMapping(mapping, channel, which);
+				controller.addCommandMapping(mapping, MIDI_CTRL, channel, which);
 			}
 			else if (childName == "prog") {
-				controller.addProgMapping(mapping, channel, which);
+				controller.addCommandMapping(mapping, MIDI_PROG, channel, which);
 			}
 		}
-
+		if (controlAttrVal) {
+			ControlMapping mapping; // <<<<<<<<<<<<<<<<<<<<<< ?????
+			if (childName == "note") {
+				controller.addControlMapping(mapping, MIDI_NOTE_ON, channel, which);
+			}
+			else if (childName == "ctrl") {
+				controller.addControlMapping(mapping, MIDI_CTRL, channel, which);
+			}
+			else if (childName == "prog") {
+				controller.addControlMapping(mapping, MIDI_PROG, channel, which);
+			}
+		}
+		if (scriptAttrVal) {
+			ScriptMapping mapping; // <<<<<<<<<<<<<<<<<<<<<< ?????
+			if (childName == "note") {
+				controller.addScriptMapping(mapping, MIDI_NOTE_ON, channel, which);
+			}
+			else if (childName == "ctrl") {
+				controller.addScriptMapping(mapping, MIDI_CTRL, channel, which);
+			}
+			else if (childName == "prog") {
+				controller.addScriptMapping(mapping, MIDI_PROG, channel, which);
+			}
+		}
 		childElement = childElement->NextSiblingElement();
 	}
 	return XML_NO_ERROR;
@@ -685,19 +727,19 @@ void Klein::setNTracks(int n)
 	nTracks = n;
 	track.clear();
 	for (int i = 0; i < n; i++) {
-		track.push_back(KleinTrack(i, nLoopsPerTrack));
+		track.push_back(make_unique<KleinTrack>(i, nLoopsPerTrack));
 	}
 }
 
 void Klein::setNLoopsPerTrack(int n)
 {
 	nLoopsPerTrack = n;
-	for (auto it = track.begin(); it != track.end(); ++it) {
+	for (unique_ptr<KleinTrack> &it: track) {
 		it->setNLoops(n);
 	}
 }
 
 void Klein::allocateBuffers(long blocksize) {
 	AudioEffectX::allocateBuffers(blocksize);
-	allocateBuffers(blocksize);
+	allocateChildBuffers(blocksize);
 }

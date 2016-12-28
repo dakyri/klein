@@ -33,17 +33,42 @@ KIfBlock::~KIfBlock()
 }
 
 int
-KIfBlock::run() {
-	if (expression != nullptr && expression->run()) {
+KIfBlock::doStart() {
+	if (expression != nullptr && expression->doStart()) {
 		if (ifBranch != nullptr) {
-			ifBranch->run();
+			ifBranch->doStart();
 		}
 	}
 	else {
 		if (elseBranch != nullptr) {
-			elseBranch->run();
+			elseBranch->doStart();
 		}
 
 	}
 	return 0;
+}
+
+KLFValue KBinop::evaluate(KLFContext & c)
+{
+	return KLFValue();
+}
+
+KLFValue KUnop::evaluate(KLFContext & c)
+{
+	return KLFValue();
+}
+
+KLFValue KConstant::evaluate(KLFContext & c)
+{
+	return KLFValue();
+}
+
+KLFValue KRValue::evaluate(KLFContext & c)
+{
+	return KLFValue();
+}
+
+KLFValue KControl::evaluate(KLFContext & c)
+{
+	return KLFValue();
 }

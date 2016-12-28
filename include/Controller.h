@@ -14,10 +14,15 @@ using namespace std;
 #include "ParserDriver.h"
 
 class Klein;
+class KLFun;
+
+typedef int cmd_id_t;
+typedef int ctl_id_t;
+typedef int tgt_id_t;
 
 /**
  * represents a single mapping between an input and an operation 
- *  - operation is either a built in command or a script
+ *  - operation is a built in command (CommandMapping), a controller/variable mapping (ControlMapping), or a KLF Script (ScriptMapping)
  * inputs could be
  *  - midi program. simplest. no time or wierd value. direct map onto operation
  *  - midi control. immediate, but with a variable control value
@@ -42,9 +47,25 @@ class Klein;
  *  - something else??
  * 
  */
+struct CommandMapping {
+	cmd_id_t command;
+	tgt_id_t target;
+
+	time_t attack;
+	time_t lastUpdate;
+};
+
 struct ControlMapping {
-	uchar command;
-	int target;
+	ctl_id_t control;
+	tgt_id_t target;
+};
+
+struct ScriptMapping {
+	KLFun *script;
+	tgt_id_t target;
+
+	time_t attack;
+	time_t lastUpdate;
 };
 
 /**
@@ -59,18 +80,23 @@ public:
 
 	bool processEvent(VstMidiEvent *e);
 
-	void addNoteMapping(ControlMapping & mapping, int channel, int which);
-	void addCtrlMapping(ControlMapping & mapping, int channel, int which);
-	void addProgMapping(ControlMapping & mapping, int channel, int which);
+	void addCommandMapping(CommandMapping & mapping, int mdicmd, int channel, int which);
+	void addControlMapping(ControlMapping & mapping, int mdicmd, int channel, int which);
+	void addScriptMapping(ScriptMapping & mapping, int mdicmd, int channel, int which);
 	status_t loadScript(const char *id, const char *src);
 
 protected:
 	Klein &klein;
-	unordered_map<int, vector<ControlMapping>> midiMap;
+	unordered_map<int, vector<CommandMapping>> cmdMap;
+	unordered_map<int, vector<ControlMapping>> ctlMap;
+	unordered_map<int, vector<ScriptMapping>> klfMap;
 
-	vector<ControlMapping> * getMidiMap(int);
+	vector<CommandMapping> * getCommandMap(int);
+	vector<ControlMapping> * getControlMap(int);
+	vector<ScriptMapping> * getScriptMap(int);
+
 	int makeMidiHash(char *midiData);
 	int makeMidiHash(int cmd, int chan, int which);
-	bool processMapping(ControlMapping &m);
+	bool processMapping(CommandMapping &m);
 };
 

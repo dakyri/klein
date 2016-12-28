@@ -9,6 +9,8 @@
 #include "Bufferator.h"
 #include "aeffectx.h"
 #include "KLFunValue.h"
+#include "KLFContext.h"
+#include "Command.h"
 
 enum SyncSource {
 	DFLT_SRC,
@@ -29,7 +31,6 @@ enum TrackMode {
 	TRAK_PEND,
 	TRAK_PAUSE,
 	TRAK_PLAY,
-	TRAK_DEAD,
 	TRAK_REC,
 	TRAK_DUB,
 	TRAK_INSERT,
@@ -53,9 +54,18 @@ string syncUnit4(SyncUnit s);
 PlayDirection playDir4(string s);
 string playDir4(PlayDirection s);
 
+/**
+ *
+ * 1 file per loop. layers shown as loop points.
+ * a lot of the time files won't be written out ... probably only on very long ones
+ */
 class SampleLoop {
 public:
+	bool initLoop();
+	bool reset();
+
 	shared_ptr<SampleInfo> sampleInfo;
+	vector<int> layers; /** array of layer offsets */
 };
 
 class KleinTrack
@@ -105,6 +115,20 @@ public:
 
 	void allocateBuffers(long blocksize);
 
+	void pushCommand(CommandStackItem & c);
+	void clearCommands();
+
+	static string getUniqueFilename();
+
+	// commands
+	bool play();
+	bool pause();
+	bool doLoop(int i);
+	bool doMute();
+	bool overdub();
+	bool record();
+
+	// constants
 	static const unsigned int framesPerControlCycle = 64;
 	static const unsigned int nOutChannels = 2;
 protected:
@@ -118,7 +142,8 @@ protected:
 	int addToRecordBuffer(const shared_ptr<SampleInfo> & csf, const float gain, float * const ins, const int nFrames, bool inc = true);
 	void startRecordBuffer(const shared_ptr<SampleInfo> & csf, const int startFrame);
 	void finalizeRecord(const shared_ptr<SampleInfo> & csf);
-	shared_ptr<SampleInfo> allocateSampleInfo();
+
+	vector<SampleLoop>::iterator allocateSampleLoop();
  
 	int id;
 	int inPortId;
@@ -162,6 +187,9 @@ protected:
 	int recordStartFrame;
 
 	vector<SampleLoop> loops;
+
+	mutex commandsLock;
+	vector<CommandStackItem> commands;
 
 	float lAmp;
 	float rAmp;

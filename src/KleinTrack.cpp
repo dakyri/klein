@@ -110,6 +110,23 @@ string playDir4(PlayDirection s) {
 	return "";
 }
 
+void addToBuffer(const float gain, float * const inl, float * const outl, const int nFrames)
+{
+	for (int i = 0; i < nFrames; i++) {
+		outl[i] = gain * inl[i];
+	}
+}
+
+void addToBuffer(const float gain, float * const ins, float * const outl, float * const outr, const int nFrames)
+{
+	int j = 0;
+	for (int i = 0; i < nFrames; i++) {
+		outl[i] = gain * ins[j++];
+		outl[i] = gain * ins[j++];
+	}
+}
+
+
 
 KleinTrack::KleinTrack(int _trackId, int nLoops)
 	: KleinTrack(_trackId, 0, 0, nLoops, SYNC_HOST, SYNC_LOOP)
@@ -297,11 +314,10 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 	float lvu = 0;
 	long nFramesOut = 0;
 
+	shared_ptr<SampleInfo> csf = nullptr;
 	if (currentSampleLoop == loops.end()) {
-		return 0;
+		csf = currentSampleLoop->sampleInfo;
 	}
-	shared_ptr<SampleInfo> csf = currentSampleLoop->sampleInfo;
-
 	bool playLoop = false;
 	switch (trackMode) {
 		case TRAK_PLAY: 
@@ -317,19 +333,20 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 
 		case TRAK_REC: {
 			if (!csf) {
-				csf = allocateSampleInfo();
+				currentSampleLoop = allocateSampleLoop();
+				csf = currentSampleLoop->sampleInfo;
 			}
 			break;
 		}
 	}	
 
-	if (!csf) {
-		return 0;
-	}
-
 	nFramesOut = 0;
 
 	if (playLoop) {
+		if (!csf) {
+			return 0;
+		}
+
 		const int ll = loopLengthFrames < 2 ? 2 : loopLengthFrames;
 		const int sf = loopStartFrame;
 		int buffInd = 0;
@@ -524,6 +541,28 @@ void KleinTrack::finalizeRecord(const shared_ptr<SampleInfo> & csf)
 	nFramesRecorded = 0;
 }
 
+vector<SampleLoop>::iterator KleinTrack::allocateSampleLoop()
+{
+	if (currentSampleLoop == loops.end()) {
+		currentSampleLoop == loops.begin();
+	}
+	currentSampleLoop->initLoop();
+	return currentSampleLoop;
+}
+
+bool SampleLoop::initLoop()
+{
+	sampleInfo = Bufferator::doCreate(KleinTrack::getUniqueFilename(), SampleFile::WAVE_TYPE, 2, 2, 44100, false);
+	return true;
+}
+
+bool SampleLoop::reset()
+{
+	sampleInfo.reset();
+	layers.clear();
+	return false;
+}
+
 
 /**
 * process a given buffer of output. pulled from android CPadSample.cpp
@@ -584,10 +623,10 @@ KleinTrack::playChunk(
 			}
 		}
 		cerr << "player got " << currentDataFrame << " chunk  " << " len " << chunkNFrames << "@  " << chunkStartFrame
-			<< " data[0]  " << chunkData[0] << " path  " << csf->path << endl;
+			<< " data[0]  " << chunkData[0] << " path  " << csf->getPath() << endl;
 	}
 	else {
-		cerr << "player failed to find " << currentDataFrame << " chunk " << cpageid << " path " << csf->path << endl;
+		cerr << "player failed to find " << currentDataFrame << " chunk " << cpageid << " path " << csf->getPath() << endl;
 	}
 
 	const int nDataChannels = 2;
@@ -949,4 +988,53 @@ void KleinTrack::allocateBuffers(long blocksize)
 		recordBufferLen = blocksize;
 	}
 	recordBuffer = new float[nOutChannels * recordBufferLen];
+}
+
+void KleinTrack::pushCommand(CommandStackItem & c)
+{
+	commandsLock.lock();
+	commands.push_back(c);
+	commandsLock.unlock();
+}
+
+void KleinTrack::clearCommands()
+{
+	commandsLock.lock();
+	commands.clear();
+	commandsLock.unlock();
+} 
+
+string KleinTrack::getUniqueFilename()
+{
+	return string();
+}
+
+bool KleinTrack::play()
+{
+	return false;
+}
+
+bool KleinTrack::pause()
+{
+	return false;
+}
+
+bool KleinTrack::doLoop(int i)
+{
+	return false;
+}
+
+bool KleinTrack::doMute()
+{
+	return false;
+}
+
+bool KleinTrack::overdub()
+{
+	return false;
+}
+
+bool KleinTrack::record()
+{
+	return false;
 }

@@ -93,9 +93,18 @@ public:
 
 	char *parameterName(long index);
 
+	KleinTrack &getTrack(int which);
+
+	// commands
+	bool selectTrack(int which);
+	bool globalMute();
+	bool globalPause();
+	bool globalReset();
+
+
 private:
 	float getTempo();
-	void allocateBuffers(long blockSize);
+	void allocateChildBuffers(long blockSize);
 
 	KleinProgram *programs;
 	bool tracksSetupDone;
@@ -105,7 +114,7 @@ private:
 	int nInputPort;
 	int nOutputPort;
 
-	vector<KleinTrack> track;
+	vector<unique_ptr<KleinTrack>> track;
 	Controller controller;
 
 	status_t loadConfig(const char *path);

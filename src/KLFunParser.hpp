@@ -144,12 +144,13 @@ namespace KLF {
 
 	Command *command;
 	Control *control;
-	
+	KBlock *blockval;
+
 	int intval;
 	float floatval;
 	double doubleval;
 
-#line 153 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
+#line 154 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
     };
 #else
     typedef YYSTYPE semantic_type;
@@ -525,7 +526,7 @@ namespace KLF {
 
 #line 5 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:377
 } // KLF
-#line 529 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
+#line 530 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
 
 
 

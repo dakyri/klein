@@ -154,20 +154,25 @@ public:
 	bool fixMemoryPanic();
 	void checkAvailableHeap();
 	bool start();
+	bool stop();
 	bool runner();
 	shared_ptr<SampleInfo> load(string path);
-	shared_ptr<SampleInfo> create(string path, int nChannels, int format, int type);
-	shared_ptr<SampleInfo> allocateInfoBlock(string path, int mxi);
-	shared_ptr<SampleInfo> allocateInfoBlock(string path, int mxi, int nChannels, int format, int type);
+	shared_ptr<SampleInfo> create(
+		string _path, SampleFile::FileType _fileType, short _nChannel, short _sampleSize, float _sampleRate, bool doOpen);
 
-//	static void free(SampleInfo *inf); // suspect that this is not needed in c++. the weak pointers will be invalid when all shared refs are reset()
-	static SampleFile & getAudioFile(string path);
+	static shared_ptr<SampleInfo> doLoad(string path);
+	static shared_ptr<SampleInfo> doCreate(
+		string _path, SampleFile::FileType _fileType, short _nChannel, short _sampleSize, float _sampleRate, bool doOpen);
+
 	static int pageStartFrame(int chunkInd);
 	static int page4Frame(int fr);
-//	static void cleanup();
-	static bool run();
-	bool stop();
+	static bool doStart();
+	static bool doStop();
 
+protected:
+	shared_ptr<SampleInfo> allocateInfoBlock(int mxi, string path);
+	shared_ptr<SampleInfo> allocateInfoBlock(
+		int mxi, string _path, SampleFile::FileType _fileType, short _nChannel, short _sampleSize, float _sampleRate, bool doOpen);
 	void dispatchGfxConstruct(SampleInfo *tgt);
 	void dispatchMafError(string txt);
 	void dispatchMafWarning(string txt);
@@ -182,7 +187,7 @@ public:
 	int id = -1;
 	int nTotalFrames = 0;
 	short nChannels = 0;
-	string path;
+
 	//	int refCount = 0;
 	SampleFile audioFile;
 	int chunkChannelCount;
@@ -198,13 +203,16 @@ public:
 	static Bufferator::ErrorLevel lastErrorLevel;
 	static string lastErrorMessage;
 
+	int16_t *buffer;
+
 public:
 	SampleInfo(string path, int _fileType, int _nChannels, int _sampleFormat, int _sampleRate);
 	SampleInfo();
 	virtual ~SampleInfo();
 
-	bool openAudioFile(string _path, int _id);
-	bool createAudioFile(string _path, int _id);
+	bool openAudioFile(string _path="");
+	bool createAudioFile(string _path="");
+	void setId(int id);
 	void setError(string msg, Bufferator::ErrorLevel lvl = Bufferator::ErrorLevel::ERROR_EVENT);
 
 	bool addChunk(long startFrame, long nFrames, float *buffer);
@@ -217,7 +225,8 @@ public:
 	SampleChunkInfo *getChunk4Frame(off_t dataFrame);
 	SampleChunkInfo *findChunk4Frame(off_t dataFrame);
 
-	string getLastErrorMessage();
+	string getLastErrorMessage() { return lastErrorMessage;  }
+	string getPath() { return audioFile.path;  }
 	bool requestPage(int page);
 	bool updateLoadedChunks();
 	bool processChunkRequests();
@@ -228,7 +237,7 @@ public:
 protected:
 	bool placeChunk(SampleChunkInfo *sci);
 	bool insertChunk(SampleChunkInfo * sci);
-
+	bool writeChunk(SampleChunkInfo * sci);
 	bool isRequiredChunk(int c);
 	void addRequiredChunk(int reqdChunk);
 	void clearRequiredChunks();

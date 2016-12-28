@@ -120,6 +120,7 @@
     <ClInclude Include="..\..\include\Bufferator.h" />
     <ClInclude Include="..\..\include\Controller.h" />
     <ClInclude Include="..\..\include\Command.h" />
+    <ClInclude Include="..\..\include\KLFContext.h" />
     <ClInclude Include="..\..\include\Klein.h" />
     <ClInclude Include="..\..\include\KleinTrack.h" />
     <ClInclude Include="..\..\include\KLFunValue.h" />

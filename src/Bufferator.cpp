@@ -61,15 +61,16 @@ milliseconds now() {
 }
 */
 SampleInfo::SampleInfo(string _path, int _fileType, int _nChannels, int _sampleFormat, int _sampleRate)
-	: path(_path), id(-1), nChannels(_nChannels), nTotalFrames(0), chunkChannelCount(0)
-	, audioFile(SampleFile::WAVE_TYPE, nChannels, _sampleFormat, _sampleRate)
+	: id(-1), nChannels(_nChannels), nTotalFrames(0), chunkChannelCount(0)
+	, audioFile(_path, SampleFile::WAVE_TYPE, nChannels, _sampleFormat, _sampleRate)
 {
 }
 
 SampleInfo::SampleInfo()
-	: path(""), id(-1), nChannels(0), nTotalFrames(0), chunkChannelCount(0)
+	: id(-1), nChannels(0), nTotalFrames(0), chunkChannelCount(0)
 {
 //	gfxCache = nullptr;
+	buffer = new int16_t[Bufferator::FRAMES_PER_PAGE * 2];
 }
 
 void SampleInfo::setError(string msg, Bufferator::ErrorLevel level) {
@@ -85,18 +86,13 @@ bool SampleInfo::addChunk(long startFrame, long nFrames, float * buffer)
 /**
  * open our connected audio file, which is presumed to already exist
  */
-bool SampleInfo::openAudioFile(string _path, int _id)
+bool SampleInfo::openAudioFile(string _path)
 {
-	if (path == "") {
-		return false;
-	}
-	path = _path;
-	id = _id;
 	nTotalFrames = 0;
 	status_t err;
-	if ((err = audioFile.setTo(path, O_RDWR)) != ERR_OK) {
+	if ((err = audioFile.open(_path, O_RDWR)) != ERR_OK) {
 		if (err == EEXIST) {
-			setError(path + " not found", Bufferator::ErrorLevel::FNF_ERROR_EVENT);
+			setError(_path + " not found", Bufferator::ErrorLevel::FNF_ERROR_EVENT);
 		}
 		else {
 			setError("Catastrophe! Some kind of IO exception! " + err);
@@ -106,7 +102,7 @@ bool SampleInfo::openAudioFile(string _path, int _id)
 	}
 	nChannels = (short)audioFile.nChannels;
 	nTotalFrames = (int)audioFile.nFrames;
-	cerr << "set to " << path << " " << nChannels << " chan " << nTotalFrames << " frame" << endl;
+	cerr << "set to " << _path << " " << nChannels << " chan " << nTotalFrames << " frame" << endl;
 
 	requestPage(0); // request start chunks from the interface request list
 	requestPage(1);
@@ -116,23 +112,25 @@ bool SampleInfo::openAudioFile(string _path, int _id)
 /**
 * create our connected audio file, which is presumed to not exist. out data is going there eventually maybe
 */
-bool SampleInfo::createAudioFile(string _path, int _id)
+bool SampleInfo::createAudioFile(string _path)
 {
 	if (_path == "") {
 		return false;
 	}
-	path = _path;
-	id = _id;
 	nTotalFrames = 0;
 	status_t err;
-	if ((err = audioFile.setTo(path, O_RDWR | O_CREAT)) != ERR_OK) {
-		setError("Catastrophe! Some kind of IO exception, while opening " + path);
+	if ((err = audioFile.open(_path, O_RDWR | O_CREAT)) != ERR_OK) {
+		setError("Catastrophe! Some kind of IO exception, while opening " + _path);
 		return false;
 
 	}
-	cerr << "set to " << path << " " << nChannels << " chan " << nTotalFrames << " frame" << endl;
+	cerr << "set to " << _path << " " << nChannels << " chan " << nTotalFrames << " frame" << endl;
 
 	return true;
+}
+
+void SampleInfo::setId(int _id) {
+	id = _id;
 }
 /*
 Observable<SampleGfxInfo> SampleInfo::getMinMax(final int npoints) {
@@ -261,6 +259,7 @@ SampleChunkInfo *SampleInfo::findChunk4Frame(off_t dataFrame) {
 
 /**
  * insert the chunk in the chunk list, adjusting the surrounding chunks so that we have no range overlap
+ * !!!! ????? this will also need to adjust anything that is cached to file
  */
 bool SampleInfo::insertChunk(SampleChunkInfo * sci)
 {
@@ -287,6 +286,7 @@ bool SampleInfo::insertChunk(SampleChunkInfo * sci)
 	}
 	if (doInsert) { 
 		chunkList.insert(cli, sci);
+		// !!!!! ????? FIXME also here need to adjust anything that is only on disk
 		while (cli != chunkList.end()) {
 			(*cli)->startFrame += sci->length;
 			(*cli)->dirty = true; // all the moved bits are dirty ... if we ever write to file
@@ -294,6 +294,23 @@ bool SampleInfo::insertChunk(SampleChunkInfo * sci)
 		chunkChannelCount += nChannels;
 	}
 	chunkLock.unlock();
+	return true;
+}
+
+bool SampleInfo::writeChunk(SampleChunkInfo * sci)
+{
+	if (!sci) {
+		return false;
+	}
+	if (!audioFile()) {
+		if (audioFile.open() != ERR_OK) {
+			return false;
+		}
+		audioFile.writeHeaderInfo();
+	}
+	audioFile.seekToFrame(sci->startFrame);
+	audioFile.NormalizeOutputCpy((char *)buffer, sci->data, sci->nFrames * 2 * sizeof(int16_t));
+	audioFile.Write(sci->data, sci->nFrames * 2 * sizeof(int16_t));
 	return true;
 }
 
@@ -382,7 +399,7 @@ bool SampleInfo::processChunkRequests()
 	for (int pageno: reqList) {
 
 		if (pageno >= 0 && Bufferator::pageStartFrame(pageno) < audioFile.nFrames) {
-			cerr << "process " << reqList.size() << " requests " << pageno << " " << path << endl;
+			cerr << "process " << reqList.size() << " requests " << pageno << " " << audioFile.path << endl;
 			SampleChunkInfo *sci = readPage(pageno);
 		}
 	}
@@ -424,6 +441,9 @@ int SampleInfo::trimAllocatedChunks(int fsi, int refCount)
 		// till the system decides it has no references ...
 		auto sci = *scii;
 		chunkLock.lock();
+		if (sci->dirty) {
+			writeChunk(sci);
+		}
 		chunkList.erase(scii);
 		delete sci;
 		chunkLock.unlock();
@@ -461,6 +481,8 @@ void SampleInfo::checkAddOldest(list<SampleChunkInfo*>::iterator sci, list<list<
 
 SampleInfo::~SampleInfo()
 {
+	delete[] buffer;
+
 	nTotalFrames = 0;
 	// audio file is closed automatically
 	for (auto sci: chunkList) {
@@ -542,7 +564,6 @@ Bufferator::Bufferator(Bufferator::Client * spm)
 }
 
 Bufferator::~Bufferator() {
-
 }
 /*
 Subscription monitorState(Action1<BufferatorException> action) {
@@ -605,6 +626,17 @@ void Bufferator::checkAvailableHeap()
 
 bool Bufferator::start() {
 	runnerThread = thread(&Bufferator::runner, this);
+	return true;
+}
+
+bool Bufferator::stop()
+{
+	isRunning = false;
+	runnerThread.join();
+	/*
+	instance.stateSubject.onCompleted();
+	instance.gfxSubject.onCompleted();
+	*/
 	return true;
 }
 
@@ -718,10 +750,11 @@ bool Bufferator::runner()
 * @param mxi
 * @return
 */
-shared_ptr<SampleInfo> Bufferator::allocateInfoBlock(string path, int mxi)
+shared_ptr<SampleInfo> Bufferator::allocateInfoBlock(int mxi, string path)
 {
 	auto p = make_shared<SampleInfo>();
-	if (!p->openAudioFile(path, mxi)) {
+	p->setId(mxi);
+	if (!p->openAudioFile(path)) {
 		return nullptr;
 	}
 	cacheLock.lock();
@@ -730,10 +763,12 @@ shared_ptr<SampleInfo> Bufferator::allocateInfoBlock(string path, int mxi)
 	return p;
 }
 
-shared_ptr<SampleInfo> Bufferator::allocateInfoBlock(string path, int mxi, int nChannels, int format, int type)
+shared_ptr<SampleInfo> Bufferator::allocateInfoBlock(
+	int mxi, string path, SampleFile::FileType fileType, short nChannel, short sampleSize, float sampleRate, bool doOpen)
 {
-	auto p = make_shared<SampleInfo>();
-	if (!p->createAudioFile(path, mxi)) {
+	auto p = make_shared<SampleInfo>(path, fileType, nChannel, sampleSize, sampleRate);
+	p->setId(mxi);
+	if (!p->createAudioFile(path)) {
 		return nullptr;
 	}
 	cacheLock.lock();
@@ -756,7 +791,7 @@ shared_ptr<SampleInfo> Bufferator::load(string path)
 	for (auto wci: cache) {
 		auto sci = wci.lock();
 		if (sci) {
-			if (sci->path == path) {
+			if (sci->audioFile.path == path) {
 				fnd = sci;
 				break;
 			}
@@ -767,10 +802,10 @@ shared_ptr<SampleInfo> Bufferator::load(string path)
 	}
 	if (fnd == nullptr) {
 		cerr << "load, adding new " << path << endl;
-		fnd = allocateInfoBlock(path, mxi);
+		fnd = allocateInfoBlock(mxi, path);
 	}
 	if (fnd != nullptr) {
-		cerr << "find " << fnd->path << " id " << fnd->id << " ref " << fnd.use_count() << " cache size " << cache.size() << endl; 
+		cerr << "find " << fnd->audioFile.path << " id " << fnd->id << " ref " << fnd.use_count() << " cache size " << cache.size() << endl; 
 	}
 	else {
 		cerr << "fnd is nullptr at end of load" << endl;
@@ -781,14 +816,15 @@ shared_ptr<SampleInfo> Bufferator::load(string path)
 /**
  * allocate a SampleInfo with a new clean buffer, create a sample file to use to back the data on this
  */
-shared_ptr<SampleInfo> Bufferator::create(string path, int nChannels, int format, int type)
+shared_ptr<SampleInfo> Bufferator::create(
+		string path, SampleFile::FileType fileType, short nChannel, short sampleSize, float sampleRate, bool doOpen)
 {
 	int mxi = 1;
 	shared_ptr<SampleInfo> fnd = nullptr;
 	for (auto wci : cache) {
 		auto sci = wci.lock();
 		if (sci) {
-			if (sci->path == path) {
+			if (sci->audioFile.path == path) {
 				fnd = sci;
 				break;
 			}
@@ -800,8 +836,19 @@ shared_ptr<SampleInfo> Bufferator::create(string path, int nChannels, int format
 	if (fnd != nullptr) {
 		return nullptr;
 	}
-	fnd = allocateInfoBlock(path, mxi, nChannels, format, type);
+	fnd = allocateInfoBlock(mxi, path, fileType, nChannel, sampleSize, sampleRate, doOpen);
 	return fnd;
+}
+
+shared_ptr<SampleInfo> Bufferator::doLoad(string path)
+{
+	return instance? instance->load(path): nullptr;
+}
+
+shared_ptr<SampleInfo> Bufferator::doCreate(
+	string path, SampleFile::FileType fileType, short nChannel, short sampleSize, float sampleRate, bool doOpen)
+{
+	return instance ? instance->create(path, fileType, nChannel, sampleSize, sampleRate, doOpen) : nullptr;
 }
 
 void Bufferator::free()
@@ -841,26 +888,14 @@ SampleChunkInfo[] Bufferator::allocateChunkBuffers(int nTotalFrames, short nChan
 */
 
 
-bool Bufferator::run()
+bool Bufferator::doStart()
 {
-	if (instance == nullptr) {
-		return false;
-	}
-	return instance->runner();
+	return instance ? instance->start() : false;
 }
 
-bool Bufferator::stop()
+bool Bufferator::doStop()
 {
-	if (instance == nullptr) {
-		return false;
-	}
-	isRunning = false;
-	runnerThread.join();
-	/*
-	instance.stateSubject.onCompleted();
-	instance.gfxSubject.onCompleted();
-	*/
-	return false;
+	return instance? instance->stop(): false;
 }
 
 void Bufferator::dispatchGfxConstruct(SampleInfo *tgt)

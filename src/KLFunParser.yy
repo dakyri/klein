@@ -47,7 +47,8 @@
 
 	Command *command;
 	Control *control;
-	
+	KBlock *blockval;
+
 	int intval;
 	float floatval;
 	double doubleval;
@@ -55,12 +56,12 @@
 
 %type <intval> script_file;
 
-%type <intval> atom
-%type <intval> expression
+%type <blockval> atom
+%type <blockval> expression
+%type <blockval> block
 %type <intval> statement
 %type <intval> statement_list
 %type <intval> script_item_list
-%type <intval> block
 %type <intval> simple_definition
 %type <intval> handler_definition
 
@@ -188,43 +189,43 @@ handler_definition
 // expressions
 ////////////////////////////
 atom : IDENT {
-			$$ = 0;
+			$$ = new KRValue($1);
 		}
 	| CONTROL {
-			$$ = 0;
+			$$ = new KControl($1);
 		}
 	| LITERAL_INT {
-			$$ = 0;
+			$$ = new KConstant($1);
 		}
 	| LITERAL_FLOAT {
-			$$ = 0;
+			$$ = new KConstant($1);
 		}
 	| LITERAL_STRING {
-			$$ = 0;
+			$$ = new KConstant($1);
 		}
 	| LITERAL_TIME {
-			$$ = 0;
+			$$ = new KConstant($1);
 		}
 	;
 	
 expression 
 	: atom { $$ = $1; }
-	| expression PLUS expression	{ $$ = $1 + $3; }
-	| expression MINUS expression	{ $$ = $1 - $3; }
-	| expression MULT expression	{ $$ = $1 * $3; }
-	| expression MOD expression		{ $$ = $1 % $3; }
-	| expression DIVIDE expression	{ $$ = $1 / $3; }
-	| MINUS expression %prec NEG	{ $$ = -$2; }
-	| NOT expression				{ $$ = !$2; }
-	| expression LT expression		{ $$ = $1 < $3; }
-	| expression GT expression		{ $$ = $1 < $3; }
-	| expression NE expression		{ $$ = $1 == $3; }
-	| expression EQ expression		{ $$ = $1 != $3; }
-	| expression GE expression		{ $$ = $1 >= $3; }
-	| expression LE expression		{ $$ = $1 <= $3; }
-	| expression AND expression		{ $$ = $1 && $3; }
-	| expression OR expression		{ $$ = $1 || $3; }
-	| expression POWER expression	{ $$ = $1 ^ $3; }
+	| expression PLUS expression	{ $$ = new KBinop(token_type::PLUS, $1, $3); }
+	| expression MINUS expression	{ $$ = new KBinop(token_type::MINUS, $1, $3); }
+	| expression MULT expression	{ $$ = new KBinop(token_type::MULT, $1, $3); }
+	| expression MOD expression		{ $$ = new KBinop(token_type::MOD, $1, $3); }
+	| expression DIVIDE expression	{ $$ = new KBinop(token_type::DIVIDE, $1, $3); }
+	| MINUS expression %prec NEG	{ $$ = new KUnop(token_type::MINUS, $2); }
+	| NOT expression				{ $$ = new KUnop(token_type::NOT, $2); }
+	| expression LT expression		{ $$ = new KBinop(token_type::LT, $1, $3); }
+	| expression GT expression		{ $$ = new KBinop(token_type::GT, $1, $3); }
+	| expression NE expression		{ $$ = new KBinop(token_type::NE, $1, $3); }
+	| expression EQ expression		{ $$ = new KBinop(token_type::EQ, $1, $3); }
+	| expression GE expression		{ $$ = new KBinop(token_type::GE, $1, $3); }
+	| expression LE expression		{ $$ = new KBinop(token_type::LE, $1, $3); }
+	| expression AND expression		{ $$ = new KBinop(token_type::AND, $1, $3); }
+	| expression OR expression		{ $$ = new KBinop(token_type::OR, $1, $3); }
+	| expression POWER expression	{ $$ = new KBinop(token_type::POWER, $1, $3); }
 	| LB expression RB				{ $$ = $2; }
 	;
 
