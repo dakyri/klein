@@ -967,17 +967,17 @@ YY_RULE_SETUP
 case 8:
 YY_RULE_SETUP
 #line 66 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
-{ yylval->intval = KLFType::INTEGER; return token::TYPE; }
+{ yylval->intval = KLFType::T_INTEGER; return token::TYPE; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 67 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
-{ yylval->intval = KLFType::FLOAT; return token::TYPE; }
+{ yylval->intval = KLFType::T_FLOAT; return token::TYPE; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 68 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
-{ yylval->intval = KLFType::BOOLEAN; return token::TYPE; }
+{ yylval->intval = KLFType::T_BOOLEAN; return token::TYPE; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP

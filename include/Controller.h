@@ -95,8 +95,10 @@ protected:
 	vector<ControlMapping> * getControlMap(int);
 	vector<ScriptMapping> * getScriptMap(int);
 
-	int makeMidiHash(char *midiData);
 	int makeMidiHash(int cmd, int chan, int which);
 	bool processMapping(CommandMapping &m);
+	bool processMapping(ControlMapping &m, int v);
+	bool processMapping(ScriptMapping &m, int wh, int v);
+
 };
 

@@ -8,7 +8,10 @@ inline uchar midiChan(uchar in) { return in & 0x0f; }
 inline uchar midiCmd(char * in) { return in[0] & 0xf0; }
 inline uchar midiChan(char * in) { return in[0] & 0x0f; }
 inline uchar midiNote(char * in) { return in[1] & 0x7f; }
-inline uchar midiVel(char * in) { return in[2] & 0x7f; }
+inline uchar midiCtrl(char * in) { return in[1] & 0x7f; }
+inline uchar midiProg(char * in) { return in[1] & 0x7f; }
+inline uchar midiNoteVel(char * in) { return in[2] & 0x7f; }
+inline uchar midiCtrlVal(char * in) { return in[2] & 0x7f; }
 
 const uchar MIDI_CMD_NOT	= 0x00;
 const uchar MIDI_NOTE_OFF	= 0x80;

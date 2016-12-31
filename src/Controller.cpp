@@ -164,6 +164,9 @@ Command::find(string nm) {
 Controller::Controller(Klein &k)
 	: klein(k)
 {
+	cmdMap.max_load_factor(0.75);
+	ctlMap.max_load_factor(0.75);
+	klfMap.max_load_factor(0.75);
 }
 
 
@@ -185,26 +188,60 @@ Controller::processEvent(VstMidiEvent * e)
 
 	switch (cmd) {
 	case MIDI_NOTE_OFF:
-	case MIDI_NOTE_ON: {
-		if ((cmv = getCommandMap(makeMidiHash(midiData))) != nullptr) {
-			for (auto cmi : *cmv) {
-
-			}
-		}
-		break;
-	}
-	case MIDI_CTRL: {
-		if ((cmv = getCommandMap(makeMidiHash(midiData))) != nullptr) {
-			for (auto cmi : *cmv) {
-				
-			}
-		}
-		break;
-	}
-	case MIDI_PROG: {
-		if ((cmv = getCommandMap(makeMidiHash(midiData))) != nullptr) {
+	case MIDI_NOTE_ON: { // has duration, secondary value
+		int note = midiNote(midiData);
+		int vel = midiNoteVel(midiData);
+		int rcmd = (cmd == MIDI_NOTE_OFF ? MIDI_NOTE_ON : cmd);
+		int hash = makeMidiHash(rcmd, chan, note);
+		if ((cmv = getCommandMap(hash)) != nullptr) {
 			for (auto cmi : *cmv) {
 				processMapping(cmi);
+			}
+		}
+		if ((dmv = getControlMap(hash)) != nullptr) {
+			for (auto dmi : *dmv) {
+				processMapping(dmi, vel);
+			}
+		}
+		if ((smv = getScriptMap(hash)) != nullptr) {
+			for (auto smi : *smv) {
+				processMapping(smi, note, vel);
+			}
+		}
+		break;
+	}
+	case MIDI_CTRL: { // instantaneous, secondary value
+		int ctl = midiCtrl(midiData);
+		int val = midiCtrlVal(midiData);
+		int hash = makeMidiHash(cmd, chan, ctl);
+		if ((cmv = getCommandMap(hash)) != nullptr) {
+			for (auto cmi : *cmv) {
+				processMapping(cmi);
+			}
+		}
+		if ((dmv = getControlMap(hash)) != nullptr) {
+			for (auto dmi : *dmv) {
+				processMapping(dmi, val);
+			}
+		}
+		if ((smv = getScriptMap(hash)) != nullptr) {
+			for (auto smi : *smv) {
+				processMapping(smi, ctl, val);
+			}
+		}
+		break;
+	}
+	case MIDI_PROG: { // instantaneous, single value
+		int prog = midiProg(midiData);
+		int hash = makeMidiHash(cmd, chan, prog);
+		if ((cmv = getCommandMap(hash)) != nullptr) {
+			for (auto cmi : *cmv) {
+				processMapping(cmi);
+			}
+		}
+		if ((smv = getScriptMap(hash)) != nullptr) {
+			for (auto smi : *smv) {
+				processMapping(smi, prog, 0);
 			}
 		}
 		break;
@@ -332,6 +369,16 @@ bool Controller::processMapping(CommandMapping & m)
 	return false;
 }
 
+bool Controller::processMapping(ControlMapping & m, int v)
+{
+	return false;
+}
+
+bool Controller::processMapping(ScriptMapping & m, int wh, int v)
+{
+	return false;
+}
+
 /**
  *
  */
@@ -366,12 +413,8 @@ vector<ScriptMapping> * Controller::getScriptMap(int hash)
 }
 
 /**
- * hash function into our unordered map. no type checking atm, assume it is a midi control with at least 2 bytes
+ * not really a hash function into our unordered map. just maps command, channel and note/ctrl/progno onto a 12 bit int
  */
-int Controller::makeMidiHash(char *midiData) {
-	return midiData[0] | (midiData[1] << 8);
-}
-
 int Controller::makeMidiHash(int cmd, int chan, int which) {
 	return (cmd << 12) | (chan << 8) | which;
 }

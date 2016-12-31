@@ -1,5 +1,21 @@
 #include "Klein.h"
+#ifdef MOCK
+class AEffect {
 
+};
+typedef int(*audioMasterCallback)(int i1, int i2, int i3, int i4, int i5, int i6);
+class AudioEffect {
+public:
+	AEffect* getAeffect() { return nullptr; }
+};
+class Klein : public AudioEffect {
+public:
+	Klein(audioMasterCallback) {}
+};
+
+int audioMasterVersion;
+int audioMaster() { return 0;  }
+#endif
 bool oome = false;
 
 #if MAC
@@ -37,7 +53,9 @@ AEffect *VSTPluginMain(audioMasterCallback audioMaster)
 #endif
 
 #if WIN32
+
 #include <windows.h>
+
 void* hInstance;
 BOOL WINAPI DllMain (HINSTANCE hInst, DWORD dwReason, LPVOID lpvReserved)
 {

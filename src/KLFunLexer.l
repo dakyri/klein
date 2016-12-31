@@ -63,9 +63,9 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 "on" { return token::ON; }
 "if" { return token::IF; }
 "else" { return token::ELSE; }
-"int" { yylval->intval = KLFType::INTEGER; return token::TYPE; }
-"float" { yylval->intval = KLFType::FLOAT; return token::TYPE; }
-"bool" { yylval->intval = KLFType::BOOLEAN; return token::TYPE; }
+"int" { yylval->intval = KLFType::T_INTEGER; return token::TYPE; }
+"float" { yylval->intval = KLFType::T_FLOAT; return token::TYPE; }
+"bool" { yylval->intval = KLFType::T_BOOLEAN; return token::TYPE; }
 
 "true" { yylval->intval = 1; return token::LITERAL_INT; }
 "false" { yylval->intval = 0; return token::LITERAL_INT; }

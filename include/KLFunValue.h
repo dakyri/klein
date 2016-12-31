@@ -3,10 +3,10 @@
 #include <stdint.h>
 
 enum KLFType {
-	INTEGER,
-	FLOAT,
-	BOOLEAN,
-	TIME
+	T_INTEGER,
+	T_FLOAT,
+	T_BOOLEAN,
+	T_TIME
 };
 
 struct ktime_t {
@@ -28,49 +28,49 @@ public:
 	type_t Type;
 
 	KLFValue(int v=0) {
-		Type = INTEGER;
+		Type = T_INTEGER;
 		value.Int = v;
 	}
 
 	KLFValue(float v) {
-		Type = FLOAT;
+		Type = T_FLOAT;
 		value.Float = v;
 	}
 
 	KLFValue(bool v) {
-		Type = BOOLEAN;
+		Type = T_BOOLEAN;
 		value.Bool = v;
 	}
 
 	KLFValue(ktime_t v) {
-		Type = TIME;
+		Type = T_TIME;
 		value.Time = v;
 	}
 
 	float FloatValue() {
 		switch (Type) {
-		case INTEGER: return value.Int;
-		case FLOAT: return value.Float;
-		case BOOLEAN: return value.Bool;
-		case TIME: return 0;
+		case T_INTEGER: return value.Int;
+		case T_FLOAT: return value.Float;
+		case T_BOOLEAN: return value.Bool;
+		case T_TIME: return 0;
 		}
 	}
 
 	int IntValue() {
 		switch (Type) {
-		case INTEGER: return value.Int;
-		case FLOAT: return value.Float;
-		case BOOLEAN: return value.Bool;
-		case TIME: return 0;
+		case T_INTEGER: return value.Int;
+		case T_FLOAT: return value.Float;
+		case T_BOOLEAN: return value.Bool;
+		case T_TIME: return 0;
 		}
 	}
 
 	bool BoolValue() {
 		switch (Type) {
-		case INTEGER: return value.Int != 0;
-		case FLOAT: return value.Float != 0;
-		case BOOLEAN: return value.Bool;
-		case TIME: return 0;
+		case T_INTEGER: return value.Int != 0;
+		case T_FLOAT: return value.Float != 0;
+		case T_BOOLEAN: return value.Bool;
+		case T_TIME: return 0;
 		}
 	}
 
@@ -78,25 +78,25 @@ public:
 	ktime_t TimeValue() {
 		ktime_t t;
 		switch (Type) {
-		case INTEGER: t.frame = value.Int; break;
-		case FLOAT: t.frame = value.Float; break;
-		case BOOLEAN: t.frame = value.Bool; break;
-		case TIME: return value.Time;
+		case T_INTEGER: t.frame = value.Int; break;
+		case T_FLOAT: t.frame = value.Float; break;
+		case T_BOOLEAN: t.frame = value.Bool; break;
+		case T_TIME: return value.Time;
 		}
 		return t;
 	}
 
 	KLFValue operator+ (KLFValue &v) {
-		if (Type == TIME) {
+		if (Type == T_TIME) {
 //			return KLFValue(TimeValue() + v.IntValue());
 		}
-		if (v.Type == TIME) {
+		if (v.Type == T_TIME) {
 //			return KLFValue(v.TimeValue() + IntValue());
 		}
-		if (Type == FLOAT || v.Type == FLOAT) {
+		if (Type == T_FLOAT || v.Type == T_FLOAT) {
 			return KLFValue(FloatValue() + v.FloatValue());
 		}
-		if (Type == INTEGER || v.Type == INTEGER) {
+		if (Type == T_INTEGER || v.Type == T_INTEGER) {
 			return KLFValue(IntValue() + v.IntValue());
 		}
 		return KLFValue();

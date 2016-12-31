@@ -14,7 +14,7 @@ ofstream dbf;
 #include "tinyxml2.h"
 
 #include "Klein.h"
-#include "AEffEditor.hpp"
+#include "KleinEditor.h"
 
 unordered_map<string, int> kvFilterIdx = {
 	/*
@@ -66,6 +66,7 @@ Klein::Klein(audioMasterCallback audioMaster)
 	, controller(*this)
 	, nTracks(4)
 	, nLoopsPerTrack(4)
+	, kleinView(nullptr)
 {
 	nInputPort = 1;
 	nOutputPort = 4;
@@ -106,6 +107,8 @@ Klein::Klein(audioMasterCallback audioMaster)
 #ifdef KLEIN_DEBUG
 	dbf << "Built the thing " << blockSize << " " << sampleRate << endl;
 #endif
+
+	setEditor(kleinView = new KleinEditor(this));
 }
 
 //------------------------------------------------------------------------
@@ -114,6 +117,7 @@ Klein::~Klein()
 	short	i;
 	if (programs)
 		delete[] programs;
+	// KleinEditor should be deleted by base class
 }
 
 //------------------------------------------------------------------------
@@ -168,14 +172,17 @@ void Klein::setParameter (long index, float value)
 #ifdef KLEIN_DEBUG
 	dbf << "set p " <<  index << ", " << value << endl;
 #endif
-	switch (index)
-	{
+	switch (index) {
 		case kOut :      fOut = ap->fOut = value; break;
 		case kDirectLevel :  fDirectLevel = ap->fDirectLevel = value; break;
 		case kDirectPan :  fDirectPan = ap->fDirectPan = 2*value-1; break;
 	}
-	if (editor)
-		editor->postUpdate ();
+
+	if (editor) {
+		editor->postUpdate();
+		((AEffGUIEditor*)editor)->setParameter(index, value);
+	}
+
 }
 
 //------------------------------------------------------------------------
@@ -560,19 +567,17 @@ bool Klein::hasMidiProgramsChanged(long channel)
 *************************************************************************************/
 string configLoadErrorStr = "";
 
-using namespace tinyxml2;
-
 status_t
 Klein::loadConfig(const char *path)
 {
-	XMLDocument doc;
+	tinyxml2::XMLDocument doc;
 
-	XMLError err = doc.LoadFile(path);
-	if (err != XML_NO_ERROR) {
+	tinyxml2::XMLError err = doc.LoadFile(path);
+	if (err != tinyxml2::XML_NO_ERROR) {
 		configLoadErrorStr = doc.GetErrorStr1();
 		return err;
 	}
-	XMLElement* root = doc.RootElement();
+	tinyxml2::XMLElement* root = doc.RootElement();
 
 	string namestr = root->Value();
 	if (namestr == "klein") {
@@ -581,7 +586,7 @@ Klein::loadConfig(const char *path)
 		if (inputPortAttrVal) nInputPort =  atoi(inputPortAttrVal);
 		if (outputPortAttrVal) nOutputPort = atoi(outputPortAttrVal);
 
-		XMLElement *childElement = root->FirstChildElement();
+		tinyxml2::XMLElement *childElement = root->FirstChildElement();
 		while (childElement != nullptr) {
 			std::string childName = childElement->Value();
 			if (childName == "tracks") {
@@ -591,7 +596,7 @@ Klein::loadConfig(const char *path)
 			} else if (childName == "midiMap") {
 				err = loadMidiMapConfig(childElement);
 			}
-			if (err != XML_NO_ERROR) {
+			if (err != tinyxml2::XML_NO_ERROR) {
 				configLoadErrorStr = doc.GetErrorStr1();
 				return err;
 			}
@@ -605,12 +610,12 @@ Klein::loadConfig(const char *path)
 	return KF_OK;
 }
 
-XMLError Klein::loadTrackConfig(tinyxml2::XMLElement *element) {
+tinyxml2::XMLError Klein::loadTrackConfig(tinyxml2::XMLElement *element) {
 	
 
 	const char *trackAttrVal = element->Attribute("nTracks");
 	const char *loopAttrVal = element->Attribute("nLoopsPerTracks");
-	XMLElement *childElement = element->FirstChildElement();
+	tinyxml2::XMLElement *childElement = element->FirstChildElement();
 	nTracks = atoi(trackAttrVal);
 	nLoopsPerTrack = atoi(loopAttrVal);
 	track.clear();
@@ -641,11 +646,11 @@ XMLError Klein::loadTrackConfig(tinyxml2::XMLElement *element) {
 		}
 		childElement = childElement->NextSiblingElement();
 	}
-	return XML_NO_ERROR;
+	return tinyxml2::XML_NO_ERROR;
 }
 
-XMLError Klein::loadScriptConfig(tinyxml2::XMLElement *element) {
-	XMLElement *childElement = element->FirstChildElement();
+tinyxml2::XMLError Klein::loadScriptConfig(tinyxml2::XMLElement *element) {
+	tinyxml2::XMLElement *childElement = element->FirstChildElement();
 	while (childElement != nullptr) {
 		std::string childName = childElement->Value();
 		const char *idAttrVal = childElement->Attribute("id");
@@ -660,11 +665,11 @@ XMLError Klein::loadScriptConfig(tinyxml2::XMLElement *element) {
 
 		childElement = childElement->NextSiblingElement();
 	}
-	return XML_NO_ERROR;
+	return tinyxml2::XML_NO_ERROR;
 }
 
-XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element) {
-	XMLElement *childElement = element->FirstChildElement();
+tinyxml2::XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element) {
+	tinyxml2::XMLElement *childElement = element->FirstChildElement();
 	while (childElement != nullptr) {
 		std::string childName = childElement->Value();
 		const char *channelAttrVal = childElement->Attribute("channel");
@@ -718,7 +723,7 @@ XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element) {
 		}
 		childElement = childElement->NextSiblingElement();
 	}
-	return XML_NO_ERROR;
+	return tinyxml2::XML_NO_ERROR;
 
 }
 

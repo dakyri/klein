@@ -28,7 +28,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -74,11 +74,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>D:\src\cpp\sg-audio;D:\src\cpp\library\VST\vst-2.3-common;D:\src\cpp\Klein\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\src\cpp\sg-audio;D:\src\cpp\library\VST\vstgui_3_0_beta4;D:\src\cpp\library\VST\vst-2.3-common;D:\src\cpp\Klein\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;WINDOWS=1;_USRDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>Linker.def</ModuleDefinitionFile>
+      <AdditionalDependencies>vstgui.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\src\cpp\library\VST\vstgui_3_0_beta4\Vstgui.build\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -120,6 +123,7 @@
     <ClInclude Include="..\..\include\Bufferator.h" />
     <ClInclude Include="..\..\include\Controller.h" />
     <ClInclude Include="..\..\include\Command.h" />
+    <ClInclude Include="..\..\include\KleinEditor.h" />
     <ClInclude Include="..\..\include\KLFContext.h" />
     <ClInclude Include="..\..\include\Klein.h" />
     <ClInclude Include="..\..\include\KleinTrack.h" />
@@ -139,8 +143,12 @@
     <ClCompile Include="..\..\src\Bufferator.cpp" />
     <ClCompile Include="..\..\src\Controller.cpp" />
     <ClCompile Include="..\..\src\Klein.cpp" />
+    <ClCompile Include="..\..\src\KleinEditor.cpp" />
     <ClCompile Include="..\..\src\KleinTrack.cpp" />
-    <ClCompile Include="..\..\src\KleinMain.cpp" />
+    <ClCompile Include="..\..\src\KleinMain.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\src\KLFun.cpp" />
     <ClCompile Include="..\..\src\KLFunLexer.cpp" />
     <ClCompile Include="..\..\src\KLFunParser.cpp" />

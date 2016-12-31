@@ -24,7 +24,8 @@ enum {
 	kNumParams
 };
 
-class Klein;
+
+class KleinEditor;
 
 class KleinProgram
 {
@@ -133,6 +134,9 @@ private:
 	long			nChunkFrameRemaining;
 
 	float			vu;
+
+	KleinEditor *kleinView;
+
 private:
 	float			beatT;
 	float			feedback;
