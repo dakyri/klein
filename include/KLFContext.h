@@ -1,8 +1,12 @@
 #pragma once
 
+class KleinTrack;
+
 class KLFContext
 {
 public:
-	KLFContext() { }
+	KLFContext(): track(nullptr) { }
 	virtual ~KLFContext() { }
+
+	KleinTrack *track;
 };

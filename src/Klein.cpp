@@ -16,44 +16,11 @@ ofstream dbf;
 #include "Klein.h"
 #include "KleinEditor.h"
 
-unordered_map<string, int> kvFilterIdx = {
-	/*
-	{"Unity", sgfUnity},
-	{"Cheesy LP", sgfCheesy303},
-	{"Cheesy HP", sgfCheesy303Hp},
-	{"Cheesy BP", sgfCheesy303Bp},
-	{"Moog1 LP", sgfMoog1Lp},
-	{"Moog1 HP", sgfMoog1Hp},
-	{"Moog1 BP", sgfMoog1Bp},
-	{"Moog2 LP", sgfMoog2Lp},
-	{"Moog2 HP", sgfMoog2Hp},
-	{"Moog2 BP", sgfMoog2Bp}*/
-};
-
-
-unordered_map<string, int> kvLFWaveformIdx = {
-	/*
-	{"Sine", sglfwSine},
-	{"+Exp", sglfwPosExp},
-	{"-Exp", sglfwNegExp},
-	{"+Saw", sglfwPosSaw},
-	{"-Saw", sglfwNegSaw},
-
-	{"Square", sglfwSquare}*/
-};
-
-unordered_map<string, int> kvLFTargetIdx = {
-	{"Direct", kDirectLevel},
-	{"Dir Pan", kDirectPan}
-};
-
 //----------------------------------------------------------------------------- 
 
 KleinProgram::KleinProgram()
 {
-	fOut = 0.7;
-	fDirectLevel = 1;
-	fDirectPan = 0;
+	masterGain = 0.7;
 
 	strcpy (name, "Init");
 }
@@ -62,7 +29,7 @@ KleinProgram::KleinProgram()
 
 
 Klein::Klein(audioMasterCallback audioMaster)
-	: AudioEffectX(audioMaster, 16, kNumParams)
+	: AudioEffectX(audioMaster, 16, trackIdBase(kMaxTrack))
 	, controller(*this)
 	, nTracks(4)
 	, nLoopsPerTrack(4)
@@ -82,9 +49,7 @@ Klein::Klein(audioMasterCallback audioMaster)
 	nChunkFrames = 0;
 	nChunkFrameRemaining = 0;
 
-	fOut = 0.7;
-	fDirectLevel = 1;
-	fDirectPan = 0;
+	masterGain = 0.7;
 
 	if (programs) {
 		setProgram(0);
@@ -120,7 +85,10 @@ Klein::~Klein()
 	// KleinEditor should be deleted by base class
 }
 
-//------------------------------------------------------------------------
+
+/**************************************************************************************
+ * VST PROGRAM/PARAMETER HOOKS
+ *************************************************************************************/
 void
 Klein::setProgram (long program)
 {
@@ -128,9 +96,7 @@ Klein::setProgram (long program)
 
 	curProgram = program;
 	short i;
-	fOut = ap->fOut;
-	fDirectLevel = ap->fDirectLevel;
-	fDirectPan = ap->fDirectPan;
+	masterGain = ap->masterGain;
 }
 
 //------------------------------------------------------------------------
@@ -148,22 +114,7 @@ void Klein::getProgramName (char *name)
 		strcpy (name, programs[curProgram].name);
 }
 
-//------------------------------------------------------------------------
-void Klein::suspend ()
-{
-	nChunkFrames = 0;	// resets lfo check
-}
 
-//------------------------------------------------------------------------
-float Klein::getVu ()
-{
-	float cvu = vu;
-	
-	vu = 0;
-	return cvu;
-}
-//fFilterFrequency = ap->fFilterFrequency = 
-//1FilterResonance = ap->fFilterResonance
 //------------------------------------------------------------------------
 void Klein::setParameter (long index, float value)
 {
@@ -173,9 +124,17 @@ void Klein::setParameter (long index, float value)
 	dbf << "set p " <<  index << ", " << value << endl;
 #endif
 	switch (index) {
-		case kOut :      fOut = ap->fOut = value; break;
-		case kDirectLevel :  fDirectLevel = ap->fDirectLevel = value; break;
-		case kDirectPan :  fDirectPan = ap->fDirectPan = 2*value-1; break;
+		case kIdMasterGain: masterGain = ap->masterGain = value; break;
+		default:
+			int trackid = track4Idx(index);
+			if (trackid >= 0 && trackid < kMaxTrack) {
+				switch (trackParamId4Idx(index)) {
+				case kIdTrackInputGain: return track[trackid]->setInputGain(ap->inputGain[trackid]=value);
+				case kIdTrackGain:		return track[trackid]->setOutputGain(ap->outputGain[trackid] = value);
+				case kIdTrackPan:		return track[trackid]->setPan(ap->pan[trackid] = value);
+				case kIdTrackFeedback:	return track[trackid]->setFeedback(ap->feedback[trackid] = value);
+				}
+			}
 	}
 
 	if (editor) {
@@ -190,11 +149,18 @@ float Klein::getParameter (long index)
 {
 	float v = 0;
 
-	switch (index)
-	{
-		case kOut :      v = fOut; break;
-		case kDirectLevel:  v = fDirectLevel; break;
-		case kDirectPan:  v = (fDirectPan+1)/2; break;
+	switch (index)	{
+		case kIdMasterGain: v = masterGain; break;
+		default:
+			int trackid = track4Idx(index);
+			if (trackid >= 0 && trackid < track.size()) {
+				switch (trackParamId4Idx(index)) {
+				case kIdTrackInputGain: return track[trackid]->getInputGain();
+				case kIdTrackGain:		return track[trackid]->getOutputGain();
+				case kIdTrackPan:		return track[trackid]->getPan();
+				case kIdTrackFeedback:	return track[trackid]->getFeedback();
+				}
+			}
 	}
 	return v;
 }
@@ -203,70 +169,128 @@ float Klein::getParameter (long index)
 char *
 Klein::parameterName(long index)
 {
-	switch (index)
-	{
-		case kOut :				return "Output";
-		case kDirectLevel :		return "DirectLevel";
-		case kDirectPan :		return "DirectPan";
+	switch (index) {
+		case kIdMasterGain: return "MasterGain";
+		default:
+			int trackid = track4Idx(index);
+			if (trackid >= 0 && trackid < kMaxTrack) {
+				switch (trackParamId4Idx(index)) {
+				case kIdTrackInputGain: return "Input";
+				case kIdTrackGain:		return "Gain";
+				case kIdTrackPan:		return "Pan";
+				case kIdTrackFeedback:	return "Feedback";
+				}
+			}
+			
 	}
 	return "";
 }
 
-KleinTrack & Klein::getTrack(int which)
-{
-	// TODO: insert return statement here
-	return *track[0];
-}
-
-bool Klein::selectTrack(int which)
-{
-	return false;
-}
-
-bool Klein::globalMute()
-{
-	return false;
-}
-
-bool Klein::globalPause()
-{
-	return false;
-}
-
-bool Klein::globalReset()
-{
-	return false;
-}
-
-void Klein::getParameterName (long index, char *label)
+void Klein::getParameterName(long index, char *label)
 {
 	sprintf(label, " %10s", parameterName(index));
 }
 
 //------------------------------------------------------------------------
-void Klein::getParameterDisplay (long index, char *text)
+void Klein::getParameterDisplay(long index, char *text)
 {
-	switch (index)
-	{
-		case kOut :      dB2string (fOut, text); break;
-		case kDirectLevel :      dB2string (fDirectLevel, text); break;
-		case kDirectPan :      dB2string (fDirectPan, text); break;
+	switch (index) {
+	case kIdMasterGain: dB2string(masterGain, text); break;
+	default:
+		int trackid = track4Idx(index);
+		if (trackid >= 0 && trackid < kMaxTrack) {
+			switch (trackParamId4Idx(index)) {
+			case kIdTrackInputGain: dB2string(track[trackid]->getInputGain(), text); break;
+			case kIdTrackGain:		dB2string(track[trackid]->getOutputGain(), text); break;
+			case kIdTrackPan:		float2string(track[trackid]->getPan(), text); break;
+			case kIdTrackFeedback:	dB2string(track[trackid]->getFeedback(), text); break;
+			}
+		}
+
 	}
 }
 
 //------------------------------------------------------------------------
-void Klein::getParameterLabel (long index, char *label)
+void Klein::getParameterLabel(long index, char *label)
 {
-	switch (index)
-	{
-		case kOut : 
-		case kDirectLevel : 
-		case kDirectPan :		strcpy (label, "   dB   ");	break;
+	switch (index) {
+	case kIdMasterGain: strcpy(label, "   dB   ");	break;
+	default:
+		int trackid = track4Idx(index);
+		if (trackid >= 0 && trackid < kMaxTrack) {
+			switch (trackParamId4Idx(index)) {
+			case kIdTrackInputGain:  strcpy(label, "   dB   ");	break;
+			case kIdTrackGain:		 strcpy(label, "   dB   ");	break;
+			case kIdTrackPan:		 strcpy(label, "        ");	break;
+			case kIdTrackFeedback:	 strcpy(label, "   dB   ");	break;
+			}
+		}
 	}
 }
 
+
+// midi program names:
+// as an example, GM names are used here. in fact, VstXSynth doesn't even support
+// multi-timbral operation so it's really just for demonstration.
+// a 'real' instrument would have a number of voices which use the
+// programs[channelProgram[channel]] parameters when it receives
+// a note on message.
+
+//------------------------------------------------------------------------
+long Klein::getMidiProgramName(long channel, MidiProgramName* mpn)
+{/*
+ long prg = mpn->thisProgramIndex;
+ if (prg < 0 || prg >= 128)
+ return 0;
+ fillProgram(channel, prg, mpn);
+ if (channel == 9)
+ return 1;*/
+	return 0;
+}
+
+//------------------------------------------------------------------------
+long Klein::getCurrentMidiProgram(long channel, MidiProgramName* mpn)
+{/*
+ if (channel < 0 || channel >= 16 || !mpn)
+ return -1;
+ long prg = channelPrograms[channel];
+ mpn->thisProgramIndex = prg;
+ fillProgram(channel, prg, mpn);*/
+	return 0;
+}
+
+
+//------------------------------------------------------------------------
+long Klein::getMidiProgramCategory(long channel, MidiProgramCategory* cat)
+{
+	/*
+	cat->parentCategoryIndex = -1;	// -1:no parent category
+	cat->flags = 0;					// reserved, none defined yet, zero.
+	long category = cat->thisCategoryIndex;
+	if (channel == 9)
+	{
+	strcpy(cat->name, "Drums");
+	return 1;
+	}
+	if (category >= 0 && category < kNumGmCategories)
+	strcpy(cat->name, GmCategories[category]);
+	else
+	cat->name[0] = 0;
+	return kNumGmCategories;*/
+	return 0;
+}
+
+long Klein::getChunk(void** data, bool isPreset = false) {
+	return 0;
+}
+
+long Klein::setChunk(void* data, long byteSize, bool isPreset = false) {
+	return 0;
+}
+
+
 /**************************************************************************************
- * VST HOOKS
+ * VST AUDIO HOOKS
  *************************************************************************************/
 
 void Klein::process (float **inputs, float **outputs, long nFrames)
@@ -339,6 +363,21 @@ void Klein::allocateChildBuffers(long blockSize)
 	}
 }
 
+//------------------------------------------------------------------------
+void Klein::suspend()
+{
+	nChunkFrames = 0;	// resets lfo check
+}
+
+//------------------------------------------------------------------------
+float Klein::getVu()
+{
+	float cvu = vu;
+
+	vu = 0;
+	return cvu;
+}
+
 /*
 
 const char* plugCanDos [] =
@@ -370,6 +409,7 @@ const char* plugCanDos [] =
 };
 
 */
+
 long Klein::canDo(char* text)
 {
 	if (!strcmp(text, "receiveVstEvents"))
@@ -477,58 +517,6 @@ long Klein::getVendorVersion() {
 }
 
 
-// midi program names:
-// as an example, GM names are used here. in fact, VstXSynth doesn't even support
-// multi-timbral operation so it's really just for demonstration.
-// a 'real' instrument would have a number of voices which use the
-// programs[channelProgram[channel]] parameters when it receives
-// a note on message.
-
-//------------------------------------------------------------------------
-long Klein::getMidiProgramName(long channel, MidiProgramName* mpn)
-{/*
-	long prg = mpn->thisProgramIndex;
-	if (prg < 0 || prg >= 128)
-		return 0;
-	fillProgram(channel, prg, mpn);
-	if (channel == 9)
-		return 1;*/
-	return 0;
-}
-
-//------------------------------------------------------------------------
-long Klein::getCurrentMidiProgram(long channel, MidiProgramName* mpn)
-{/*
-	if (channel < 0 || channel >= 16 || !mpn)
-		return -1;
-	long prg = channelPrograms[channel];
-	mpn->thisProgramIndex = prg;
-	fillProgram(channel, prg, mpn);*/
-	return 0;
-}
-
-
-//------------------------------------------------------------------------
-long Klein::getMidiProgramCategory(long channel, MidiProgramCategory* cat)
-{
-	/*
-	cat->parentCategoryIndex = -1;	// -1:no parent category
-	cat->flags = 0;					// reserved, none defined yet, zero.
-	long category = cat->thisCategoryIndex;
-	if (channel == 9)
-	{
-		strcpy(cat->name, "Drums");
-		return 1;
-	}
-	if (category >= 0 && category < kNumGmCategories)
-		strcpy(cat->name, GmCategories[category]);
-	else
-		cat->name[0] = 0;
-	return kNumGmCategories;*/
-	return 0;
-}
-
-
 //-----------------------------------------------------------------------------------------
 long Klein::processEvents(VstEvents* ev)
 {
@@ -563,8 +551,8 @@ bool Klein::hasMidiProgramsChanged(long channel)
 }
 
 /**************************************************************************************
-* CONFIGURATION
-*************************************************************************************/
+ * CONFIGURATION
+ *************************************************************************************/
 string configLoadErrorStr = "";
 
 status_t
@@ -747,4 +735,30 @@ void Klein::setNLoopsPerTrack(int n)
 void Klein::allocateBuffers(long blocksize) {
 	AudioEffectX::allocateBuffers(blocksize);
 	allocateChildBuffers(blocksize);
+}
+
+KleinTrack & Klein::getTrack(int which)
+{
+	// TODO: maybe we should put in a guard and exception
+	return *track[0];
+}
+
+bool Klein::selectTrack(int which)
+{
+	return false;
+}
+
+bool Klein::globalMute()
+{
+	return false;
+}
+
+bool Klein::globalPause()
+{
+	return false;
+}
+
+bool Klein::globalReset()
+{
+	return false;
 }

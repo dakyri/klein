@@ -6,6 +6,10 @@ enum KLFType {
 	T_INTEGER,
 	T_FLOAT,
 	T_BOOLEAN,
+	T_STRING, // and garbage collection ??? for this and t_object
+	T_OBJECT, 
+		// ?? go javascripty for composites, an object as a key-value map, array as a key-value map with integer keys
+		// implement as an unordered_map?
 	T_TIME
 };
 

@@ -14,15 +14,30 @@ using namespace std;
 #include "KleinTrack.h"
 #include "Controller.h"
 
-#include "Delay.h"
-
-enum {
-	kOut,
-	kDirectLevel,
-	kDirectPan,
-
-	kNumParams
+enum ParameterId {
+	kIdMasterGain,
+	kNumGlobalParams,
+	kTrackParamBase=kNumGlobalParams
 };
+
+enum TrackParameterId {
+	kIdTrackInputGain,
+	kIdTrackGain,
+	kIdTrackPan,
+	kIdTrackFeedback,
+	kNumTrackParams
+};
+
+const int kMaxTrack = 16;
+
+// 0 <= track < MAX_TRACK
+inline int trackIdBase(int track) { return kTrackParamBase + track*kNumTrackParams; }
+inline int trackParamId4Idx(int idx) { return (idx - kTrackParamBase) % kNumTrackParams;  }
+inline int track4Idx(int idx) { return (idx - kTrackParamBase) / kNumTrackParams; }
+inline int idTrackInputGain(int track) { return trackIdBase(track) + kIdTrackInputGain; }
+inline int idTrackGain(int track) { return trackIdBase(track) + kIdTrackGain; }
+inline int idTrackPan(int track) { return trackIdBase(track) + kIdTrackPan; }
+inline int idTrackFeedback(int track) { return trackIdBase(track) + kIdTrackPan; }
 
 
 class KleinEditor;
@@ -34,9 +49,12 @@ public:
 	KleinProgram();
 	~KleinProgram() {}
 private:
-	float fOut;
-	float fDirectLevel;
-	float fDirectPan;
+	float masterGain;
+	float inputGain[kMaxTrack];
+	float outputGain[kMaxTrack];
+	float feedback[kMaxTrack];
+	float pan[kMaxTrack];
+
 	char name[24];
 };
 
@@ -57,33 +75,36 @@ public:
 	static const int MAX_CHANNELS = 8;
 
 /* VST callbacks */
-	virtual void process(float **inputs, float **outputs, long sampleframes);
-	virtual void processReplacing(float **inputs, float **outputs, long sampleFrames);
-	virtual long processEvents(VstEvents* events);
+	virtual void process(float **inputs, float **outputs, long sampleframes) override;
+	virtual void processReplacing(float **inputs, float **outputs, long sampleFrames) override;
+	virtual long processEvents(VstEvents* events) override;
 
 
-	virtual void setProgram(long program);
-	virtual void setProgramName(char *name);
-	virtual void getProgramName(char *name);
-	virtual void setParameter(long index, float value);
-	virtual float getParameter(long index);
-	virtual void getParameterLabel(long index, char *label);
-	virtual void getParameterDisplay(long index, char *text);
-	virtual void getParameterName(long index, char *text);
-	virtual float getVu();
-	virtual void suspend();
+	virtual void setProgram(long program) override;
+	virtual void setProgramName(char *name) override;
+	virtual void getProgramName(char *name) override;
+	virtual void setParameter(long index, float value) override;
+	virtual float getParameter(long index) override;
+	virtual void getParameterLabel(long index, char *label) override;
+	virtual void getParameterDisplay(long index, char *text) override;
+	virtual void getParameterName(long index, char *text) override;
+	virtual float getVu() override;
+	virtual void suspend() override;
 
-	virtual long getMidiProgramName(long channel, MidiProgramName* midiProgramName);
-	virtual long getCurrentMidiProgram(long channel, MidiProgramName* currentProgram);
-	virtual long getMidiProgramCategory(long channel, MidiProgramCategory* category);
-	virtual bool hasMidiProgramsChanged(long channel);
-	virtual bool getMidiKeyName(long channel, MidiKeyName* keyName);
+	virtual long getChunk(void** data, bool isPreset = false) override;
+	virtual long setChunk(void* data, long byteSize, bool isPreset = false) override;
 
-	virtual bool getEffectName(char* name);
-	virtual bool getVendorString(char* text);
-	virtual bool getProductString(char* text);
-	virtual long getVendorVersion();
-	virtual long canDo(char* text);
+	virtual long getMidiProgramName(long channel, MidiProgramName* midiProgramName) override;
+	virtual long getCurrentMidiProgram(long channel, MidiProgramName* currentProgram) override;
+	virtual long getMidiProgramCategory(long channel, MidiProgramCategory* category) override;
+	virtual bool hasMidiProgramsChanged(long channel) override;
+	virtual bool getMidiKeyName(long channel, MidiKeyName* keyName) override;
+
+	virtual bool getEffectName(char* name) override;
+	virtual bool getVendorString(char* text) override;
+	virtual bool getProductString(char* text) override;
+	virtual long getVendorVersion() override;
+	virtual long canDo(char* text) override;
 
 	virtual void inputConnected(long index, bool state);	// Input at <index> has been (dis-)connected,
 	virtual void outputConnected(long index, bool state);	// Same as input; state == true: connected
@@ -103,7 +124,7 @@ public:
 	bool globalReset();
 
 
-private:
+protected:
 	float getTempo();
 	void allocateChildBuffers(long blockSize);
 
@@ -126,25 +147,16 @@ private:
 	void setNTracks(int n);
 	void setNLoopsPerTrack(int n);
 
-	float			fOut;
-	float			fDirectLevel;
-	float			fDirectPan;
+	long nChunkFrames;
+	long nChunkFrameRemaining;
 
-	long			nChunkFrames;
-	long			nChunkFrameRemaining;
-
-	float			vu;
+	float vu;
 
 	KleinEditor *kleinView;
 
-private:
-	float			beatT;
-	float			feedback;
-	float			directL, directR;
+// vst parameters
+	float masterGain;
 };
 
-extern unordered_map<string, int> kvFilterIdx;
-extern unordered_map<string, int> kvLFTargetIdx;
-extern unordered_map<string, int> kvLFWaveformIdx;
 
 #endif

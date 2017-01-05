@@ -10,6 +10,11 @@ KLFun::~KLFun()
 {
 }
 
+bool KLFun::doStart(KLFContext & c)
+{
+	return false;
+}
+
 KBlock::KBlock()
 {
 
@@ -33,15 +38,15 @@ KIfBlock::~KIfBlock()
 }
 
 int
-KIfBlock::doStart() {
-	if (expression != nullptr && expression->doStart()) {
+KIfBlock::doStart(KLFContext &c) {
+	if (expression != nullptr && expression->doStart(c)) {
 		if (ifBranch != nullptr) {
-			ifBranch->doStart();
+			ifBranch->doStart(c);
 		}
 	}
 	else {
 		if (elseBranch != nullptr) {
-			elseBranch->doStart();
+			elseBranch->doStart(c);
 		}
 
 	}

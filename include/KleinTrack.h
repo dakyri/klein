@@ -9,7 +9,6 @@
 #include "Bufferator.h"
 #include "aeffectx.h"
 #include "KLFunValue.h"
-#include "KLFContext.h"
 #include "Command.h"
 
 enum SyncSource {
@@ -80,6 +79,7 @@ public:
 	void setOutputGain(int v);
 	void setPan(int v);
 	void setFeedback(int v);
+
 	void setSecondaryFeedback(int v);
 	void setPitchBend(int v);
 	void setPitchOct(int v);
@@ -88,6 +88,11 @@ public:
 	void setSpeedOct(int v);
 	void setSpeedStep(int v);
 	void setTimeStretch(int v);
+
+	float getInputGain();
+	float getOutputGain();
+	float getPan();
+	float getFeedback();
 
 	void setInPort(const int port);
 	void setOutPort(const int port);

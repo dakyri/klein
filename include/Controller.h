@@ -12,6 +12,7 @@ using namespace std;
 #include "MidiDefs.h"
 #include "Command.h"
 #include "ParserDriver.h"
+#include "KLFContext.h"
 
 class Klein;
 class KLFun;
@@ -60,9 +61,11 @@ struct ControlMapping {
 	tgt_id_t target;
 };
 
-struct ScriptMapping {
+// every script mapping should have a separate context, so this should inherit from whatever holds the call stack for scripts
+// todo 
+struct ScriptMapping: public KLFContext {
 	KLFun *script;
-	tgt_id_t target;
+	tgt_id_t targetId;
 
 	time_t attack;
 	time_t lastUpdate;

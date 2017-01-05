@@ -172,23 +172,43 @@ KleinTrack::~KleinTrack()
 
 void
 KleinTrack::setInputGain(int v) {
-
+	inputGain = v;
 }
+float KleinTrack::getInputGain()
+{
+	return inputGain;
+}
+
 
 void
 KleinTrack::setOutputGain(int v) {
-
+	outputGain = v;
 }
+float KleinTrack::getOutputGain()
+{
+	return outputGain;
+}
+
 
 void
 KleinTrack::setPan(int v) {
-
+	pan = v;
+}
+float KleinTrack::getPan()
+{
+	return pan;
 }
 
 void
 KleinTrack::setFeedback(int v) {
-
+	feedback = v;
 }
+
+float KleinTrack::getFeedback()
+{
+	return feedback;
+}
+
 
 void
 KleinTrack::setSecondaryFeedback(int v) {

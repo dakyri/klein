@@ -376,6 +376,9 @@ bool Controller::processMapping(ControlMapping & m, int v)
 
 bool Controller::processMapping(ScriptMapping & m, int wh, int v)
 {
+	auto s = m.script;
+	if (!s) return false;
+	s->doStart(m);
 	return false;
 }
 

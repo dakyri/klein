@@ -31,7 +31,7 @@ public:
 	KBlock();
 	virtual ~KBlock();
 
-	int virtual doStart() { return 0; }
+	int virtual doStart(KLFContext &c) { return 0; }
 	KLFValue virtual evaluate(KLFContext &c) { return KLFValue(); }
 };
 
@@ -40,7 +40,7 @@ public:
 	KIfBlock();
 	virtual ~KIfBlock();
 
-	int virtual doStart();
+	int virtual doStart(KLFContext &c) override;
 
 protected:
 	KBlock *expression;
@@ -57,7 +57,7 @@ public:
 		if (expression) delete expression;
 	}
 
-	int virtual doStart();
+	int virtual doStart(KLFContext &c) override;
 
 protected:
 	KBlock *lvalue;
@@ -151,8 +151,7 @@ public:
 	KLFun();
 	virtual ~KLFun();
 
-	bool doStart();
-
+	bool doStart(KLFContext &c);
 protected:
 	KBlock *main;
 };
