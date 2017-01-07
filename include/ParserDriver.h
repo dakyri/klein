@@ -4,6 +4,7 @@
 #include <string>
 #include "KLFunLexer.h"
 #include "KLFunParser.hpp"
+#include "KLFun.h"
 
 namespace KLF {
 
@@ -12,7 +13,7 @@ public:
 	ParserDriver();
 	virtual ~ParserDriver();
 
-	void parse(std::istream& inStream);
+	status_t parse(KLFun *klf, std::istream& inStream, vector<string> &errorList);
 
 	std::ostream& print(std::ostream &stream);
 private:
@@ -21,6 +22,9 @@ private:
 
 protected:
 	friend KLF::KLFunParser;
+
+	KLFun *fun;	/** POP to the function we are building into. will retain ownership of all the structurues we build */
+
 
 // global variables for passing more complex values around while parsing
 	/*

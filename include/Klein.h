@@ -139,10 +139,10 @@ protected:
 	vector<unique_ptr<KleinTrack>> track;
 	Controller controller;
 
-	status_t loadConfig(const char *path);
-	tinyxml2::XMLError loadTrackConfig(tinyxml2::XMLElement *element);
-	tinyxml2::XMLError loadScriptConfig(tinyxml2::XMLElement *element);
-	tinyxml2::XMLError loadMidiMapConfig(tinyxml2::XMLElement *element);
+	status_t loadConfig(const char *path, vector<string> &errorList);
+	tinyxml2::XMLError loadTrackConfig(tinyxml2::XMLElement *element, vector<string> &errorList);
+	tinyxml2::XMLError loadScriptConfig(tinyxml2::XMLElement *element, vector<string> &errorList);
+	tinyxml2::XMLError loadMidiMapConfig(tinyxml2::XMLElement *element, vector<string> &errorList);
 
 	void setNTracks(int n);
 	void setNLoopsPerTrack(int n);
@@ -158,5 +158,7 @@ protected:
 	float masterGain;
 };
 
+
+#include "debug.h"
 
 #endif

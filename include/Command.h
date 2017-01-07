@@ -2,6 +2,13 @@
 
 #include <string>
 using namespace std;
+
+typedef int cmd_id_t;
+typedef int ctl_id_t;
+typedef int script_id_t;
+typedef int tgt_id_t;
+
+
 /**
  * constant for and structure for creating searchable list of Commands, actions which a controller
  * can take to affect the looper
@@ -121,7 +128,7 @@ struct Command {
 	Command(int _command, string _scriptName, string _displayName):
 		command(_command), scriptName(_scriptName), displayName(_displayName) {}
 
-	int command;
+	cmd_id_t command;
 	string scriptName;
 	string displayName;
 
@@ -162,7 +169,7 @@ struct Control {
 	Control(int _command, string _scriptName, string _displayName) :
 		control(_command), scriptName(_scriptName), displayName(_displayName) {}
 
-	int control;
+	ctl_id_t control;
 	string scriptName;
 	string displayName;
 

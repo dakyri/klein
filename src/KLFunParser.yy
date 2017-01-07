@@ -164,9 +164,15 @@ statement
 		
 script_item_list
 	: { $$ = 0; }
-	| script_item_list statement { $$ = 0; }
-	| script_item_list simple_definition { $$ = 0; }
-	| script_item_list handler_definition { $$ = 0; }
+	| script_item_list statement {
+			$$ = 0;
+		}
+	| script_item_list simple_definition {
+			$$ = 0;
+		}
+	| script_item_list handler_definition {
+			$$ = 0;
+		}
 	;
 
 statement_list : { $$ = 0; }

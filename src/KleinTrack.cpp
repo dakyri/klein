@@ -141,7 +141,6 @@ KleinTrack::KleinTrack(int _trackId, int _inPortId, int _outPortId, int nLoops, 
 	, syncSrc(_syncSrc)
 	, syncUnit(_syncUnit)
 	, playDirection(PLAY_FWD)
-	, currentSampleLoop(loops.begin())
 	, currentDirectionFwd(true)
 	, psi(1)
 	, lAmp(1)
@@ -266,6 +265,7 @@ void KleinTrack::setNLoops(const int nLoops)
 	for (int i = 0; i < nLoops; i++) {
 		loops.push_back(SampleLoop());
 	}
+	currentSampleLoop = loops.end();
 }
 
 void KleinTrack::setSyncSrc(const SyncSource ss) {
@@ -325,6 +325,9 @@ float KleinTrack::getVu()
  */
 long KleinTrack::processAdding(float ** const inputs, float ** const outputs, const long startOffset, const long nFrames)
 {
+#if KLEIN_DEBUG >= 10
+	dbf << "processAdding " << id << " off " << startOffset << ", nFrames " << nFrames << endl;
+#endif
 	const int ii = inPortId * 2;
 	const int oi = outPortId * 2;
 	float * const inl = inputs[ii] + startOffset;
@@ -335,7 +338,7 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 	long nFramesOut = 0;
 
 	shared_ptr<SampleInfo> csf = nullptr;
-	if (currentSampleLoop == loops.end()) {
+	if (currentSampleLoop != loops.end()) {
 		csf = currentSampleLoop->sampleInfo;
 	}
 	bool playLoop = false;
@@ -361,7 +364,6 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 	}	
 
 	nFramesOut = 0;
-
 	if (playLoop) {
 		if (!csf) {
 			return 0;
@@ -372,6 +374,9 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 		int buffInd = 0;
 		//		Log.d("player", String.format("pad %d to play %d %d", id, nFrames, nOutChannels));
 		while (nFramesOut < nFrames) {
+#if KLEIN_DEBUG >= 12
+			dbf << ">> processAdding.3 " << id << " off " << startOffset << ", nFrames " << nFrames << endl;
+#endif
 			const int nFramesRemaining = nFrames - nFramesOut;
 			const int nIterFrames = currentDirectionFwd ?
 				((nFramesRemaining > ll - currentLoopFrame) ? (ll - currentLoopFrame) : nFramesRemaining) :
@@ -385,12 +390,15 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 				currentLoopFrame = nextDataFrame - sf;
 				nFramesOut += nIterOutFrames;
 				//				Log.d("player", String.format("pad %d played %d %d requested %d loop %d data %d end %d", id, nIterOutFrames, nFramesOut, nIterFrames, currentLoopFrame, getNextDataFrame(cPadPointer), ll));
-			}
-			else {
+			} else {
 				if (!isPlaying()) {
 					break;
 				}
 			}
+#if KLEIN_DEBUG >= 12
+			dbf << "processAdding 2 " << id << " nIterFrames " << nIterFrames << ", nFramesOut " << nFramesOut << endl;
+#endif
+
 			if (currentLoopFrame >= ll) {
 				if (currentDirectionFwd) {
 					loopEnd(csf);
@@ -398,8 +406,7 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 				else {
 					currentLoopFrame = ll;
 				}
-			}
-			else if (currentLoopFrame <= 0) {
+			} else if (currentLoopFrame <= 0) {
 				if (currentDirectionFwd) {
 					currentLoopFrame = 0;
 				}
@@ -601,6 +608,9 @@ int
 KleinTrack::playChunk(
 	const shared_ptr<SampleInfo>& csf, float *const outBuf, float *const rawBuf, const int nRequestedFrames, const int currentDataFrame, const bool directionFwd)
 {
+#if KLEIN_DEBUG >= 6
+	dbf << "playChunk " << id << " off " << nRequestedFrames << ", nFrames " << currentDataFrame << ", dir " << directionFwd << endl;
+#endif
 	int chunkStartFrame = 0;
 	int chunkNFrames = 0;
 	float* chunkData = nullptr;
@@ -642,11 +652,14 @@ KleinTrack::playChunk(
 				}
 			}
 		}
-		cerr << "player got " << currentDataFrame << " chunk  " << " len " << chunkNFrames << "@  " << chunkStartFrame
+#ifdef KLEIN_DEBUG >= 6
+		dbf << "player got " << currentDataFrame << " chunk  " << " len " << chunkNFrames << "@  " << chunkStartFrame
 			<< " data[0]  " << chunkData[0] << " path  " << csf->getPath() << endl;
-	}
-	else {
+#endif
+	} else {
+#ifdef KLEIN_DEBUG >= 6
 		cerr << "player failed to find " << currentDataFrame << " chunk " << cpageid << " path " << csf->getPath() << endl;
+#endif
 	}
 
 	const int nDataChannels = 2;

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <boost/filesystem.hpp>
 
 #include "Controller.h"
 #include "Klein.h"
@@ -448,7 +449,26 @@ void Controller::addScriptMapping(ScriptMapping & mapping, int mdicmd, int chann
 }
 
 
-status_t Controller::loadScript(const char * id, const char * src)
+status_t Controller::addScript(script_id_t id, const char * src)
 {
+	boost::filesystem::path s(src);
+	if (!exists(s)) {
+		return ERR_ERROR;
+	}
+	scripts.push_back(KLFun(id, src));
+	return ERR_OK;
+}
+
+status_t Controller::lockAndLoadScripts(vector<string>& errors)
+{
+	for (KLFun &it : scripts) {
+		if (!it.loaded) {
+			vector<string> errorMessages;
+			status_t err = it.load(errorMessages);
+			if (err == ERR_OK) {
+				it.loaded = true;
+			}
+		}
+	}
 	return ERR_OK;
 }

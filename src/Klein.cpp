@@ -5,16 +5,16 @@
 #include <fstream>
 using namespace std;
 
-#undef KLEIN_DEBUG 11
-#ifdef KLEIN_DEBUG
-ofstream dbf;
-
-#endif
-
 #include "tinyxml2.h"
 
 #include "Klein.h"
 #include "KleinEditor.h"
+ 
+
+#ifdef KLEIN_DEBUG
+ofstream dbf;
+
+#endif
 
 //----------------------------------------------------------------------------- 
 
@@ -38,8 +38,12 @@ Klein::Klein(audioMasterCallback audioMaster)
 	nInputPort = 1;
 	nOutputPort = 4;
 	tracksSetupDone = false;
-	
-	loadConfig("config.xml");
+
+	vector<string> configErrorList;
+	status_t err = loadConfig("config.xml", configErrorList);
+	if (err == ERR_OK) {
+		controller.lockAndLoadScripts(configErrorList);
+	}
 	if (!tracksSetupDone) { 
 		setNTracks(nTracks);
 	}
@@ -58,7 +62,8 @@ Klein::Klein(audioMasterCallback audioMaster)
 	vu = 0;
 
 #ifdef KLEIN_DEBUG
-	dbf.open("debug.out");
+	dbf.open("debug.txt");
+	dbf << unitbuf;
 #endif
 	
 //	SGLFO::InitializeDefaultWavetables();
@@ -280,11 +285,11 @@ long Klein::getMidiProgramCategory(long channel, MidiProgramCategory* cat)
 	return 0;
 }
 
-long Klein::getChunk(void** data, bool isPreset = false) {
+long Klein::getChunk(void** data, bool isPreset) {
 	return 0;
 }
 
-long Klein::setChunk(void* data, long byteSize, bool isPreset = false) {
+long Klein::setChunk(void* data, long byteSize, bool isPreset) {
 	return 0;
 }
 
@@ -323,12 +328,18 @@ void Klein::process (float **inputs, float **outputs, long nFrames)
 //---------------------------------------------------------------------------
 void Klein::processReplacing (float **inputs, float **outputs, long nFrames)
 {
+#if KLEIN_DEBUG >= 2
+	dbf << "process replacing " << nFrames << endl;
+#endif
 	float cvu = vu;
 	for (int i = 0; i < nOutputPort * 2; ++i) {
 		memset(outputs[i], 0, nFrames * sizeof(float));
 	}
 	long currentOutFrame = 0;
 	while (currentOutFrame < nFrames) {
+#if KLEIN_DEBUG >= 4
+		dbf << "process replacing loop currentOutFrame " << currentOutFrame << endl;
+#endif
 		const VstTimeInfo *t = getTimeInfo(kVstTempoValid);
 		long framesThisChunk = nFrames-currentOutFrame;
 		for (unique_ptr<KleinTrack> &ti: track) {
@@ -336,7 +347,13 @@ void Klein::processReplacing (float **inputs, float **outputs, long nFrames)
 			if (l > 0 && l < framesThisChunk) {
 				framesThisChunk = l;
 			}
+#if KLEIN_DEBUG >= 12
+			dbf << "process replacing 3 framesThisChunk " << framesThisChunk << ", l " << l << endl;
+#endif
 		}
+#if KLEIN_DEBUG >= 6
+		dbf << "process replacing 3 framesThisChunk " << framesThisChunk << endl;
+#endif
 		for (unique_ptr<KleinTrack> &ti : track) {
 			const long framesHandled = ti->processAdding(inputs, outputs, currentOutFrame, nFrames);
 			float tvu = ti->getVu();
@@ -553,16 +570,15 @@ bool Klein::hasMidiProgramsChanged(long channel)
 /**************************************************************************************
  * CONFIGURATION
  *************************************************************************************/
-string configLoadErrorStr = "";
 
 status_t
-Klein::loadConfig(const char *path)
+Klein::loadConfig(const char *path, vector<string> &errorList)
 {
 	tinyxml2::XMLDocument doc;
 
 	tinyxml2::XMLError err = doc.LoadFile(path);
 	if (err != tinyxml2::XML_NO_ERROR) {
-		configLoadErrorStr = doc.GetErrorStr1();
+		errorList.push_back(doc.GetErrorStr1());
 		return err;
 	}
 	tinyxml2::XMLElement* root = doc.RootElement();
@@ -578,27 +594,26 @@ Klein::loadConfig(const char *path)
 		while (childElement != nullptr) {
 			std::string childName = childElement->Value();
 			if (childName == "tracks") {
-				err = loadTrackConfig(childElement);
+				err = loadTrackConfig(childElement, errorList);
 			} else if (childName == "scripts") {
-				err = loadScriptConfig(childElement);
+				err = loadScriptConfig(childElement, errorList);
 			} else if (childName == "midiMap") {
-				err = loadMidiMapConfig(childElement);
+				err = loadMidiMapConfig(childElement, errorList);
 			}
 			if (err != tinyxml2::XML_NO_ERROR) {
-				configLoadErrorStr = doc.GetErrorStr1();
-				return err;
+				errorList.push_back(doc.GetErrorStr1());
 			}
 			childElement = childElement->NextSiblingElement();
 		}
 
 	} else {
-		configLoadErrorStr = "Expected 'klein' as root element";
+		errorList.push_back("Expected 'klein' as root element");
 		return KF_ERROR;
 	}
-	return KF_OK;
+	return errorList.size() > 0;
 }
 
-tinyxml2::XMLError Klein::loadTrackConfig(tinyxml2::XMLElement *element) {
+tinyxml2::XMLError Klein::loadTrackConfig(tinyxml2::XMLElement *element, vector<string> &errorList) {
 	
 
 	const char *trackAttrVal = element->Attribute("nTracks");
@@ -637,17 +652,19 @@ tinyxml2::XMLError Klein::loadTrackConfig(tinyxml2::XMLElement *element) {
 	return tinyxml2::XML_NO_ERROR;
 }
 
-tinyxml2::XMLError Klein::loadScriptConfig(tinyxml2::XMLElement *element) {
+tinyxml2::XMLError Klein::loadScriptConfig(tinyxml2::XMLElement *element, vector<string> &errorList) {
 	tinyxml2::XMLElement *childElement = element->FirstChildElement();
 	while (childElement != nullptr) {
 		std::string childName = childElement->Value();
-		const char *idAttrVal = childElement->Attribute("id");
-		const char *srcAttrVal = childElement->Attribute("src");
 
-		if (idAttrVal && srcAttrVal) {
-			status_t err = controller.loadScript(idAttrVal, srcAttrVal);
-			if (err != ERR_OK) {
-
+		if (childName == "script") { 
+			const char *idAttrVal = childElement->Attribute("id");
+			const char *srcAttrVal = childElement->Attribute("src");
+			if (idAttrVal && srcAttrVal) {
+				status_t err = controller.addScript(atoi(idAttrVal), srcAttrVal);
+				if (err != ERR_OK) {
+					errorList.push_back(string("Failed to load script ") + " srcAttrVal");
+				}
 			}
 		}
 
@@ -656,7 +673,7 @@ tinyxml2::XMLError Klein::loadScriptConfig(tinyxml2::XMLElement *element) {
 	return tinyxml2::XML_NO_ERROR;
 }
 
-tinyxml2::XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element) {
+tinyxml2::XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element, vector<string> &errorList) {
 	tinyxml2::XMLElement *childElement = element->FirstChildElement();
 	while (childElement != nullptr) {
 		std::string childName = childElement->Value();
@@ -667,38 +684,50 @@ tinyxml2::XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element) {
 		const char *functionAttrVal = childElement->Attribute("function");
 		const char *controlAttrVal = childElement->Attribute("control");
 		const char *scriptAttrVal = childElement->Attribute("script");
+		const char *targetAttrVal = childElement->Attribute("target");
 
 		int channel = channelAttrVal ? atoi(channelAttrVal) : 0;
 		int which = whichAttrVal ? atoi(whichAttrVal): 0;
 
 		// TODO XXXX FIXME ???? map function/control/script here into mapping
 
+		tgt_id_t tgt = -1;
+		if (targetAttrVal) {
+			tgt = atoi(targetAttrVal);
+		}
 		if (functionAttrVal) {
-			CommandMapping mapping; // <<<<<<<<<<<<<<<<<<<<<< ?????
-			if (childName == "note") {
-				controller.addCommandMapping(mapping, MIDI_NOTE_ON, channel, which);
-			}
-			else if (childName == "ctrl") {
-				controller.addCommandMapping(mapping, MIDI_CTRL, channel, which);
-			}
-			else if (childName == "prog") {
-				controller.addCommandMapping(mapping, MIDI_PROG, channel, which);
+			Command *c = Command::find(functionAttrVal);
+			if (c != nullptr) {
+				CommandMapping mapping(c->command, tgt); // <<<<<<<<<<<<<<<<<<<<<< ?????
+				if (childName == "note") {
+					controller.addCommandMapping(mapping, MIDI_NOTE_ON, channel, which);
+				}
+				else if (childName == "ctrl") {
+					controller.addCommandMapping(mapping, MIDI_CTRL, channel, which);
+				}
+				else if (childName == "prog") {
+					controller.addCommandMapping(mapping, MIDI_PROG, channel, which);
+				}
 			}
 		}
 		if (controlAttrVal) {
-			ControlMapping mapping; // <<<<<<<<<<<<<<<<<<<<<< ?????
-			if (childName == "note") {
-				controller.addControlMapping(mapping, MIDI_NOTE_ON, channel, which);
-			}
-			else if (childName == "ctrl") {
-				controller.addControlMapping(mapping, MIDI_CTRL, channel, which);
-			}
-			else if (childName == "prog") {
-				controller.addControlMapping(mapping, MIDI_PROG, channel, which);
+			Control *c = Control::find(controlAttrVal);
+			if (c != nullptr) {
+				ControlMapping mapping(c->control, tgt); 
+				if (childName == "note") {
+					controller.addControlMapping(mapping, MIDI_NOTE_ON, channel, which);
+				}
+				else if (childName == "ctrl") {
+					controller.addControlMapping(mapping, MIDI_CTRL, channel, which);
+				}
+				else if (childName == "prog") {
+					controller.addControlMapping(mapping, MIDI_PROG, channel, which);
+				}
 			}
 		}
 		if (scriptAttrVal) {
-			ScriptMapping mapping; // <<<<<<<<<<<<<<<<<<<<<< ?????
+			script_id_t id = atoi(scriptAttrVal);
+			ScriptMapping mapping(id, tgt); // connect to the actual scripts later: check it all then
 			if (childName == "note") {
 				controller.addScriptMapping(mapping, MIDI_NOTE_ON, channel, which);
 			}

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __KLEIN_TRACK
+#define __KLEIN_TRACK
 
 #include <vector>
 #include <memory>
@@ -207,3 +208,7 @@ protected:
 
 void addToBuffer(const float gain, float * const inl, float * const outl, const int nFrames);
 void addToBuffer(const float gain, float * const ins, float * const outl, float * const outr, const int nFrames);
+
+#include "debug.h"
+
+#endif

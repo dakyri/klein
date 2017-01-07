@@ -4,7 +4,7 @@
  * The Klein Looper Functional language. KLF script.
  * Keep is simple stupid and get looping working before you go to town on this
  */
-
+#include "mwdefs.h"
 #include "KLFunValue.h"
 #include "KLFContext.h"
 
@@ -148,11 +148,24 @@ protected:
 class KLFun
 {
 public:
-	KLFun();
+	KLFun(script_id_t _id, const char * const _path);
 	virtual ~KLFun();
 
 	bool doStart(KLFContext &c);
+	status_t load(vector<string> &errors);
+	status_t clear(); /** reset state of blocks and symbols so we can rebuild a compiled script into this */
+
+	string &getPath();
+	script_id_t getId();
+
 protected:
+	string path;
+	script_id_t id;
+
+	bool loaded;
+
 	KBlock *main;
+
+	friend class Controller;
 };
 

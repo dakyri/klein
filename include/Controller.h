@@ -17,10 +17,6 @@ using namespace std;
 class Klein;
 class KLFun;
 
-typedef int cmd_id_t;
-typedef int ctl_id_t;
-typedef int tgt_id_t;
-
 /**
  * represents a single mapping between an input and an operation 
  *  - operation is a built in command (CommandMapping), a controller/variable mapping (ControlMapping), or a KLF Script (ScriptMapping)
@@ -49,6 +45,9 @@ typedef int tgt_id_t;
  * 
  */
 struct CommandMapping {
+	CommandMapping() : CommandMapping(0, -1) {}
+	CommandMapping(cmd_id_t i, tgt_id_t t) : command(i), target(t), attack(0), lastUpdate(0) {}
+
 	cmd_id_t command;
 	tgt_id_t target;
 
@@ -57,6 +56,9 @@ struct CommandMapping {
 };
 
 struct ControlMapping {
+	ControlMapping() : ControlMapping(0, -1) {}
+	ControlMapping(ctl_id_t i, tgt_id_t t) : control(i), target(t) {}
+
 	ctl_id_t control;
 	tgt_id_t target;
 };
@@ -64,8 +66,12 @@ struct ControlMapping {
 // every script mapping should have a separate context, so this should inherit from whatever holds the call stack for scripts
 // todo 
 struct ScriptMapping: public KLFContext {
+	ScriptMapping() : ScriptMapping(0, -1) {}
+	ScriptMapping(script_id_t i, tgt_id_t t) : script(nullptr), id(i), target(t), attack(0), lastUpdate(0) {}
+
 	KLFun *script;
-	tgt_id_t targetId;
+	script_id_t id;
+	tgt_id_t target;
 
 	time_t attack;
 	time_t lastUpdate;
@@ -86,7 +92,8 @@ public:
 	void addCommandMapping(CommandMapping & mapping, int mdicmd, int channel, int which);
 	void addControlMapping(ControlMapping & mapping, int mdicmd, int channel, int which);
 	void addScriptMapping(ScriptMapping & mapping, int mdicmd, int channel, int which);
-	status_t loadScript(const char *id, const char *src);
+	status_t addScript(script_id_t id, const char *src);
+	status_t lockAndLoadScripts(vector<string> &errors);
 
 protected:
 	Klein &klein;
@@ -97,6 +104,8 @@ protected:
 	vector<CommandMapping> * getCommandMap(int);
 	vector<ControlMapping> * getControlMap(int);
 	vector<ScriptMapping> * getScriptMap(int);
+
+	vector<KLFun> scripts;
 
 	int makeMidiHash(int cmd, int chan, int which);
 	bool processMapping(CommandMapping &m);

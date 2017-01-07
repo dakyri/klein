@@ -1,0 +1,13 @@
+<klein nInputPort="4" nOutputPort="4">
+  <tracks nTrack="8">
+    <track />
+  </tracks>
+  <scripts>
+    <script id="an_id" src="from somewhere"/>
+  </scripts>
+  <midiMap>
+    <note channel="1" which="1" context="1"/>
+    <ctrl channel="1" which="1" context="1"/>
+    <prog channel="1" which="1" context="1"/>
+  </midiMap>
+</klein>
