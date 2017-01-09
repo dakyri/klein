@@ -7,6 +7,7 @@
 #include "mwdefs.h"
 #include "KLFunValue.h"
 #include "KLFContext.h"
+#include "Sym.h"
 
 #include <string>
 #include <vector>
@@ -31,8 +32,21 @@ public:
 	KBlock();
 	virtual ~KBlock();
 
-	int virtual doStart(KLFContext &c) { return 0; }
+	int virtual execute(KLFContext &c) { return 0; }
 	KLFValue virtual evaluate(KLFContext &c) { return KLFValue(); }
+};
+
+class KListBlock: public KBlock {
+public:
+	KListBlock();
+	virtual ~KListBlock();
+
+	int virtual execute(KLFContext &c) override;
+
+	void add(KBlock *);
+	void clear();
+protected:
+	vector<KBlock*> child;
 };
 
 class KIfBlock : public KBlock {
@@ -40,7 +54,7 @@ public:
 	KIfBlock();
 	virtual ~KIfBlock();
 
-	int virtual doStart(KLFContext &c) override;
+	int virtual execute(KLFContext &c) override;
 
 protected:
 	KBlock *expression;
@@ -48,22 +62,48 @@ protected:
 	KBlock *elseBranch;
 };
 
-class KAssBlock : public KBlock {
+class KCtlAssBlock : public KBlock {
 public:
-	KAssBlock(KBlock *lv, KBlock *e)
-		: lvalue(lv), expression(e) {} 
-	virtual ~KAssBlock() {
-		if (lvalue) delete lvalue;
+	KCtlAssBlock(Control *c, KBlock *e)
+		: control(c), expression(e) {} 
+	virtual ~KCtlAssBlock() {
 		if (expression) delete expression;
 	}
 
-	int virtual doStart(KLFContext &c) override;
+	int virtual execute(KLFContext &c) override;
 
 protected:
-	KBlock *lvalue;
+	Control *control;
 	KBlock *expression;
 };
 
+
+class KVarAssBlock : public KBlock {
+public:
+	KVarAssBlock(Sym *s, KBlock *e)
+		: sym(s), expression(e) {}
+	virtual ~KVarAssBlock() {
+		if (expression) delete expression;
+	}
+
+	int virtual execute(KLFContext &c) override;
+
+protected:
+	Sym *sym;
+	KBlock *expression;
+};
+
+class KCmdBlock : public KBlock {
+public:
+	KCmdBlock(Command *c): command(c) {}
+	virtual ~KCmdBlock() {
+	}
+
+	int virtual execute(KLFContext &c) override;
+
+protected:
+	Command *command;
+};
 
 class KBinop : public KBlock {
 public:
@@ -154,6 +194,8 @@ public:
 	bool doStart(KLFContext &c);
 	status_t load(vector<string> &errors);
 	status_t clear(); /** reset state of blocks and symbols so we can rebuild a compiled script into this */
+
+	bool setEventHandler(int eventId, KBlock *code);
 
 	string &getPath();
 	script_id_t getId();

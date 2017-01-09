@@ -10,9 +10,13 @@ enum KLFType {
 	T_OBJECT, 
 		// ?? go javascripty for composites, an object as a key-value map, array as a key-value map with integer keys
 		// implement as an unordered_map?
+	T_FUNCTION,
+	T_BLOCK,
+	T_KLF,
 	T_TIME
 };
 
+/** ok. kind of reasonable. but will break on sample rate >= 96. we're good up to 48 (64) and that'll be ok for now */
 struct ktime_t {
 	uint16_t frame;
 	uint16_t second;
@@ -28,6 +32,8 @@ public:
 		float Float;
 //		double Double;
 		ktime_t Time;
+		class KLFun *function;
+		class KBlock *block;
 	} value;
 	type_t Type;
 
@@ -58,6 +64,7 @@ public:
 		case T_BOOLEAN: return value.Bool;
 		case T_TIME: return 0;
 		}
+		return 0;
 	}
 
 	int IntValue() {
@@ -67,6 +74,7 @@ public:
 		case T_BOOLEAN: return value.Bool;
 		case T_TIME: return 0;
 		}
+		return 0;
 	}
 
 	bool BoolValue() {
@@ -76,6 +84,7 @@ public:
 		case T_BOOLEAN: return value.Bool;
 		case T_TIME: return 0;
 		}
+		return false;
 	}
 
 
@@ -88,6 +97,16 @@ public:
 		case T_TIME: return value.Time;
 		}
 		return t;
+	}
+
+	bool operator() () {
+		switch (Type) {
+		case T_INTEGER: return value.Int;
+		case T_FLOAT: return value.Float; break;
+		case T_BOOLEAN: return value.Bool; break;
+		case T_TIME: return value.Time.frame != 0 || value.Time.minute != 0 || value.Time.second != 0;
+		}
+		return false;
 	}
 
 	KLFValue operator+ (KLFValue &v) {

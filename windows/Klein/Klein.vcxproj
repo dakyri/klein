@@ -134,6 +134,7 @@
     <ClInclude Include="..\..\include\KLFunLexer.h" />
     <ClInclude Include="..\..\include\mwdefs.h" />
     <ClInclude Include="..\..\include\ParserDriver.h" />
+    <ClInclude Include="..\..\include\Sym.h" />
     <ClInclude Include="..\..\include\tinyxml2.h" />
     <ClInclude Include="..\..\src\KLFunParser.hpp" />
   </ItemGroup>
@@ -154,6 +155,7 @@
     <ClCompile Include="..\..\src\KLFunLexer.cpp" />
     <ClCompile Include="..\..\src\KLFunParser.cpp" />
     <ClCompile Include="..\..\src\ParserDriver.cpp" />
+    <ClCompile Include="..\..\src\Sym.cpp" />
     <ClCompile Include="..\..\src\tinyxml2.cpp" />
   </ItemGroup>
   <ItemGroup>

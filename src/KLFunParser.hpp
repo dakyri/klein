@@ -45,13 +45,14 @@
 
 	#include "Command.h"
 	#include "KLFun.h"
+	#include "Sym.h"
 	
 	namespace KLF {
 		class ParserDriver;
  		class KLFunLexer;
 	}
 
-#line 55 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
+#line 56 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
 
 
 # include <cstdlib> // std::abort
@@ -123,7 +124,7 @@
 
 #line 5 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:377
 namespace KLF {
-#line 127 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
+#line 128 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
 
 
 
@@ -137,7 +138,7 @@ namespace KLF {
     /// Symbol semantic values.
     union semantic_type
     {
-    #line 44 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:377
+    #line 45 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:377
 
 	std::string *stringval;
 	std::vector<int> *vectival;
@@ -145,12 +146,13 @@ namespace KLF {
 	Command *command;
 	Control *control;
 	KBlock *blockval;
+	KListBlock *listval;
 
 	int intval;
 	float floatval;
 	double doubleval;
 
-#line 154 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
+#line 156 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
     };
 #else
     typedef YYSTYPE semantic_type;
@@ -177,40 +179,43 @@ namespace KLF {
         LITERAL_FLOAT = 264,
         LITERAL_TIME = 265,
         LITERAL_STRING = 266,
-        COMMAND = 267,
-        CONTROL = 268,
-        ASSGN = 269,
-        IF = 270,
-        ELSE = 271,
-        ON = 272,
-        LSQB = 273,
-        RSQB = 274,
-        LBRA = 275,
-        RBRA = 276,
-        LB = 277,
-        RB = 278,
-        COMMA = 279,
-        COLON = 280,
-        COLON2 = 281,
-        SEMI = 282,
-        DOT = 283,
-        PLUS = 284,
-        MINUS = 285,
-        MULT = 286,
-        DIVIDE = 287,
-        MOD = 288,
-        POWER = 289,
-        LT = 290,
-        GT = 291,
-        LE = 292,
-        GE = 293,
-        EQ = 294,
-        NE = 295,
-        AND = 296,
-        OR = 297,
-        NOT = 298,
-        NEWLINE = 299,
-        NEG = 300
+        ATTRIB_NAME = 267,
+        ATTRIB_MULTICLICK = 268,
+        ATTRIB_SUSTAIN = 269,
+        COMMAND = 270,
+        CONTROL = 271,
+        ASSGN = 272,
+        IF = 273,
+        ELSE = 274,
+        ON = 275,
+        LSQB = 276,
+        RSQB = 277,
+        LBRA = 278,
+        RBRA = 279,
+        LB = 280,
+        RB = 281,
+        COMMA = 282,
+        COLON = 283,
+        COLON2 = 284,
+        SEMI = 285,
+        DOT = 286,
+        PLUS = 287,
+        MINUS = 288,
+        MULT = 289,
+        DIVIDE = 290,
+        MOD = 291,
+        POWER = 292,
+        LT = 293,
+        GT = 294,
+        LE = 295,
+        GE = 296,
+        EQ = 297,
+        NE = 298,
+        AND = 299,
+        OR = 300,
+        NOT = 301,
+        NEWLINE = 302,
+        NEG = 303
       };
     };
 
@@ -410,7 +415,7 @@ namespace KLF {
     static const char* const yytname_[];
 
   // YYRLINE[YYN] -- Source line where rule number YYN was defined.
-  static const unsigned char yyrline_[];
+  static const unsigned short int yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
     virtual void yy_reduce_print_ (int r);
     /// Print the state stack on the debug stream.
@@ -509,12 +514,12 @@ namespace KLF {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 150,     ///< Last index in yytable_.
-      yynnts_ = 9,  ///< Number of nonterminal symbols.
+      yylast_ = 143,     ///< Last index in yytable_.
+      yynnts_ = 12,  ///< Number of nonterminal symbols.
       yyfinal_ = 3, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 46  ///< Number of tokens.
+      yyntokens_ = 49  ///< Number of tokens.
     };
 
 
@@ -526,7 +531,7 @@ namespace KLF {
 
 #line 5 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:377
 } // KLF
-#line 530 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
+#line 535 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
 
 
 

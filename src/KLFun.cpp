@@ -1,22 +1,6 @@
 #include "Command.h"
 #include "KLFun.h"
 
-
-KLFun::KLFun(int _id, const char * const _path)
-	: id(_id), path(_path), main(nullptr), loaded(false)
-{
-}
-
-
-KLFun::~KLFun()
-{
-}
-
-bool KLFun::doStart(KLFContext & c)
-{
-	return false;
-}
-
 KBlock::KBlock()
 {
 
@@ -25,6 +9,33 @@ KBlock::KBlock()
 KBlock::~KBlock()
 {
 
+}
+
+KListBlock::KListBlock()
+{
+}
+
+KListBlock::~KListBlock()
+{
+	clear();
+}
+
+int KListBlock::execute(KLFContext & c)
+{
+	return 0;
+}
+
+void KListBlock::add(KBlock *b)
+{
+	child.push_back(b);
+}
+
+void KListBlock::clear()
+{
+	for (auto it : child) {
+		delete it;
+	}
+	child.clear();
 }
 
 KIfBlock::KIfBlock()
@@ -40,18 +51,33 @@ KIfBlock::~KIfBlock()
 }
 
 int
-KIfBlock::doStart(KLFContext &c) {
-	if (expression != nullptr && expression->doStart(c)) {
+KIfBlock::execute(KLFContext &c) {
+	if (expression != nullptr && expression->evaluate(c)()) {
 		if (ifBranch != nullptr) {
-			ifBranch->doStart(c);
+			ifBranch->execute(c);
 		}
 	}
 	else {
 		if (elseBranch != nullptr) {
-			elseBranch->doStart(c);
+			elseBranch->execute(c);
 		}
 
 	}
+	return 0;
+}
+
+int KCtlAssBlock::execute(KLFContext & c)
+{
+	return 0;
+}
+
+int KVarAssBlock::execute(KLFContext & c)
+{
+	return 0;
+}
+
+int KCmdBlock::execute(KLFContext & c)
+{
 	return 0;
 }
 
@@ -83,10 +109,29 @@ KLFValue KControl::evaluate(KLFContext & c)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "ParserDriver.h"
 #include <fstream>
+#include <boost\filesystem\path.hpp>
 
 using namespace KLF;
 
 ParserDriver klfParser;
+
+
+KLFun::KLFun(script_id_t _id, const char * const _path)
+	: id(_id), path(_path), main(nullptr), loaded(false)
+{
+}
+
+
+KLFun::~KLFun()
+{
+	clear();
+}
+
+bool KLFun::doStart(KLFContext & c)
+{
+	return false;
+}
+
 
 /**
  * return this function to an empty state ready for parsing
@@ -97,6 +142,27 @@ status_t KLFun::clear()
 		delete main;
 		main = nullptr;
 	}
+	return ERR_OK;
+}
+
+bool KLFun::setEventHandler(int eventId, KBlock * code)
+{
+	bool added = false;
+	switch (eventId) {
+	case KLFEvent::CLICK:
+		break;
+	case KLFEvent::END_CLICK:
+		break;
+	case KLFEvent::SUSTAIN:
+		break;
+	case KLFEvent::END_SUSTAIN:
+		break;
+	}
+	if (!added) {
+		delete code;
+		return false;
+	}
+	return true;
 }
 
 /**
@@ -105,10 +171,10 @@ status_t KLFun::clear()
 status_t KLFun::load(vector<string>& errors)
 {
 	ifstream infile(path);
-	status_t err = klfParser.parse(this, infile, errors);
+	boost::filesystem::path p(path);
+	status_t err = klfParser.parse(this, infile, p.leaf().string(), errors);
 	if (err == ERR_OK) {
 		loaded = true;
 	}
 	return err;
 }
-

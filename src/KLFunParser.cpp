@@ -49,7 +49,7 @@
 
 #line 51 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:412
 // Unqualified %code blocks.
-#line 25 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:413
+#line 26 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:413
 
 	#include <iostream>
 	#include <cstdlib>
@@ -342,35 +342,35 @@ namespace KLF {
     {
             case 3: // WORD
 
-#line 136 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
+#line 144 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
         { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
 #line 348 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
         break;
 
       case 4: // SYMBOL
 
-#line 136 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
+#line 144 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
         { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
 #line 355 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
         break;
 
       case 7: // IDENT
 
-#line 136 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
+#line 144 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
         { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
 #line 362 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
         break;
 
       case 10: // LITERAL_TIME
 
-#line 137 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
+#line 145 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
         { if ((yysym.value.vectival))  { delete ((yysym.value.vectival)); ((yysym.value.vectival)) = nullptr; } }
 #line 369 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
         break;
 
       case 11: // LITERAL_STRING
 
-#line 136 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
+#line 144 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
         { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
 #line 376 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
         break;
@@ -600,253 +600,311 @@ namespace KLF {
           switch (yyn)
             {
   case 2:
-#line 142 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.intval) = (yystack_[0].value.intval); }
-#line 606 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 150 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			Sym *s = stab.define(driver.name, T_KLF);
+			stab.enterScope(s);
+		}
+#line 609 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 3:
-#line 150 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 153 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
-			(yylhs.value.intval) = 0;
+			stab.leaveScope();
 		}
-#line 614 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 617 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 4:
-#line 153 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 163 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
-			(yylhs.value.intval) = 0;
-		}
-#line 622 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
-    break;
-
-  case 5:
-#line 156 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    {
-			(yylhs.value.intval) = 0;
+			Sym *s = stab.find(*(yystack_[2].value.stringval));
+			if (s != nullptr) {
+				(yylhs.value.blockval) = new KVarAssBlock(nullptr, (yystack_[0].value.blockval));
+			} else {
+				driver.addErrorMessage((*(yystack_[2].value.stringval))+" not found near line.");
+			}
 		}
 #line 630 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
-  case 6:
-#line 159 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+  case 5:
+#line 171 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
-			(yylhs.value.intval) = 0;
+			(yylhs.value.blockval) = new KCtlAssBlock((yystack_[2].value.control), (yystack_[0].value.blockval));
 		}
 #line 638 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
+  case 6:
+#line 174 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			(yylhs.value.blockval) = new KCmdBlock((yystack_[0].value.command));
+		}
+#line 646 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
   case 7:
-#line 166 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.intval) = 0; }
-#line 644 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
-    break;
-
-  case 8:
-#line 167 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.intval) = 0; }
-#line 650 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
-    break;
-
-  case 9:
-#line 168 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.intval) = 0; }
-#line 656 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 177 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			(yylhs.value.blockval) = (yystack_[1].value.listval);
+		}
+#line 654 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 10:
-#line 169 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.intval) = 0; }
+#line 186 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			driver.name = *(yystack_[0].value.stringval);
+		}
 #line 662 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 11:
-#line 172 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.intval) = 0; }
-#line 668 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 189 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			driver.sustainTime = (yystack_[0].value.intval);
+		}
+#line 670 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 12:
-#line 173 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.intval) = 0; }
-#line 674 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 192 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			driver.clickTime = (yystack_[0].value.intval);
+		}
+#line 678 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 13:
-#line 177 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { 
-			(yylhs.value.intval) = 0;
-		}
-#line 682 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 198 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.intval) = 0; }
+#line 684 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 14:
-#line 183 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 199 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yylhs.value.intval) = 0;
 		}
-#line 690 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 692 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 15:
-#line 191 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 202 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
-			(yylhs.value.blockval) = new KRValue((yystack_[0].value.stringval));
+			(yylhs.value.intval) = 0;
 		}
-#line 698 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 700 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 16:
-#line 194 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 205 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
-			(yylhs.value.blockval) = new KControl((yystack_[0].value.control));
+			(yylhs.value.intval) = 0;
 		}
-#line 706 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 708 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 17:
-#line 197 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 210 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
-			(yylhs.value.blockval) = new KConstant((yystack_[0].value.intval));
+			(yylhs.value.listval) = new KListBlock();
 		}
-#line 714 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 716 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 18:
-#line 200 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 213 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
-			(yylhs.value.blockval) = new KConstant((yystack_[0].value.doubleval));
+			(yystack_[1].value.listval)->add((yystack_[0].value.blockval));
+			(yylhs.value.listval) = (yystack_[1].value.listval);
 		}
-#line 722 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 725 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 19:
-#line 203 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    {
-			(yylhs.value.blockval) = new KConstant((yystack_[0].value.stringval));
+#line 220 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { 
+			Sym *s = stab.define(*(yystack_[0].value.stringval), (yystack_[1].value.intval));
 		}
-#line 730 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 733 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 20:
-#line 206 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 226 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
-			(yylhs.value.blockval) = new KConstant((yystack_[0].value.vectival));
+			if (driver.fun) {
+				if (!driver.fun->setEventHandler((yystack_[1].value.intval), (yystack_[0].value.blockval))) {
+					driver.addErrorMessage("Error while setting handler");
+				}
+			} else {
+				driver.addErrorMessage("No Functional defined while setting handler");
+				delete (yystack_[0].value.blockval);
+			}
 		}
-#line 738 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 748 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 21:
-#line 212 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = (yystack_[0].value.blockval); }
-#line 744 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
-    break;
-
-  case 22:
-#line 213 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::PLUS, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 750 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
-    break;
-
-  case 23:
-#line 214 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::MINUS, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 241 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			(yylhs.value.blockval) = new KRValue((yystack_[0].value.stringval));
+		}
 #line 756 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
+  case 22:
+#line 244 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			(yylhs.value.blockval) = new KControl((yystack_[0].value.control));
+		}
+#line 764 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
+  case 23:
+#line 247 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			(yylhs.value.blockval) = new KConstant((yystack_[0].value.intval));
+		}
+#line 772 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
   case 24:
-#line 215 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::MULT, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 762 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
-    break;
-
-  case 25:
-#line 216 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::MOD, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 768 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
-    break;
-
-  case 26:
-#line 217 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::DIVIDE, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 774 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
-    break;
-
-  case 27:
-#line 218 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KUnop(token_type::MINUS, (yystack_[0].value.blockval)); }
+#line 250 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			(yylhs.value.blockval) = new KConstant((yystack_[0].value.doubleval));
+		}
 #line 780 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
+  case 25:
+#line 253 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			(yylhs.value.blockval) = new KConstant((yystack_[0].value.stringval));
+		}
+#line 788 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
+  case 26:
+#line 256 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    {
+			(yylhs.value.blockval) = new KConstant((yystack_[0].value.vectival));
+		}
+#line 796 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
+  case 27:
+#line 262 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = (yystack_[0].value.blockval); }
+#line 802 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
   case 28:
-#line 219 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KUnop(token_type::NOT, (yystack_[0].value.blockval)); }
-#line 786 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 263 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::PLUS, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 808 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 29:
-#line 220 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::LT, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 792 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 264 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::MINUS, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 814 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 30:
-#line 221 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::GT, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 798 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 265 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::MULT, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 820 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 31:
-#line 222 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::NE, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 804 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 266 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::MOD, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 826 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 32:
-#line 223 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::EQ, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 810 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 267 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::DIVIDE, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 832 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 33:
-#line 224 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::GE, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 816 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 268 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KUnop(token_type::MINUS, (yystack_[0].value.blockval)); }
+#line 838 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 34:
-#line 225 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::LE, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 822 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 269 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KUnop(token_type::NOT, (yystack_[0].value.blockval)); }
+#line 844 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 35:
-#line 226 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::AND, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 828 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 270 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::LT, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 850 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 36:
-#line 227 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::OR, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 834 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 271 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::GT, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 856 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 37:
-#line 228 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
-    { (yylhs.value.blockval) = new KBinop(token_type::POWER, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 840 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 272 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::NE, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 862 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 38:
-#line 229 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 273 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::EQ, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 868 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
+  case 39:
+#line 274 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::GE, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 874 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
+  case 40:
+#line 275 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::LE, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 880 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
+  case 41:
+#line 276 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::AND, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 886 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
+  case 42:
+#line 277 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::OR, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 892 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
+  case 43:
+#line 278 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+    { (yylhs.value.blockval) = new KBinop(token_type::POWER, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
+#line 898 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+    break;
+
+  case 44:
+#line 279 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = (yystack_[1].value.blockval); }
-#line 846 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 904 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
 
-#line 850 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 908 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
             default:
               break;
             }
@@ -1007,116 +1065,121 @@ namespace KLF {
   }
 
 
-  const signed char KLFunParser::yypact_ninf_ = -24;
+  const signed char KLFunParser::yypact_ninf_ = -25;
 
   const signed char KLFunParser::yytable_ninf_ = -1;
 
   const signed char
   KLFunParser::yypact_[] =
   {
-     -24,    14,     0,   -24,    15,     7,   -24,    10,    22,   -24,
-     -24,   -24,   -24,   -24,    -7,    -7,    93,    64,   -24,   -24,
-     -24,   -24,   -24,   -24,    -7,    -7,    -7,   -24,    57,    57,
-     -24,   -24,   -24,    28,    -5,    98,    -7,    -7,    -7,    -7,
-      -7,    -7,    -7,    -7,    -7,    -7,    -7,    -7,    -7,    -7,
-     -24,   -23,   -23,    -5,    -5,    -5,    -5,   110,   110,   110,
-     110,   110,   110,    98,    85
+     -25,     6,    19,   -25,    -3,     9,    16,   -25,   -25,   -25,
+     -25,   -25,     0,     7,     8,   -25,    10,    29,   -25,   -25,
+     -25,   -25,   -25,    -7,    -7,    69,    67,   -25,   -25,   -25,
+     -25,   -25,   -25,    -7,    -7,    -7,   -25,    61,    61,   -25,
+     -25,   -25,    28,    -1,    88,    -7,    -7,    -7,    -7,    -7,
+      -7,    -7,    -7,    -7,    -7,    -7,    -7,    -7,    -7,   -25,
+     -24,   -24,    -1,    -1,    -1,    -1,   100,   100,   100,   100,
+     100,   100,    88,    75
   };
 
   const unsigned char
   KLFunParser::yydefact_[] =
   {
-       7,     0,     2,     1,     0,     0,     5,     0,     0,    11,
-       8,     9,    10,    13,     0,     0,     0,     0,    15,    17,
-      18,    20,    19,    16,     0,     0,     0,    21,     3,     4,
-      14,     6,    12,     0,    27,    28,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      38,    22,    23,    24,    26,    25,    37,    29,    30,    34,
-      33,    32,    31,    35,    36
+       8,     0,     2,     1,     0,     0,     0,    13,     9,    10,
+      12,    11,     3,     0,     0,     6,     0,     0,    17,    14,
+      15,    16,    19,     0,     0,     0,     0,    21,    23,    24,
+      26,    25,    22,     0,     0,     0,    27,     4,     5,    20,
+       7,    18,     0,    33,    34,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,    44,
+      28,    29,    30,    32,    31,    43,    35,    36,    40,    39,
+      38,    37,    41,    42
   };
 
   const signed char
   KLFunParser::yypgoto_[] =
   {
-     -24,   -24,     2,   -24,   -24,   -24,   -24,   -24,     1
+     -25,   -25,   -25,    -4,   -25,   -25,   -25,   -25,   -25,   -25,
+     -25,    -5
   };
 
   const signed char
   KLFunParser::yydefgoto_[] =
   {
-      -1,     1,    10,     2,    17,    11,    12,    27,    28
+      -1,     1,     7,    19,     2,     8,    12,    26,    20,    21,
+      36,    37
   };
 
   const signed char
   KLFunParser::yytable_[] =
   {
-      18,    19,    20,    21,    22,     4,    23,     5,    38,    39,
-      40,    41,     6,     7,     3,    24,    29,     8,    30,    32,
-       9,    14,    13,    25,    15,    33,    34,    35,    16,    41,
-       0,     0,     0,     0,     0,     0,    26,    51,    52,    53,
-      54,    55,    56,    57,    58,    59,    60,    61,    62,    63,
-      64,    50,     0,     0,     0,     0,     0,    36,    37,    38,
-      39,    40,    41,    42,    43,    44,    45,    46,    47,    48,
-      49,     5,     0,     0,     0,     0,     6,     7,     0,     0,
-       0,     0,     0,     0,     9,    31,    36,    37,    38,    39,
-      40,    41,    42,    43,    44,    45,    46,    47,    48,    49,
-       5,     0,     0,     0,     0,     6,     7,     0,     0,     0,
-       0,     0,     0,     9,    36,    37,    38,    39,    40,    41,
-      42,    43,    44,    45,    46,    47,    48,    36,    37,    38,
-      39,    40,    41,    42,    43,    44,    45,    46,    47,    36,
-      37,    38,    39,    40,    41,    -1,    -1,    -1,    -1,    -1,
-      -1
+      27,    28,    29,    30,    31,    13,     3,    14,     9,    32,
+      47,    48,    49,    50,    22,    15,    16,    10,    33,    38,
+      17,    39,    41,    18,    11,    23,    34,    24,    42,    43,
+      44,     4,     5,     6,     0,    25,    50,     0,     0,    35,
+      60,    61,    62,    63,    64,    65,    66,    67,    68,    69,
+      70,    71,    72,    73,    59,     0,     0,     0,     0,     0,
+      45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
+      55,    56,    57,    58,    14,     0,    14,     0,     0,     0,
+       0,     0,    15,    16,    15,    16,     0,     0,     0,     0,
+      18,    40,    18,    45,    46,    47,    48,    49,    50,    51,
+      52,    53,    54,    55,    56,    57,    58,    45,    46,    47,
+      48,    49,    50,    51,    52,    53,    54,    55,    56,    57,
+      45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
+      55,    56,    45,    46,    47,    48,    49,    50,    -1,    -1,
+      -1,    -1,    -1,    -1
   };
 
   const signed char
   KLFunParser::yycheck_[] =
   {
-       7,     8,     9,    10,    11,     5,    13,     7,    31,    32,
-      33,    34,    12,    13,     0,    22,    15,    17,    16,    17,
-      20,    14,     7,    30,    14,    24,    25,    26,     6,    34,
-      -1,    -1,    -1,    -1,    -1,    -1,    43,    36,    37,    38,
-      39,    40,    41,    42,    43,    44,    45,    46,    47,    48,
-      49,    23,    -1,    -1,    -1,    -1,    -1,    29,    30,    31,
+       7,     8,     9,    10,    11,     5,     0,     7,    11,    16,
+      34,    35,    36,    37,     7,    15,    16,     8,    25,    24,
+      20,    25,    26,    23,     8,    17,    33,    17,    33,    34,
+      35,    12,    13,    14,    -1,     6,    37,    -1,    -1,    46,
+      45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
+      55,    56,    57,    58,    26,    -1,    -1,    -1,    -1,    -1,
       32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
-      42,     7,    -1,    -1,    -1,    -1,    12,    13,    -1,    -1,
-      -1,    -1,    -1,    -1,    20,    21,    29,    30,    31,    32,
-      33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
-       7,    -1,    -1,    -1,    -1,    12,    13,    -1,    -1,    -1,
-      -1,    -1,    -1,    20,    29,    30,    31,    32,    33,    34,
-      35,    36,    37,    38,    39,    40,    41,    29,    30,    31,
-      32,    33,    34,    35,    36,    37,    38,    39,    40,    29,
-      30,    31,    32,    33,    34,    35,    36,    37,    38,    39,
-      40
+      42,    43,    44,    45,     7,    -1,     7,    -1,    -1,    -1,
+      -1,    -1,    15,    16,    15,    16,    -1,    -1,    -1,    -1,
+      23,    24,    23,    32,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    42,    43,    44,    45,    32,    33,    34,
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,    32,    33,    34,    35,    36,    37,    38,    39,
+      40,    41,    42,    43
   };
 
   const unsigned char
   KLFunParser::yystos_[] =
   {
-       0,    47,    49,     0,     5,     7,    12,    13,    17,    20,
-      48,    51,    52,     7,    14,    14,     6,    50,     7,     8,
-       9,    10,    11,    13,    22,    30,    43,    53,    54,    54,
-      48,    21,    48,    54,    54,    54,    29,    30,    31,    32,
-      33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
-      23,    54,    54,    54,    54,    54,    54,    54,    54,    54,
-      54,    54,    54,    54,    54
+       0,    50,    53,     0,    12,    13,    14,    51,    54,    11,
+       8,     8,    55,     5,     7,    15,    16,    20,    23,    52,
+      57,    58,     7,    17,    17,     6,    56,     7,     8,     9,
+      10,    11,    16,    25,    33,    46,    59,    60,    60,    52,
+      24,    52,    60,    60,    60,    32,    33,    34,    35,    36,
+      37,    38,    39,    40,    41,    42,    43,    44,    45,    26,
+      60,    60,    60,    60,    60,    60,    60,    60,    60,    60,
+      60,    60,    60,    60
   };
 
   const unsigned char
   KLFunParser::yyr1_[] =
   {
-       0,    46,    47,    48,    48,    48,    48,    49,    49,    49,
-      49,    50,    50,    51,    52,    53,    53,    53,    53,    53,
-      53,    54,    54,    54,    54,    54,    54,    54,    54,    54,
-      54,    54,    54,    54,    54,    54,    54,    54,    54
+       0,    49,    51,    50,    52,    52,    52,    52,    53,    53,
+      54,    54,    54,    55,    55,    55,    55,    56,    56,    57,
+      58,    59,    59,    59,    59,    59,    59,    60,    60,    60,
+      60,    60,    60,    60,    60,    60,    60,    60,    60,    60,
+      60,    60,    60,    60,    60
   };
 
   const unsigned char
   KLFunParser::yyr2_[] =
   {
-       0,     2,     1,     3,     3,     1,     3,     0,     2,     2,
-       2,     0,     2,     2,     3,     1,     1,     1,     1,     1,
-       1,     1,     3,     3,     3,     3,     3,     2,     2,     3,
-       3,     3,     3,     3,     3,     3,     3,     3,     3
+       0,     2,     0,     3,     3,     3,     1,     3,     0,     2,
+       2,     2,     2,     0,     2,     2,     2,     0,     2,     2,
+       3,     1,     1,     1,     1,     1,     1,     1,     3,     3,
+       3,     3,     3,     2,     2,     3,     3,     3,     3,     3,
+       3,     3,     3,     3,     3
   };
 
 
@@ -1128,23 +1191,25 @@ namespace KLF {
   {
   "\"end of file\"", "error", "$undefined", "WORD", "SYMBOL", "TYPE",
   "EVENT", "IDENT", "LITERAL_INT", "LITERAL_FLOAT", "LITERAL_TIME",
-  "LITERAL_STRING", "COMMAND", "CONTROL", "ASSGN", "IF", "ELSE", "ON",
-  "LSQB", "RSQB", "LBRA", "RBRA", "LB", "RB", "COMMA", "COLON", "COLON2",
-  "SEMI", "DOT", "PLUS", "MINUS", "MULT", "DIVIDE", "MOD", "POWER", "LT",
-  "GT", "LE", "GE", "EQ", "NE", "AND", "OR", "NOT", "NEWLINE", "NEG",
-  "$accept", "script_file", "statement", "script_item_list",
-  "statement_list", "simple_definition", "handler_definition", "atom",
-  "expression", YY_NULLPTR
+  "LITERAL_STRING", "ATTRIB_NAME", "ATTRIB_MULTICLICK", "ATTRIB_SUSTAIN",
+  "COMMAND", "CONTROL", "ASSGN", "IF", "ELSE", "ON", "LSQB", "RSQB",
+  "LBRA", "RBRA", "LB", "RB", "COMMA", "COLON", "COLON2", "SEMI", "DOT",
+  "PLUS", "MINUS", "MULT", "DIVIDE", "MOD", "POWER", "LT", "GT", "LE",
+  "GE", "EQ", "NE", "AND", "OR", "NOT", "NEWLINE", "NEG", "$accept",
+  "script_file", "$@1", "statement", "script_attribute_list",
+  "script_attribute", "script_item_list", "statement_list",
+  "simple_definition", "handler_definition", "atom", "expression", YY_NULLPTR
   };
 
 
-  const unsigned char
+  const unsigned short int
   KLFunParser::yyrline_[] =
   {
-       0,   142,   142,   150,   153,   156,   159,   166,   167,   168,
-     169,   172,   173,   177,   183,   191,   194,   197,   200,   203,
-     206,   212,   213,   214,   215,   216,   217,   218,   219,   220,
-     221,   222,   223,   224,   225,   226,   227,   228,   229
+       0,   150,   150,   150,   163,   171,   174,   177,   183,   183,
+     186,   189,   192,   198,   199,   202,   205,   210,   213,   220,
+     226,   241,   244,   247,   250,   253,   256,   262,   263,   264,
+     265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
+     275,   276,   277,   278,   279
   };
 
   // Print the state stack on the debug stream.
@@ -1215,9 +1280,9 @@ namespace KLF {
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
       35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
-      45
+      45,    46,    47,    48
     };
-    const unsigned int user_token_number_max_ = 300;
+    const unsigned int user_token_number_max_ = 303;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int>(t) <= yyeof_)
@@ -1230,8 +1295,8 @@ namespace KLF {
 
 #line 5 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:1167
 } // KLF
-#line 1234 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:1167
-#line 233 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:1168
+#line 1299 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:1167
+#line 283 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:1168
 
  
 

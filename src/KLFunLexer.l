@@ -75,6 +75,10 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 "sustain" { yylval->intval = KLFEvent::SUSTAIN; return token::EVENT; }
 "endSustain" { yylval->intval = KLFEvent::END_SUSTAIN; return token::EVENT; }
 
+"\\name" { return token::ATTRIB_NAME; }
+"\\multiclick" { return token::ATTRIB_MULTICLICK; }
+"\\sustain" { return token::ATTRIB_SUSTAIN; }
+
 {IDENT} {
 	Command *cmd = Command::find(yytext);
 	if (cmd != nullptr) {

@@ -9,6 +9,7 @@
 
 	#include "Command.h"
 	#include "KLFun.h"
+	#include "Sym.h"
 	
 	namespace KLF {
 		class ParserDriver;
@@ -48,19 +49,22 @@
 	Command *command;
 	Control *control;
 	KBlock *blockval;
+	KListBlock *listval;
 
 	int intval;
 	float floatval;
 	double doubleval;
 }
 
-%type <intval> script_file;
+%start script_file;
 
 %type <blockval> atom
 %type <blockval> expression
 %type <blockval> block
-%type <intval> statement
-%type <intval> statement_list
+%type <blockval> statement
+%type <listval> statement_list
+/* %type <intval> script_attribute */
+/* %type <intval> script_attribute_list */
 %type <intval> script_item_list
 %type <intval> simple_definition
 %type <intval> handler_definition
@@ -80,6 +84,10 @@
 %token <doubleval> LITERAL_FLOAT
 %token <vectival> LITERAL_TIME
 %token <stringval> LITERAL_STRING
+
+%token ATTRIB_NAME
+%token ATTRIB_MULTICLICK
+%token ATTRIB_SUSTAIN
 
 %token <command> COMMAND
 %token <control> CONTROL
@@ -139,7 +147,12 @@
 %%
 
 script_file
-	: script_item_list { $$ = $1; }
+	: script_attribute_list {
+			Sym *s = stab.define(driver.name, T_KLF);
+			stab.enterScope(s);
+		} script_item_list {
+			stab.leaveScope();
+		}
 	;
 	
 //////////////////////////////////
@@ -148,19 +161,38 @@ script_file
 
 statement
 	: IDENT ASSGN expression {
-			$$ = 0;
+			Sym *s = stab.find(*$1);
+			if (s != nullptr) {
+				$$ = new KVarAssBlock(nullptr, $3);
+			} else {
+				driver.addErrorMessage((*$1)+" not found near line.");
+			}
 		}
 	| CONTROL ASSGN expression {
-			$$ = 0;
+			$$ = new KCtlAssBlock($1, $3);
 		}
 	| COMMAND {
-			$$ = 0;
+			$$ = new KCmdBlock($1);
 		}
 	| LBRA statement_list RBRA {
-			$$ = 0;
+			$$ = $2;
 		}
 	;
 
+		
+script_attribute_list :  | script_attribute_list script_attribute ;
+
+script_attribute
+	: ATTRIB_NAME LITERAL_STRING {
+			driver.name = *$2;
+		}
+	| ATTRIB_SUSTAIN LITERAL_INT {
+			driver.sustainTime = $2;
+		}
+	| ATTRIB_MULTICLICK LITERAL_INT {
+			driver.clickTime = $2;
+		}
+	;
 		
 script_item_list
 	: { $$ = 0; }
@@ -175,19 +207,31 @@ script_item_list
 		}
 	;
 
-statement_list : { $$ = 0; }
-	| statement_list statement { $$ = 0; }
+statement_list : {
+			$$ = new KListBlock();
+		}
+	| statement_list statement {
+			$1->add($2);
+			$$ = $1;
+		}
 	;
 
 simple_definition
 	: TYPE IDENT { 
-			$$ = 0;
+			Sym *s = stab.define(*$2, $1);
 		}
 	;
 
 handler_definition
 	: ON EVENT statement {
-			$$ = 0;
+			if (driver.fun) {
+				if (!driver.fun->setEventHandler($2, $3)) {
+					driver.addErrorMessage("Error while setting handler");
+				}
+			} else {
+				driver.addErrorMessage("No Functional defined while setting handler");
+				delete $3;
+			}
 		}
 	;
 
