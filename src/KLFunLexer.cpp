@@ -599,12 +599,12 @@ static yyconst flex_int32_t yy_rule_can_match_eol[54] =
 
 static yyconst flex_int16_t yy_rule_linenum[53] =
     {   0,
-       39,   44,   49,   57,   63,   64,   65,   66,   67,   68,
-       70,   71,   73,   74,   75,   76,   78,   79,   80,   82,
-       97,   99,  100,  101,  102,  103,  104,  106,  107,  108,
-      109,  110,  112,  113,  114,  115,  116,  118,  119,  120,
-      121,  122,  123,  125,  126,  127,  130,  134,  138,  142,
-      143,  144
+       39,   44,   49,   55,   61,   62,   63,   64,   65,   66,
+       68,   69,   71,   72,   73,   74,   76,   77,   78,   80,
+       95,   97,   98,   99,  100,  101,  102,  104,  105,  106,
+      107,  108,  110,  111,  112,  113,  114,  116,  117,  118,
+      119,  120,  121,  123,  124,  125,  128,  132,  136,  140,
+      141,  142
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -943,17 +943,15 @@ case 3:
 YY_RULE_SETUP
 #line 49 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 {
-/* TODO XXX FIXME ??? best implementation for this may be as a triplet
- */
 //	TypedValue *v = new TypedValue();
-//	yylval->typedval = v;
+	yylval->timeval.string2t(yytext);
 	return token::LITERAL_TIME;
 }
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 57 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 55 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 {
 	/*matches string-literal on a single line*/;
 	yylval->stringval = new std::string(yytext+1, strlen(yytext)-1);
@@ -962,82 +960,82 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 63 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 61 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::ON; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 64 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 62 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::IF; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 65 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 63 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::ELSE; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 66 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 64 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { yylval->intval = KLFType::T_INTEGER; return token::TYPE; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 67 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 65 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { yylval->intval = KLFType::T_FLOAT; return token::TYPE; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 68 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 66 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { yylval->intval = KLFType::T_BOOLEAN; return token::TYPE; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 70 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 68 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { yylval->intval = 1; return token::LITERAL_INT; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 71 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 69 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { yylval->intval = 0; return token::LITERAL_INT; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 73 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 71 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { yylval->intval = KLFEvent::CLICK; return token::EVENT; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 74 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 72 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { yylval->intval = KLFEvent::END_CLICK; return token::EVENT; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 75 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 73 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { yylval->intval = KLFEvent::SUSTAIN; return token::EVENT; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 76 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 74 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { yylval->intval = KLFEvent::END_SUSTAIN; return token::EVENT; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 78 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 76 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::ATTRIB_NAME; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 79 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 77 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::ATTRIB_MULTICLICK; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 80 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 78 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::ATTRIB_SUSTAIN; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 82 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 80 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 {
 	Command *cmd = Command::find(yytext);
 	if (cmd != nullptr) {
@@ -1055,137 +1053,137 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 97 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 95 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::ASSGN; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 99 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 97 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::LSQB; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 100 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 98 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::RSQB; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 101 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 99 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::LBRA; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 102 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 100 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::RBRA; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 103 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 101 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::LB; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 104 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 102 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::RB; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 106 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 104 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::COMMA; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 107 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 105 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::COLON; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 108 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 106 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::COLON2; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 109 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 107 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::SEMI; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 110 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 108 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::DOT; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 112 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 110 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::PLUS; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 113 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 111 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::MINUS; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 114 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 112 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::MULT; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 115 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 113 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::DIVIDE; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 116 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 114 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::MOD; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 118 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 116 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::LT; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 119 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 117 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::GT; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 120 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 118 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::LE; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 121 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 119 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::GE; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 122 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 120 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::EQ; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 123 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 121 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::NE; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 125 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 123 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::AND; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 126 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 124 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::OR; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 127 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 125 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { return token::NOT; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 130 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 128 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 {
 	// skip white space
 }
@@ -1193,39 +1191,39 @@ YY_RULE_SETUP
 case 48:
 /* rule 48 can match eol */
 YY_RULE_SETUP
-#line 134 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 132 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { 
 	// skip white space, but perhaps also give an interactive prompt
 }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 138 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 136 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { 
 	; // oops      
 }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 142 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 140 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { BEGIN(C_COMMENT); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 143 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 141 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 144 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 142 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 { }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 147 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 145 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1229 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.cpp"
+#line 1227 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(C_COMMENT):
 	yyterminate();
@@ -2346,7 +2344,7 @@ void yyfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 147 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
+#line 145 "D:\\src\\cpp\\Klein\\src\\KLFunLexer.l"
 
 
 

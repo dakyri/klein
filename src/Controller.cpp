@@ -253,10 +253,14 @@ Controller::processEvent(VstMidiEvent * e)
 	return true;
 }
 
-bool Controller::processMapping(CommandMapping & m)
+bool Controller::processMapping(const CommandMapping & m) {
+	return processCommand(m.command, m.target);
+}
+
+bool Controller::processCommand(const cmd_id_t cmd, const tgt_id_t tgt) const
 {
-	KleinTrack &t = klein.getTrack(m.target);
-	switch (m.command) {
+	KleinTrack &t = klein.getTrack(tgt);
+	switch (cmd) {
 		case Command::AUTO_RECORD: return true;
 		case Command::BACKWARD: return true;
 		case Command::BOUNCE: return true;
@@ -370,16 +374,56 @@ bool Controller::processMapping(CommandMapping & m)
 	return false;
 }
 
-bool Controller::processMapping(ControlMapping & m, int v)
+bool Controller::processMapping(const ControlMapping & m, int v)
 {
+	return setControl(m.control, m.target, v);
+}
+
+bool Controller::setControl(const ctl_id_t control, const tgt_id_t tgt, const int v) const
+{
+	KleinTrack &t = klein.getTrack(tgt);
+	switch (control) {
+		case Control::FEEDBACK:		t.setFeedback(v);  return true;
+		case Control::INPUT_LEVEL:	t.setInputGain(v);  return true;
+		case Control::OUTPUT_LEVEL:	t.setOutputGain(v);   return true;
+		case Control::PAN:			t.setPan(v);  return true;
+		case Control::PITCH_BEND:	return false;
+		case Control::PITCH_OCT:	return false;
+		case Control::PITCH_STEP:	return false;
+		case Control::SECONDARY_FEEDBACK: t.setSecondaryFeedback(v);  return true;
+		case Control::SPEED_BEND:	return false;
+		case Control::SPEED_OCT:	return false;
+		case Control::SPEED_STEP:	return false;
+		case Control::TIME_STRETCH:	return false;
+	}
 	return false;
 }
 
-bool Controller::processMapping(ScriptMapping & m, int wh, int v)
+KLFValue Controller::getControl(const ctl_id_t control, const tgt_id_t tgt) const
+{
+	KleinTrack &t = klein.getTrack(tgt);
+	switch (control) {
+	case Control::FEEDBACK:		return KLFValue(t.getFeedback());
+	case Control::INPUT_LEVEL:	return KLFValue(t.getInputGain());
+	case Control::OUTPUT_LEVEL:	return KLFValue(t.getOutputGain());
+	case Control::PAN:			return KLFValue(t.getPan());
+	case Control::PITCH_BEND:	return KLFValue();
+	case Control::PITCH_OCT:	return KLFValue();
+	case Control::PITCH_STEP:	return KLFValue();
+	case Control::SECONDARY_FEEDBACK: return KLFValue(t.getSecondaryFeedback()); 
+	case Control::SPEED_BEND:	return KLFValue();
+	case Control::SPEED_OCT:	return KLFValue();
+	case Control::SPEED_STEP:	return KLFValue();
+	case Control::TIME_STRETCH:	return KLFValue();
+	}
+	return KLFValue();
+}
+
+bool Controller::processMapping(const ScriptMapping & m, int wh, int v)
 {
 	auto s = m.script;
 	if (!s) return false;
-	s->doStart(m);
+	s->doStart(*this, m);
 	return false;
 }
 

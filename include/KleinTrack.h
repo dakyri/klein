@@ -94,6 +94,7 @@ public:
 	float getOutputGain();
 	float getPan();
 	float getFeedback();
+	float getSecondaryFeedback();
 
 	void setInPort(const int port);
 	void setOutPort(const int port);

@@ -8,6 +8,8 @@
 
 using namespace std;
 
+class KLFun;
+
 class Sym {
 public:
 	Sym(const string &_name, Sym * const _scope, const type_t _type);
@@ -18,9 +20,17 @@ protected:
 	Sym *scope;
 
 	type_t type;
-	int contextIdx; /** index of our object within the relevant context */
+	union sym_val_t {
+		int contextIdx; /** index of our object within the relevant context */
+		KLFun *klfScript; /** POP to the scrupt object we've defined with this symbol */
+	} value;
+
+	list<Sym *> children;
+	int allocatedChildren; /** number of children on the context stack */
 
 	friend class SymTab;
+	friend class KLFContext;
+	friend class KLFValue;
 };
 
 /**
@@ -32,11 +42,12 @@ public:
 	virtual ~SymTab();
 
 	Sym *define(const string &_name, Sym * const _scope, const type_t _type);
+	Sym *define(const string &_name, Sym * const _scope, const KLFun *);
 	Sym *define(const string &_name, const type_t _type);
 	Sym *find(const string &_name, Sym * const _scope);
 	Sym *find(const string &_name);
-	bool del(const string &_name, Sym * const _scope);
-	bool del(Sym *);
+	bool del(const string &_name, Sym * const _scope, bool delFromScopeChildren=true);
+	bool del(const Sym *sym);
 
 	Sym *topScope();
 	void enterScope(Sym *sym);

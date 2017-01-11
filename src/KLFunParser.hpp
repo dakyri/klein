@@ -151,8 +151,9 @@ namespace KLF {
 	int intval;
 	float floatval;
 	double doubleval;
+	ktime_t timeval;
 
-#line 156 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
+#line 157 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
     };
 #else
     typedef YYSTYPE semantic_type;
@@ -531,7 +532,7 @@ namespace KLF {
 
 #line 5 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:377
 } // KLF
-#line 535 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
+#line 536 "D:\\src\\cpp\\Klein\\src\\KLFunParser.hpp" // lalr1.cc:377
 
 
 

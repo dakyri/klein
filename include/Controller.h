@@ -65,16 +65,12 @@ struct ControlMapping {
 
 // every script mapping should have a separate context, so this should inherit from whatever holds the call stack for scripts
 // todo 
-struct ScriptMapping: public KLFContext {
+struct ScriptMapping: public KLFBaseContext {
 	ScriptMapping() : ScriptMapping(0, -1) {}
-	ScriptMapping(script_id_t i, tgt_id_t t) : script(nullptr), id(i), target(t), attack(0), lastUpdate(0) {}
+	ScriptMapping(script_id_t i, tgt_id_t t) : KLFBaseContext(t), script(nullptr), id(i) {}
 
 	KLFun *script;
 	script_id_t id;
-	tgt_id_t target;
-
-	time_t attack;
-	time_t lastUpdate;
 };
 
 /**
@@ -108,9 +104,17 @@ protected:
 	vector<KLFun> scripts;
 
 	int makeMidiHash(int cmd, int chan, int which);
-	bool processMapping(CommandMapping &m);
-	bool processMapping(ControlMapping &m, int v);
-	bool processMapping(ScriptMapping &m, int wh, int v);
+	bool processMapping(const CommandMapping &m);
+	bool processMapping(const ControlMapping &m, const int v);
+	bool processMapping(const ScriptMapping &m, const int wh, const int v);
 
+	bool processCommand(const cmd_id_t cmd, const tgt_id_t tgt) const;
+	bool setControl(const ctl_id_t cmd, const tgt_id_t tgt, const int v) const;
+	KLFValue Controller::getControl(const ctl_id_t control, const tgt_id_t tgt) const;
+
+	friend class KControl;
+	friend class KCmdBlock;
+	friend class KVarAssBlock;
+	friend class KCtlAssBlock;
 };
 

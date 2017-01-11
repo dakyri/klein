@@ -119,6 +119,9 @@
     <ClCompile Include="..\..\src\Sym.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\KLFContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\KLFunLexer.l">

@@ -208,6 +208,11 @@ float KleinTrack::getFeedback()
 	return feedback;
 }
 
+float KleinTrack::getSecondaryFeedback()
+{
+	return 0.0f;
+}
+
 
 void
 KleinTrack::setSecondaryFeedback(int v) {

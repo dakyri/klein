@@ -54,6 +54,7 @@
 	int intval;
 	float floatval;
 	double doubleval;
+	ktime_t timeval;
 }
 
 %start script_file;
@@ -82,7 +83,7 @@
 
 %token <intval> LITERAL_INT
 %token <doubleval> LITERAL_FLOAT
-%token <vectival> LITERAL_TIME
+%token <timeval> LITERAL_TIME
 %token <stringval> LITERAL_STRING
 
 %token ATTRIB_NAME
@@ -163,7 +164,7 @@ statement
 	: IDENT ASSGN expression {
 			Sym *s = stab.find(*$1);
 			if (s != nullptr) {
-				$$ = new KVarAssBlock(nullptr, $3);
+				$$ = new KVarAssBlock(s, $3);
 			} else {
 				driver.addErrorMessage((*$1)+" not found near line.");
 			}
@@ -239,7 +240,11 @@ handler_definition
 // expressions
 ////////////////////////////
 atom : IDENT {
-			$$ = new KRValue($1);
+			Sym *s = stab.find(*$1);
+			if (s == nullptr) {
+				driver.addErrorMessage((*$1)+" no defined near line "+to_string(scanner.lineno()));
+			}
+			$$ = new KRValue(s);
 		}
 	| CONTROL {
 			$$ = new KControl($1);
@@ -286,7 +291,7 @@ expression
 void 
 KLF::KLFunParser::error( const std::string &err_message )
 {
-   std::cerr << "Error: " << err_message << ", near line " << scanner.lineno() << "\n"; 
+   driver.addErrorMessage(driver.formatMessage(err_message)); 
 }
 
 

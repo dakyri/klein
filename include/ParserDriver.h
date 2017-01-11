@@ -25,6 +25,7 @@ protected:
 
 	void addErrorMessage(const string &s);
 	void postParseCleanup();
+	string formatMessage(const string &msg);
 
 	KLFun *fun;	/** POP to the function we are building into. will retain ownership of all the structurues we build */
 	string name;

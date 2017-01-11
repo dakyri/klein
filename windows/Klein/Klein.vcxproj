@@ -151,6 +151,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\KLFContext.cpp" />
     <ClCompile Include="..\..\src\KLFun.cpp" />
     <ClCompile Include="..\..\src\KLFunLexer.cpp" />
     <ClCompile Include="..\..\src\KLFunParser.cpp" />

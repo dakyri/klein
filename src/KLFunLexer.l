@@ -47,10 +47,8 @@ REAL {INTEGER}("."{INTEGER})?{EXPONENT}?
 }
 
 {INTEGER}":"{INTEGER}"."{INTEGER} {
-/* TODO XXX FIXME ??? best implementation for this may be as a triplet
- */
 //	TypedValue *v = new TypedValue();
-//	yylval->typedval = v;
+	yylval->timeval.string2t(yytext);
 	return token::LITERAL_TIME;
 }
 

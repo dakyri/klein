@@ -32,8 +32,8 @@ public:
 	KBlock();
 	virtual ~KBlock();
 
-	int virtual execute(KLFContext &c) { return 0; }
-	KLFValue virtual evaluate(KLFContext &c) { return KLFValue(); }
+	int virtual execute(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) { return 0; }
+	KLFValue virtual evaluate(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) { return KLFValue(); }
 };
 
 class KListBlock: public KBlock {
@@ -41,7 +41,7 @@ public:
 	KListBlock();
 	virtual ~KListBlock();
 
-	int virtual execute(KLFContext &c) override;
+	int virtual execute(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
 
 	void add(KBlock *);
 	void clear();
@@ -54,7 +54,7 @@ public:
 	KIfBlock();
 	virtual ~KIfBlock();
 
-	int virtual execute(KLFContext &c) override;
+	int virtual execute(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
 
 protected:
 	KBlock *expression;
@@ -70,7 +70,7 @@ public:
 		if (expression) delete expression;
 	}
 
-	int virtual execute(KLFContext &c) override;
+	int virtual execute(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
 
 protected:
 	Control *control;
@@ -86,7 +86,7 @@ public:
 		if (expression) delete expression;
 	}
 
-	int virtual execute(KLFContext &c) override;
+	int virtual execute(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
 
 protected:
 	Sym *sym;
@@ -99,7 +99,7 @@ public:
 	virtual ~KCmdBlock() {
 	}
 
-	int virtual execute(KLFContext &c) override;
+	int virtual execute(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
 
 protected:
 	Command *command;
@@ -114,7 +114,7 @@ public:
 		if (right != nullptr) delete right;
 	}
 
-	KLFValue virtual evaluate(KLFContext &c) override;
+	KLFValue virtual evaluate(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
 
 protected:
 	op_id_t cmd;
@@ -126,57 +126,61 @@ protected:
 class KUnop : public KBlock {
 public:
 	KUnop(op_id_t t, KBlock *o)
-		: cmd(t), op(o) {}
+		: cmd(t), operand(o) {}
 	virtual ~KUnop() {
-		if (op != nullptr) delete op;
+		if (operand != nullptr) delete operand;
 	}
 
-	KLFValue virtual evaluate(KLFContext &c) override;
+	KLFValue virtual evaluate(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
 
 protected:
 	op_id_t cmd;
 
-	KBlock *op;
+	KBlock *operand;
 };
 
 class KConstant : public KBlock {
 public:
-	KConstant(int i) {}
-	KConstant(float f) {}
-	KConstant(double d) {}
-	KConstant(string *s) {}
-	KConstant(vector<int> *s) {}
+	KConstant(int i): value(i) {}
+	KConstant(float f): value(f) {}
+	KConstant(double d): value((float)d) {}
+	KConstant(string *s): value(*s) {}
+	KConstant(ktime_t s): value(s) {}
+	//	KConstant(vector<int> *s) {}
 
 	virtual ~KConstant() {
 	}
 
-	KLFValue virtual evaluate(KLFContext &c) override;
+	KLFValue virtual evaluate(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
 
 protected:
+	KLFValue value;
 };
 
 class KRValue : public KBlock {
 public:
-	KRValue(string *) {}
+	KRValue(Sym *_sym): sym(_sym) {}
 	KRValue() {}
 
 	virtual ~KRValue() {
 	}
 
-	KLFValue virtual evaluate(KLFContext &c) override;
+	KLFValue virtual evaluate(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
 
 protected:
+	Sym *sym;
 };
 
 class KControl : public KBlock {
 public:
-	KControl(Control *) {}
+	KControl(Control *c): control(c) {}
 	virtual ~KControl() {
 	}
 
-	KLFValue virtual evaluate(KLFContext &c) override;
+	KLFValue virtual evaluate(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
 
 protected:
+	Control *control;
 };
 
 /**
@@ -191,8 +195,9 @@ public:
 	KLFun(script_id_t _id, const char * const _path);
 	virtual ~KLFun();
 
-	bool doStart(KLFContext &c);
+	bool doStart(const Controller &c, const KLFBaseContext &b);
 	status_t load(vector<string> &errors);
+	status_t unload();
 	status_t clear(); /** reset state of blocks and symbols so we can rebuild a compiled script into this */
 
 	bool setEventHandler(int eventId, KBlock *code);
@@ -203,6 +208,7 @@ public:
 protected:
 	string path;
 	script_id_t id;
+	Sym *sym;
 
 	bool loaded;
 

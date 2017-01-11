@@ -342,37 +342,30 @@ namespace KLF {
     {
             case 3: // WORD
 
-#line 144 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
+#line 145 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
         { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
 #line 348 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
         break;
 
       case 4: // SYMBOL
 
-#line 144 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
+#line 145 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
         { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
 #line 355 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
         break;
 
       case 7: // IDENT
 
-#line 144 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
+#line 145 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
         { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
 #line 362 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
         break;
 
-      case 10: // LITERAL_TIME
-
-#line 145 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
-        { if ((yysym.value.vectival))  { delete ((yysym.value.vectival)); ((yysym.value.vectival)) = nullptr; } }
-#line 369 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
-        break;
-
       case 11: // LITERAL_STRING
 
-#line 144 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
+#line 145 "D:\src\cpp\Klein\src\KLFunParser.yy" // lalr1.cc:614
         { if ((yysym.value.stringval))  { delete ((yysym.value.stringval)); ((yysym.value.stringval)) = nullptr; } }
-#line 376 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
+#line 369 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:614
         break;
 
 
@@ -600,140 +593,140 @@ namespace KLF {
           switch (yyn)
             {
   case 2:
-#line 150 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 151 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			Sym *s = stab.define(driver.name, T_KLF);
 			stab.enterScope(s);
 		}
-#line 609 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 602 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 3:
-#line 153 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 154 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			stab.leaveScope();
 		}
-#line 617 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 610 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 4:
-#line 163 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 164 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			Sym *s = stab.find(*(yystack_[2].value.stringval));
 			if (s != nullptr) {
-				(yylhs.value.blockval) = new KVarAssBlock(nullptr, (yystack_[0].value.blockval));
+				(yylhs.value.blockval) = new KVarAssBlock(s, (yystack_[0].value.blockval));
 			} else {
 				driver.addErrorMessage((*(yystack_[2].value.stringval))+" not found near line.");
 			}
 		}
-#line 630 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 623 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 5:
-#line 171 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 172 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yylhs.value.blockval) = new KCtlAssBlock((yystack_[2].value.control), (yystack_[0].value.blockval));
 		}
-#line 638 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 631 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 6:
-#line 174 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 175 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yylhs.value.blockval) = new KCmdBlock((yystack_[0].value.command));
 		}
-#line 646 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 639 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 7:
-#line 177 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 178 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yylhs.value.blockval) = (yystack_[1].value.listval);
 		}
-#line 654 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 647 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 10:
-#line 186 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 187 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			driver.name = *(yystack_[0].value.stringval);
 		}
-#line 662 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 655 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 11:
-#line 189 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 190 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			driver.sustainTime = (yystack_[0].value.intval);
 		}
-#line 670 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 663 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 12:
-#line 192 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 193 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			driver.clickTime = (yystack_[0].value.intval);
 		}
-#line 678 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 671 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 13:
-#line 198 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 199 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.intval) = 0; }
-#line 684 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 677 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 14:
-#line 199 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 200 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yylhs.value.intval) = 0;
 		}
-#line 692 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 685 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 15:
-#line 202 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 203 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yylhs.value.intval) = 0;
 		}
-#line 700 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 693 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 16:
-#line 205 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 206 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yylhs.value.intval) = 0;
 		}
-#line 708 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 701 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 17:
-#line 210 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 211 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yylhs.value.listval) = new KListBlock();
 		}
-#line 716 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 709 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 18:
-#line 213 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 214 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yystack_[1].value.listval)->add((yystack_[0].value.blockval));
 			(yylhs.value.listval) = (yystack_[1].value.listval);
 		}
-#line 725 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 718 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 19:
-#line 220 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 221 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { 
 			Sym *s = stab.define(*(yystack_[0].value.stringval), (yystack_[1].value.intval));
 		}
-#line 733 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 726 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 20:
-#line 226 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 227 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			if (driver.fun) {
 				if (!driver.fun->setEventHandler((yystack_[1].value.intval), (yystack_[0].value.blockval))) {
@@ -744,167 +737,171 @@ namespace KLF {
 				delete (yystack_[0].value.blockval);
 			}
 		}
-#line 748 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 741 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 21:
-#line 241 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 242 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
-			(yylhs.value.blockval) = new KRValue((yystack_[0].value.stringval));
+			Sym *s = stab.find(*(yystack_[0].value.stringval));
+			if (s == nullptr) {
+				driver.addErrorMessage((*(yystack_[0].value.stringval))+" no defined near line "+to_string(scanner.lineno()));
+			}
+			(yylhs.value.blockval) = new KRValue(s);
 		}
-#line 756 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 753 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 22:
-#line 244 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 249 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yylhs.value.blockval) = new KControl((yystack_[0].value.control));
 		}
-#line 764 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 761 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 23:
-#line 247 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 252 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yylhs.value.blockval) = new KConstant((yystack_[0].value.intval));
 		}
-#line 772 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 769 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 24:
-#line 250 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 255 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yylhs.value.blockval) = new KConstant((yystack_[0].value.doubleval));
 		}
-#line 780 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 777 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 25:
-#line 253 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 258 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
 			(yylhs.value.blockval) = new KConstant((yystack_[0].value.stringval));
 		}
-#line 788 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 785 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 26:
-#line 256 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 261 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     {
-			(yylhs.value.blockval) = new KConstant((yystack_[0].value.vectival));
+			(yylhs.value.blockval) = new KConstant((yystack_[0].value.timeval));
 		}
-#line 796 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 793 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 27:
-#line 262 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 267 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = (yystack_[0].value.blockval); }
-#line 802 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 799 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 28:
-#line 263 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 268 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::PLUS, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 808 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 805 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 29:
-#line 264 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 269 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::MINUS, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 814 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 811 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 30:
-#line 265 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 270 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::MULT, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 820 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 817 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 31:
-#line 266 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 271 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::MOD, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 826 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 823 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 32:
-#line 267 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 272 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::DIVIDE, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 832 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 829 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 33:
-#line 268 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 273 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KUnop(token_type::MINUS, (yystack_[0].value.blockval)); }
-#line 838 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 835 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 34:
-#line 269 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 274 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KUnop(token_type::NOT, (yystack_[0].value.blockval)); }
-#line 844 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 841 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 35:
-#line 270 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 275 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::LT, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 850 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 847 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 36:
-#line 271 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 276 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::GT, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 856 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 853 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 37:
-#line 272 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 277 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::NE, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 862 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 859 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 38:
-#line 273 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 278 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::EQ, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 868 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 865 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 39:
-#line 274 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 279 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::GE, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 874 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 871 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 40:
-#line 275 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 280 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::LE, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 880 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 877 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 41:
-#line 276 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 281 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::AND, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 886 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 883 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 42:
-#line 277 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 282 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::OR, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 892 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 889 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 43:
-#line 278 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 283 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = new KBinop(token_type::POWER, (yystack_[2].value.blockval), (yystack_[0].value.blockval)); }
-#line 898 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 895 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
   case 44:
-#line 279 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
+#line 284 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:859
     { (yylhs.value.blockval) = (yystack_[1].value.blockval); }
-#line 904 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 901 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
     break;
 
 
-#line 908 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
+#line 905 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:859
             default:
               break;
             }
@@ -1205,11 +1202,11 @@ namespace KLF {
   const unsigned short int
   KLFunParser::yyrline_[] =
   {
-       0,   150,   150,   150,   163,   171,   174,   177,   183,   183,
-     186,   189,   192,   198,   199,   202,   205,   210,   213,   220,
-     226,   241,   244,   247,   250,   253,   256,   262,   263,   264,
-     265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275,   276,   277,   278,   279
+       0,   151,   151,   151,   164,   172,   175,   178,   184,   184,
+     187,   190,   193,   199,   200,   203,   206,   211,   214,   221,
+     227,   242,   249,   252,   255,   258,   261,   267,   268,   269,
+     270,   271,   272,   273,   274,   275,   276,   277,   278,   279,
+     280,   281,   282,   283,   284
   };
 
   // Print the state stack on the debug stream.
@@ -1295,15 +1292,15 @@ namespace KLF {
 
 #line 5 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:1167
 } // KLF
-#line 1299 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:1167
-#line 283 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:1168
+#line 1296 "D:\\src\\cpp\\Klein\\src\\KLFunParser.cpp" // lalr1.cc:1167
+#line 288 "D:\\src\\cpp\\Klein\\src\\KLFunParser.yy" // lalr1.cc:1168
 
  
 
 void 
 KLF::KLFunParser::error( const std::string &err_message )
 {
-   std::cerr << "Error: " << err_message << ", near line " << scanner.lineno() << "\n"; 
+   driver.addErrorMessage(driver.formatMessage(err_message)); 
 }
 
 

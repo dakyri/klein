@@ -67,3 +67,8 @@ void KLF::ParserDriver::postParseCleanup()
 {
 	errors = nullptr;
 }
+
+string KLF::ParserDriver::formatMessage(const string & msg)
+{
+	return msg + ", near "+to_string(scanner.lineno());
+}
