@@ -178,6 +178,14 @@ float KleinTrack::getInputGain()
 	return inputGain;
 }
 
+void
+KleinTrack::setInputPan(int v) {
+	inputPan = v;
+}
+float KleinTrack::getInputPan()
+{
+	return inputPan;
+}
 
 void
 KleinTrack::setOutputGain(int v) {
@@ -273,6 +281,7 @@ void KleinTrack::setNLoops(const int nLoops)
 	currentSampleLoop = loops.end();
 }
 
+
 void KleinTrack::setSyncSrc(const SyncSource ss) {
 	syncSrc = ss;
 }
@@ -285,7 +294,6 @@ void KleinTrack::setPlayDirection(const PlayDirection p)
 {
 	playDirection = p;
 }
-
 
 
 void KleinTrack::recordStart(const ktime_t & at)
@@ -1012,6 +1020,31 @@ long KleinTrack::boringFrames(const VstTimeInfo * const t, const long startOffse
 bool KleinTrack::isPlaying()
 {
 	return true;
+}
+
+bool KleinTrack::isRecording()
+{
+	return false;
+}
+
+SyncSource KleinTrack::getSyncSrc()
+{
+	return SyncSource();
+}
+
+SyncUnit KleinTrack::getSyncUnit()
+{
+	return SyncUnit();
+}
+
+PlayDirection KleinTrack::getPlayDirection()
+{
+	return PlayDirection();
+}
+
+TrackMode KleinTrack::getMode()
+{
+	return TrackMode();
 }
 
 void KleinTrack::allocateBuffers(long blocksize)

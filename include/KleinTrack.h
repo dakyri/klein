@@ -77,6 +77,7 @@ public:
 	virtual ~KleinTrack();
 
 	void setInputGain(int v);
+	void setInputPan(int v);
 	void setOutputGain(int v);
 	void setPan(int v);
 	void setFeedback(int v);
@@ -91,6 +92,7 @@ public:
 	void setTimeStretch(int v);
 
 	float getInputGain();
+	float getInputPan();
 	float getOutputGain();
 	float getPan();
 	float getFeedback();
@@ -104,7 +106,12 @@ public:
 	void setSyncSrc(const SyncSource ss);
 	void setSyncUnit(const SyncUnit su);
 	void setPlayDirection(const PlayDirection p);
-	
+// getters for track properties
+	TrackMode getMode();
+	SyncSource getSyncSrc();
+	SyncUnit getSyncUnit();
+	PlayDirection getPlayDirection();
+
 	void recordStart(const ktime_t &at);
 	void recordStop(const ktime_t &at);
 	void overdubStart();
@@ -118,7 +125,9 @@ public:
 
 	long processAdding(float ** const inputs, float ** const  outputs, const long startOffset, const long sampleFrames);
 	long boringFrames(const VstTimeInfo * const t, const long startOffset);
+
 	bool isPlaying();
+	bool isRecording();
 
 	void allocateBuffers(long blocksize);
 
@@ -175,6 +184,7 @@ protected:
 	bool mute;
 
 	float inputGain;
+	float inputPan;
 	float outputGain;
 	float pan;
 	float feedback;

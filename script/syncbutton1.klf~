@@ -1,0 +1,43 @@
+\name "Sync Control"
+\multiclick 250
+\sustain 500
+
+/* just pressed record control */
+
+bool hasFired=false
+bool hasEndsustain=false
+
+switchQuantize = "loop"
+emptyLoopAction = "copyTiming"
+timeCopyMode = "play"
+
+on click { }
+
+on endClick {
+    if (!hasFired && hasEndsustain) {
+ 	hasFired=true
+        if (clickCount == 0)
+            Realign
+        else if (clickCount == 1)
+            MuteRealign
+    }
+}
+
+on sustain {
+    /* message sustaining $sustainCount */
+    if (sustainCount >= 1 && !hasFired) {
+	hasFired=true
+        message "keeping track 1 mastery"
+	Track1
+	SyncMasterTrack
+	for (*) {
+/*	    message $track */
+            Realign
+	}
+    }
+}
+
+on endSustain {
+    /* message end sustaining $sustainCount */
+    hasEndsustain=true
+}

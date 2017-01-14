@@ -125,12 +125,13 @@ struct Command {
 		WINDOW_END_BACKWARD,
 		WINDOW_END_FORWARD
 	};
-	Command(int _command, string _scriptName, string _displayName):
-		command(_command), scriptName(_scriptName), displayName(_displayName) {}
+	Command(int _command, bool _mappable, string _scriptName, string _displayName):
+		command(_command), scriptName(_scriptName), displayName(_displayName), mappable(_mappable) {}
 
 	cmd_id_t command;
 	string scriptName;
 	string displayName;
+	bool mappable;
 
 	static Command *find(string nm);
 };
@@ -149,12 +150,14 @@ struct CommandStackItem {
 
 /*
  * constant for and structure for creating searchable list of controls, whose values the controller
- * may reasonably assign things too
+ * may reasonably assign things too. Some are directly mappable, some are script only
  */
 struct Control {
 	enum {
+		// mappable track variables
 		FEEDBACK,
 		INPUT_LEVEL,
+		INPUT_PAN,
 		OUTPUT_LEVEL,
 		PAN,
 		PITCH_BEND,
@@ -164,14 +167,29 @@ struct Control {
 		SPEED_BEND,
 		SPEED_OCT,
 		SPEED_STEP,
-		TIME_STRETCH
+		TIME_STRETCH,
+
+		// unmappable binding related variables
+		CLICK_COUNT,
+		SUSTAIN_COUNT, 
+
+		// unmappable track variable
+		IS_RECORDING,
+		MODE,
+
+		// global variables
+		EMPTY_LOOP_ACT,
+		SWITCH_QUANTIZE,
+		TIME_COPY_MODE,
 	};
-	Control(int _command, string _scriptName, string _displayName) :
-		control(_command), scriptName(_scriptName), displayName(_displayName) {}
+	Control(int _command, bool _mappable, bool _readOnly, string _scriptName, string _displayName) :
+		control(_command), scriptName(_scriptName), displayName(_displayName), mappable(_mappable), readOnly(_readOnly) {}
 
 	ctl_id_t control;
 	string scriptName;
 	string displayName;
+	bool mappable;
+	bool readOnly;
 
 	static Control *find(string nm);
 };

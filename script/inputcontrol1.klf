@@ -1,0 +1,37 @@
+\name "Input Control"
+\multiclick 500
+\sustain 1000
+\autoload
+
+/* just pressed pitching button */
+
+on click { }
+
+bool hasFired=false
+bool hasEndSustain=false
+
+on endClick {
+    if (!hasFired && hasEndSustain) {
+       if (clickCount >= 0) {
+           if (pluginInputPort == 0)
+              pluginInputPort=1
+           else
+              pluginInputPort=0 
+        } else if (clickCount == 1) {
+        }
+    }
+   /* message track $track now on input $pluginInputPort */
+}
+
+on sustain {
+    if (sustainCount == 1) {
+/*        message long press */
+	pluginInputPort=0
+	hasFired=true
+    }
+}
+
+on endSustain {
+    /* long press checking done */
+    hasEndsustain=true
+}

@@ -1,0 +1,45 @@
+!name Loop Control Var
+!multiclick 250
+!sustain 1000
+!autoload
+
+# just pressed record control
+
+variable hasFired false
+variable hasEndsustain false
+
+label click
+end
+
+label endClick
+    # message $mode end click
+    set emptyLoopAction none
+#    set emptyLoopAction copy
+#    set emptyLoopAction copyTiming
+
+    if !hasFired
+ 	set hasFired true
+        if $clickCount = 0
+            NextLoop
+        elseif $clickCount = 1
+            PrevLoop
+        else
+        endif
+    endif
+end
+
+label sustain
+    # message not a lot happening here $sustainCount
+end
+
+label endSustain
+    # message end sustaining $sustainCount
+    if hasFired
+        if $clickCount = 0
+            PreviousLoop
+        elseif $clickCount = 1
+            NextLoop
+        else
+        endif
+    endif
+end

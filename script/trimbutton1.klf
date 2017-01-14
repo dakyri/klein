@@ -1,0 +1,61 @@
+!name Trim Button
+!multiclick 250
+!sustain 1000
+!autoload
+
+# just pressed record control
+# if no loop recorded, does a record
+# single click TrimStart, removes from beginning of loop to current position
+# double click TrimEnd, removes from current position to end of loop 
+# long click does an undo
+
+variable hasFired false
+variable hasEndsustain false
+if mode="reset"
+    Record
+    set hasFired true
+elseif isRecording
+    if mode="substitute"
+        Substitute
+    elseif mode="overdub"
+        Overdub
+    else
+        Record
+    endif
+    set hasFired true
+endif
+
+label click
+end
+
+label endClick
+    # message $mode end click
+    if !hasFired && hasEndsustain
+ 	set hasFired true
+        if $clickCount = 0
+	    variable a $quantize
+            set $quantize "subcycle"
+            TrimStart
+	    set $quantize $a
+        elseif $clickCount = 1
+	    variable a $quantize
+            set $quantize "subcycle"
+            TrimEnd
+	    set $quantize $a
+        else
+        endif
+    endif
+end
+
+label sustain
+    # message sustaining $sustainCount
+    if $sustainCount >= 1
+        Undo
+	set hasFired true
+    endif
+end
+
+label endSustain
+    message end sustaining $sustainCount
+    set hasEndsustain true
+end

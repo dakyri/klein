@@ -1,0 +1,37 @@
+!name Pitch Control
+!multiclick 500
+!sustain 1000
+!autoload
+
+# just pressed pitching button
+set pitchSequence "5,7,12,7,5,0,-5,0"
+
+label click
+end
+
+label endClick
+    if $clickCount = 1
+#        PitchStep -7
+#	PitchUp
+	PitchNext
+    elseif $clickCount = 2
+#	PitchStep 7
+#	PitchDown
+	PitchPrevious
+    elseif $clickCount = 3
+	PitchStep -12
+    elseif $clickCount = 4
+	PitchStep 12
+    endif
+end
+
+label sustain
+    if $sustainCount = 1
+#        message long press
+	PitchStep 0
+    endif
+end
+
+label endSustain
+    # long press checking done
+end

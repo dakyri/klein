@@ -1,0 +1,37 @@
+!name Speed Control
+!multiclick 500
+!sustain 1000
+!autoload
+
+# just pressed speeding button
+set speedSequence "5,7,12,7,5,0,-5,0"
+
+label click
+end
+
+label endClick
+    if $clickCount = 1
+#        SpeedStep -7
+#	SpeedUp
+	SpeedNext
+    elseif $clickCount = 2
+#	SpeedStep 7
+#	SpeedDown
+	SpeedPrevious
+    elseif $clickCount = 3
+#	SpeedStep -12
+    elseif $clickCount = 4
+#	SpeedStep 12
+    endif
+end
+
+label sustain
+    if $sustainCount = 1
+#        message long press
+	SpeedStep 0
+    endif
+end
+
+label endSustain
+    # long press checking done
+end

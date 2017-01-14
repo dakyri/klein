@@ -1,0 +1,41 @@
+\name "Record Button"
+\multiclick 250
+\sustain 1000
+
+/*
+just pressed record control
+main normal record button
+empty loop records
+non empty overdubs
+long click resets
+click while recording ends recording
+*/
+
+bool hasFired=false
+if (mode == "reset") {
+    Record
+} else if (!isRecording) {
+    Overdub
+} else { 
+    if (mode == "substitute")
+        Substitute
+    else if (mode == "overdub")
+        Overdub
+    else
+        Record
+}
+
+on click {
+}
+
+on endClick {
+}
+
+on sustain {
+    if (sustainCount == 1)
+        Reset
+}
+
+on endSustain {
+    /* long press checking done */
+}

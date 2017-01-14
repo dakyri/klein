@@ -105,11 +105,11 @@ protected:
 
 	int makeMidiHash(int cmd, int chan, int which);
 	bool processMapping(const CommandMapping &m);
-	bool processMapping(const ControlMapping &m, const int v);
-	bool processMapping(const ScriptMapping &m, const int wh, const int v);
+	bool processMapping(const ControlMapping &m, const midi_val_t v);
+	bool processMapping(const ScriptMapping &m, const midi_what_t wh, const midi_val_t v);
 
 	bool processCommand(const cmd_id_t cmd, const tgt_id_t tgt) const;
-	bool setControl(const ctl_id_t cmd, const tgt_id_t tgt, const int v) const;
+	bool setControl(const ctl_id_t cmd, const tgt_id_t tgt, const KLFValue& v) const;
 	KLFValue Controller::getControl(const ctl_id_t control, const tgt_id_t tgt) const;
 
 	friend class KControl;

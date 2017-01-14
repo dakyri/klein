@@ -137,6 +137,7 @@
     <ClInclude Include="..\..\include\Sym.h" />
     <ClInclude Include="..\..\include\tinyxml2.h" />
     <ClInclude Include="..\..\src\KLFunParser.hpp" />
+    <ClInclude Include="KLFObject.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\library\VST\vst-2.3-common\AudioEffect.cpp" />

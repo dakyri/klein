@@ -11,6 +11,7 @@
 
 #include <string>
 #include <vector>
+#include <ostream>
 
 using namespace std;
 struct Control;
@@ -34,6 +35,7 @@ public:
 
 	int virtual execute(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) { return 0; }
 	KLFValue virtual evaluate(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) { return KLFValue(); }
+	void virtual dump(std::ostream &stream, int indent) { stream << "KBlock" << std::endl; }
 };
 
 class KListBlock: public KBlock {
@@ -42,6 +44,7 @@ public:
 	virtual ~KListBlock();
 
 	int virtual execute(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
+	void virtual dump(std::ostream &stream, int indent) override;
 
 	void add(KBlock *);
 	void clear();
@@ -55,6 +58,7 @@ public:
 	virtual ~KIfBlock();
 
 	int virtual execute(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
+	void virtual dump(std::ostream &stream, int indent) override;
 
 protected:
 	KBlock *expression;
@@ -71,6 +75,7 @@ public:
 	}
 
 	int virtual execute(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
+	void virtual dump(std::ostream &stream, int indent) override;
 
 protected:
 	Control *control;
@@ -87,6 +92,7 @@ public:
 	}
 
 	int virtual execute(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
+	void virtual dump(std::ostream &stream, int indent) override;
 
 protected:
 	Sym *sym;
@@ -100,6 +106,7 @@ public:
 	}
 
 	int virtual execute(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
+	void virtual dump(std::ostream &stream, int indent) override;
 
 protected:
 	Command *command;
@@ -115,6 +122,7 @@ public:
 	}
 
 	KLFValue virtual evaluate(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
+	void virtual dump(std::ostream &stream, int indent) override;
 
 protected:
 	op_id_t cmd;
@@ -130,6 +138,7 @@ public:
 	virtual ~KUnop() {
 		if (operand != nullptr) delete operand;
 	}
+	void virtual dump(std::ostream &stream, int indent) override;
 
 	KLFValue virtual evaluate(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
 
@@ -152,6 +161,7 @@ public:
 	}
 
 	KLFValue virtual evaluate(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
+	void virtual dump(std::ostream &stream, int indent) override;
 
 protected:
 	KLFValue value;
@@ -166,6 +176,7 @@ public:
 	}
 
 	KLFValue virtual evaluate(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
+	void virtual dump(std::ostream &stream, int indent) override;
 
 protected:
 	Sym *sym;
@@ -178,6 +189,7 @@ public:
 	}
 
 	KLFValue virtual evaluate(const Controller &c, const KLFBaseContext &ctxt, const KLFContext &top) override;
+	void virtual dump(std::ostream &stream, int indent) override;
 
 protected:
 	Control *control;
@@ -213,6 +225,10 @@ protected:
 	bool loaded;
 
 	KBlock *main;
+	KBlock *onClick;
+	KBlock *onEndClick;
+	KBlock *onSustain;
+	KBlock *onEndSustain;
 
 	friend class Controller;
 };

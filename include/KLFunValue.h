@@ -159,8 +159,9 @@ public:
 		float Float;
 //		double Double;
 		ktime_t Time;
-		class KLFun *function;
-		class KBlock *block;
+		class KLFun *Function;
+		class KBlock *Block;
+		class KLFObject *Object;
 		string *String;
 	} value;
 	type_t Type;
@@ -190,7 +191,7 @@ public:
 		value.String = new string(s);
 	}
 
-	KLFValue(string s) {
+	KLFValue(string &s) {
 		Type = T_STRING;
 		value.String = new string(s);
 	}
@@ -206,6 +207,21 @@ public:
 		case T_FLOAT: return value.Float;
 		case T_BOOLEAN: return value.Bool;
 		case T_TIME: return 60*value.Time.minute + value.Time.second + (value.Time.frame/((float)sampleRate));
+		case T_STRING: return stof(*value.String);
+		}
+		return 0;
+	}
+
+	/**
+	 * a specific cast for float control parameters (gain, feedback etc), which are valued from [0,1].
+	 * integer values are assumed to be in from midi values (integral [0,127]) and are normalized
+	 */
+	float ControlFloatValue() const {
+		switch (Type) {
+		case T_INTEGER: return (value.Int/127.0);
+		case T_FLOAT: return value.Float;
+		case T_BOOLEAN: return value.Bool;
+		case T_TIME: return 60 * value.Time.minute + value.Time.second + (value.Time.frame / ((float)sampleRate));
 		case T_STRING: return stof(*value.String);
 		}
 		return 0;

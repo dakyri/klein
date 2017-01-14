@@ -1,0 +1,56 @@
+!name Secondary Record Button
+!multiclick 250
+!sustain 1000
+!autoload
+
+# just pressed record control
+# empty loop does normal record
+# if recording stop
+# non empty loop, single click does substitute
+# non empty loop, double click does insert
+# long click does undo
+
+variable hasFired false
+variable hasEndsustain false
+if mode="reset"
+    Record
+    set hasFired true
+elseif isRecording
+    if mode="substitute"
+        Substitute
+    elseif mode="overdub"
+        Overdub
+    else
+        Record
+    endif
+    set hasFired true
+endif
+
+label click
+end
+
+label endClick
+    # message $mode end click
+    if !hasFired && hasEndsustain
+ 	set hasFired true
+        if $clickCount = 0
+            Substitute
+        elseif $clickCount = 1
+            Insert
+        else
+        endif
+    endif
+end
+
+label sustain
+    # message sustaining $sustainCount
+    if $sustainCount >= 1
+        Undo
+	set hasFired true
+    endif
+end
+
+label endSustain
+    # message end sustaining $sustainCount
+    set hasEndsustain true
+end

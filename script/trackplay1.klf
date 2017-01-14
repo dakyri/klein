@@ -1,0 +1,43 @@
+!name Track Control
+!multiclick 250
+!sustain 1000
+!autoload
+
+# just pressed track control
+if inMute
+#    Mute
+else
+    Play
+endif
+ 
+label click
+    if $clickCount = 1
+#        message got doubleclick
+#        Mute
+    endif
+end
+
+label endClick
+    if $clickCount = 0
+	if inMute
+	    Mute
+	endif
+    elseif $clickCount = 1
+	Mute
+    elseif $clickCount >= 2
+	variable oldQuantize $quantize
+	set quantize off
+	Mute
+	set quantize $oldQuantize
+    endif 
+end
+
+label sustain
+    if $sustainCount = 1
+	Reverse
+    endif
+end
+
+label endSustain
+    # long press checking done
+end

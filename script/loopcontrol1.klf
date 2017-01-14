@@ -1,0 +1,61 @@
+\name Loop Control
+\multiclick 250
+\sustain 500
+\autoload
+
+/* just pressed record control */
+
+boo hasFired=false
+boo hasEndsustain=false
+
+switchQuantize="loop"
+emptyLoopAction="copyTiming"
+timeCopyMode="play"
+
+on endClick {
+/* message $mode end click
+    set emptyLoopAction record
+    set emptyLoopAction none
+    set emptyLoopAction copy
+    set emptyLoopAction copyTiming */
+
+    if (!hasFired) { 
+ 	hasFired=true
+        if (clickCount == 0) {
+            NextLoop
+        } elseif (clickCount == 1) {
+	    if (track == 1) {
+		emptyLoopAction="none"
+		switchQuantize="off"
+#		wait loop
+		int totalSlices=subCycleCount*cycleCount
+		wait until subcycle totalSlices-1
+		NextLoop	
+		SyncMasterTrack
+		wait 0ms
+		if (mode == "reset")
+		    Record
+		switchQuantize="loop"
+	    } else {
+	    	emptyLoopAction="record"
+            	NextLoop
+	    }
+`       }
+    }
+}
+
+label sustain
+    # message sustaining $sustainCount
+    if $sustainCount >= 1
+        if $clickCount = 1
+	    set emptyLoopAction record
+	endif
+	NextLoop
+	set hasFired true
+    endif
+end
+
+label endSustain
+    # message end sustaining $sustainCount
+    set hasEndsustain true
+end

@@ -14,132 +14,140 @@
  * sorted list of commands. we can search in here via binary search
  */
 vector<Command> commands {
-	{ Command::AUTO_RECORD,	"AutoRecord", "Auto Record" },
-	{ Command::BACKWARD,	"Backward", "Backward" },
-	{ Command::BOUNCE,		"Bounce", "Bounce" },
-	{ Command::CHECKPOINT,	"Checkpoint", "Checkpoint" },
-	{ Command::CLEAR,		"Clear", "Clear" },
-	{ Command::CONFIRM,		"Confirm", "Confirm" },
-	{ Command::FOCUS_LOCK,	"FocusLock", "Focus Lock" },
-	{ Command::FORWARD,		"Forward", "Forward" },
-	{ Command::GLOBAL_MUTE,	"GlobalMute", "Global Mute" },
-	{ Command::GLOBAL_PAUSE, "GlobalPause", "Global Pause" },
-	{ Command::GLOBAL_RESET, "GlobalReset", "Global Reset" },
-	{ Command::HALF_SPEED,	"HalfSpeed", "Half Speed" },
-	{ Command::INSERT,		"Insert", "Insert" },
-	{ Command::INSERT_DIVIDE, "InsertDivide", "Insert Divide" },
-	{ Command::INSERT_DIVIDE_3, "InsertDivide3", "Insert Divide 3" },
-	{ Command::INSERT_DIVIDE_4, "InsertDivide4", "Insert Divide 4" },
-	{ Command::INSERT_MULTIPLY, "InsertMultiply", "Insert Multiply" },
-	{ Command::INSERT_MULTIPLY_3, "InsertMultiply3", "Insert Multiply 3" },
-	{ Command::INSERT_MULTIPLY_4, "InsertMultiply4", "Insert Multiply 4" },
-	{ Command::LOOP1,	"Loop1", "Loop 1" },
-	{ Command::LOOP2,	"Loop2", "Loop 2" },
-	{ Command::LOOP3,	"Loop3", "Loop 3" },
-	{ Command::LOOP4,	"Loop4", "Loop 4" },
-	{ Command::LOOP5,	"Loop5", "Loop 5" },
-	{ Command::LOOP6,	"Loop6", "Loop 6" },
-	{ Command::LOOP7,	"Loop7", "Loop 7" },
-	{ Command::LOOP8,	"Loop8", "Loop 8" },
-	{ Command::MIDI_START,	"MidiStart", "Midi Start" },
-	{ Command::MIDI_STOP,	"MidiStop", "Midi Stop" },
-	{ Command::MULTIPLY,	"Multiply", "Multiply" },
-	{ Command::MUTE,		"Mute", "Mute" },
-	{ Command::MUTE_MIDI_START, "MuteMidiStart", "Mute Midi Start" },
-	{ Command::MUTE_REALIGN, "MuteRealign", "Mute Realign" },
-	{ Command::NEXT_LOOP,	"NextLoop", "Next Loop" },
-	{ Command::NEXT_TRACK,	"NextTrack", "Next Track" },
-	{ Command::OVERDUB,		"Overdub", "Overdub" },
-	{ Command::PAUSE,		"Pause", "Pause" },
-	{ Command::PITCH_CANCEL, "PitchCancel", "Pitch Cancel" },
-	{ Command::PITCH_DOWN,	"PitchDown", "Pitch Down" },
-	{ Command::PITCH_NEXT,	"Pitch Next", "Pitch Next" },
-	{ Command::PITCH_PREVIOUS, "PitchPrevious", "Pitch Previous" },
-	{ Command::PITCH_STEP,	"PitchStep", "Pitch Step" },
-	{ Command::PITCH_UP,	"PitchUp", "Pitch Up" },
-	{ Command::PLAY,		"Play", "Play" },
-	{ Command::PREVIOUS_LOOP, "PreviousLoop", "Previous Loop" },
-	{ Command::PREVIOUS_TRACK, "PreviousTrack", "Previous Track" },
-	{ Command::REALIGN,		"Realign", "Realign" },
-	{ Command::RECORD,		"Record", "Record" },
-	{ Command::REDO,		"Redo", "Redo" },
-	{ Command::REHEARSE,	"Rehearse", "Rehearse" },
-	{ Command::RELOAD_SCRIPTS, "ReloadScripts", "Reload Scripts" },
-	{ Command::REPLACE,		"Replace", "Replace" },
-	{ Command::RESET,		"Reset", "Reset" },
-	{ Command::RESTART,		"Restart", "Restart" },
-	{ Command::RESTART_ONCE, "RestartOnce", "Restart Once" },
-	{ Command::REVERSE,		"Reverse", "Reverse" },
-	{ Command::SAMPLE_2,	"Sample2", "Sample 2" },
-	{ Command::SAMPLE_3,	"Sample3", "Sample 3" },
-	{ Command::SAMPLE_4,	"Sample4", "Sample 4" },
-	{ Command::SAMPLE_5,	"Sample5", "Sample 5" },
-	{ Command::SAMPLE_6,	"Sample6", "Sample 6" },
-	{ Command::SAMPLE_7,	"Sample7", "Sample 7" },
-	{ Command::SAMPLE_8,	"Sample8", "Sample 8" },
-	{ Command::SAMPLE_9,	"Sample9", "Sample 9" },
-	{ Command::SAVE_AUDIO_RECORDING, "SaveAudioRecording", "Save Audio Recording" },
-	{ Command::SAVE_LOOP,	"SaveLoop", "Save Loop" },
-	{ Command::SHUFFLE,		"Shuffle", "Shuffle" },
-	{ Command::SLIP_BACKWARD, "SlipBackward", "Slip Backward" },
-	{ Command::SLIP_FORWARD, "SlipForward", "Slip Forward" },
-	{ Command::SOLO,		 "Solo", "Solo" },
-	{ Command::SPEED_CANCEL, "SpeedCancel", "Speed Cancel" },
-	{ Command::SPEED_DOWN,	"SpeedDown", "Speed Down" },
-	{ Command::SPEED_NEXT,	"SpeedNext", "Speed Next" },
-	{ Command::SPEED_PREV,	"SpeedPrev", "Speed Prev" },
-	{ Command::SPEED_STEP,	"SpeedStep", "Speed Step" },
-	{ Command::SPEED_TOGGLE, "SpeedToggle", "Speed Toggle" },
-	{ Command::SPEED_UP,	"SpeedUp", "Speed Up" },
-	{ Command::START_AUDIO_RECORDING,	"StartAudioRecording", "Start Audio Recording" },
-	{ Command::START_POINT, "StartPoint", "Start Point" },
-	{ Command::STATUS,		"Status", "Status" },
-	{ Command::STOP_AUDIO_RECORDING,	"StopAudioRecording", "Stop Audio Recording" },
-	{ Command::STUTTER,		"Stutter", "Stutter" },
-	{ Command::SUBSTITUTE,	"Substitute", "Substitute" },
-	{ Command::SUSTAIN_,	"Sustain", "Sustain" },
-	{ Command::SYNC_MASTER_TRACK,	"SyncMasterTrack", "Sync Master Track" },
-	{ Command::SYNC_START_POINT,	"SyncStartPoint", "Sync Start Point" },
-	{ Command::TRACK_1,		"Track1", "Track 1" },
-	{ Command::TRACK_2,		"Track2", "Track 2" },
-	{ Command::TRACK_3,		"Track3", "Track 3" },
-	{ Command::TRACK_4,		"Track4", "Track 4" },
-	{ Command::TRACK_5,		"Track5", "Track 5" },
-	{ Command::TRACK_6,		"Track6", "Track 6" },
-	{ Command::TRACK_7,		"Track7", "Track 7" },
-	{ Command::TRACK_8,		"Track8", "Track 8" },
-	{ Command::TRACK_COPY,	"TrackCopy", "Track Copy" },
-	{ Command::TRACK_COPY_TIMING,	"TrackCopyTiming", "Track Copy Timing" },
-	{ Command::TRACK_GROUP, "TrackGroup", "Track Group" },
-	{ Command::TRACK_RESET, "TrackReset", "Track Reset" },
-	{ Command::TRIM_END,	"TrimEnd", "Trim End" },
-	{ Command::TRIM_START,	"TrimStart", "Trim Start" },
-	{ Command::UI_,				"Ui ", "Ui " },
-	{ Command::UNDO,			"Undo", "Undo" },
-	{ Command::WINDOW_BACKWARD, "WindowBackward", "Window Backward" },
-	{ Command::WINDOW_FORWARD,	"WindowForward", "Window Forward" },
-	{ Command::WINDOW_START_BACKWARD,	"WindowStartBackward", "Window Start Backward" },
-	{ Command::WINDOW_START_FORWARD,	"WindowStartForward", "Window Start Forward" },
-	{ Command::WINDOW_END_BACKWARD,		"WindowEndBackward", "Window End Backward" },
-	{ Command::WINDOW_END_FORWARD,		"WindowEndForward", "Window End Forward" },
+	{ Command::AUTO_RECORD,	true, "AutoRecord", "Auto Record" },
+	{ Command::BACKWARD,	true, "Backward", "Backward" },
+	{ Command::BOUNCE,		true, "Bounce", "Bounce" },
+	{ Command::CHECKPOINT,	true, "Checkpoint", "Checkpoint" },
+	{ Command::CLEAR,		true, "Clear", "Clear" },
+	{ Command::CONFIRM,		true, "Confirm", "Confirm" },
+	{ Command::FOCUS_LOCK,	true, "FocusLock", "Focus Lock" },
+	{ Command::FORWARD,		true, "Forward", "Forward" },
+	{ Command::GLOBAL_MUTE,	true, "GlobalMute", "Global Mute" },
+	{ Command::GLOBAL_PAUSE, true, "GlobalPause", "Global Pause" },
+	{ Command::GLOBAL_RESET, true, "GlobalReset", "Global Reset" },
+	{ Command::HALF_SPEED,	true, "HalfSpeed", "Half Speed" },
+	{ Command::INSERT,		true, "Insert", "Insert" },
+	{ Command::INSERT_DIVIDE, true, "InsertDivide", "Insert Divide" },
+	{ Command::INSERT_DIVIDE_3, true, "InsertDivide3", "Insert Divide 3" },
+	{ Command::INSERT_DIVIDE_4, true, "InsertDivide4", "Insert Divide 4" },
+	{ Command::INSERT_MULTIPLY, true, "InsertMultiply", "Insert Multiply" },
+	{ Command::INSERT_MULTIPLY_3, true, "InsertMultiply3", "Insert Multiply 3" },
+	{ Command::INSERT_MULTIPLY_4, true, "InsertMultiply4", "Insert Multiply 4" },
+	{ Command::LOOP1,	true, "Loop1", "Loop 1" },
+	{ Command::LOOP2,	true, "Loop2", "Loop 2" },
+	{ Command::LOOP3,	true, "Loop3", "Loop 3" },
+	{ Command::LOOP4,	true, "Loop4", "Loop 4" },
+	{ Command::LOOP5,	true, "Loop5", "Loop 5" },
+	{ Command::LOOP6,	true, "Loop6", "Loop 6" },
+	{ Command::LOOP7,	true, "Loop7", "Loop 7" },
+	{ Command::LOOP8,	true, "Loop8", "Loop 8" },
+	{ Command::MIDI_START,	true, "MidiStart", "Midi Start" },
+	{ Command::MIDI_STOP,	true, "MidiStop", "Midi Stop" },
+	{ Command::MULTIPLY,	true, "Multiply", "Multiply" },
+	{ Command::MUTE,		true, "Mute", "Mute" },
+	{ Command::MUTE_MIDI_START, true, "MuteMidiStart", "Mute Midi Start" },
+	{ Command::MUTE_REALIGN, true, "MuteRealign", "Mute Realign" },
+	{ Command::NEXT_LOOP,	true, "NextLoop", "Next Loop" },
+	{ Command::NEXT_TRACK,	true, "NextTrack", "Next Track" },
+	{ Command::OVERDUB,		true, "Overdub", "Overdub" },
+	{ Command::PAUSE,		true, "Pause", "Pause" },
+	{ Command::PITCH_CANCEL, true, "PitchCancel", "Pitch Cancel" },
+	{ Command::PITCH_DOWN,	true, "PitchDown", "Pitch Down" },
+	{ Command::PITCH_NEXT,	true, "Pitch Next", "Pitch Next" },
+	{ Command::PITCH_PREVIOUS, true, "PitchPrevious", "Pitch Previous" },
+	{ Command::PITCH_STEP,	true, "PitchStep", "Pitch Step" },
+	{ Command::PITCH_UP,	true, "PitchUp", "Pitch Up" },
+	{ Command::PLAY,		true, "Play", "Play" },
+	{ Command::PREVIOUS_LOOP, true, "PreviousLoop", "Previous Loop" },
+	{ Command::PREVIOUS_TRACK, true, "PreviousTrack", "Previous Track" },
+	{ Command::REALIGN,		true, "Realign", "Realign" },
+	{ Command::RECORD,		true, "Record", "Record" },
+	{ Command::REDO,		true, "Redo", "Redo" },
+	{ Command::REHEARSE,	true, "Rehearse", "Rehearse" },
+	{ Command::RELOAD_SCRIPTS, true, "ReloadScripts", "Reload Scripts" },
+	{ Command::REPLACE,		true, "Replace", "Replace" },
+	{ Command::RESET,		true, "Reset", "Reset" },
+	{ Command::RESTART,		true, "Restart", "Restart" },
+	{ Command::RESTART_ONCE, true, "RestartOnce", "Restart Once" },
+	{ Command::REVERSE,		true, "Reverse", "Reverse" },
+	{ Command::SAMPLE_2,	true, "Sample2", "Sample 2" },
+	{ Command::SAMPLE_3,	true, "Sample3", "Sample 3" },
+	{ Command::SAMPLE_4,	true, "Sample4", "Sample 4" },
+	{ Command::SAMPLE_5,	true, "Sample5", "Sample 5" },
+	{ Command::SAMPLE_6,	true, "Sample6", "Sample 6" },
+	{ Command::SAMPLE_7,	true, "Sample7", "Sample 7" },
+	{ Command::SAMPLE_8,	true, "Sample8", "Sample 8" },
+	{ Command::SAMPLE_9,	true, "Sample9", "Sample 9" },
+	{ Command::SAVE_AUDIO_RECORDING, true, "SaveAudioRecording", "Save Audio Recording" },
+	{ Command::SAVE_LOOP,	true, "SaveLoop", "Save Loop" },
+	{ Command::SHUFFLE,		true, "Shuffle", "Shuffle" },
+	{ Command::SLIP_BACKWARD, true, "SlipBackward", "Slip Backward" },
+	{ Command::SLIP_FORWARD, true, "SlipForward", "Slip Forward" },
+	{ Command::SOLO,		 true, "Solo", "Solo" },
+	{ Command::SPEED_CANCEL, true, "SpeedCancel", "Speed Cancel" },
+	{ Command::SPEED_DOWN,	true, "SpeedDown", "Speed Down" },
+	{ Command::SPEED_NEXT,	true, "SpeedNext", "Speed Next" },
+	{ Command::SPEED_PREV,	true, "SpeedPrev", "Speed Prev" },
+	{ Command::SPEED_STEP,	true, "SpeedStep", "Speed Step" },
+	{ Command::SPEED_TOGGLE, true, "SpeedToggle", "Speed Toggle" },
+	{ Command::SPEED_UP,	true, "SpeedUp", "Speed Up" },
+	{ Command::START_AUDIO_RECORDING,	true, "StartAudioRecording", "Start Audio Recording" },
+	{ Command::START_POINT, true, "StartPoint", "Start Point" },
+	{ Command::STATUS,		true, "Status", "Status" },
+	{ Command::STOP_AUDIO_RECORDING,	true, "StopAudioRecording", "Stop Audio Recording" },
+	{ Command::STUTTER,		true, "Stutter", "Stutter" },
+	{ Command::SUBSTITUTE,	true, "Substitute", "Substitute" },
+	{ Command::SUSTAIN_,	true, "Sustain", "Sustain" },
+	{ Command::SYNC_MASTER_TRACK,	true, "SyncMasterTrack", "Sync Master Track" },
+	{ Command::SYNC_START_POINT,	true, "SyncStartPoint", "Sync Start Point" },
+	{ Command::TRACK_1,		true, "Track1", "Track 1" },
+	{ Command::TRACK_2,		true, "Track2", "Track 2" },
+	{ Command::TRACK_3,		true, "Track3", "Track 3" },
+	{ Command::TRACK_4,		true, "Track4", "Track 4" },
+	{ Command::TRACK_5,		true, "Track5", "Track 5" },
+	{ Command::TRACK_6,		true, "Track6", "Track 6" },
+	{ Command::TRACK_7,		true, "Track7", "Track 7" },
+	{ Command::TRACK_8,		true, "Track8", "Track 8" },
+	{ Command::TRACK_COPY,	true, "TrackCopy", "Track Copy" },
+	{ Command::TRACK_COPY_TIMING,	true, "TrackCopyTiming", "Track Copy Timing" },
+	{ Command::TRACK_GROUP, true, "TrackGroup", "Track Group" },
+	{ Command::TRACK_RESET, true, "TrackReset", "Track Reset" },
+	{ Command::TRIM_END,	true, "TrimEnd", "Trim End" },
+	{ Command::TRIM_START,	true, "TrimStart", "Trim Start" },
+	{ Command::UI_,				true, "Ui ", "Ui " },
+	{ Command::UNDO,			true, "Undo", "Undo" },
+	{ Command::WINDOW_BACKWARD, true, "WindowBackward", "Window Backward" },
+	{ Command::WINDOW_FORWARD,	true, "WindowForward", "Window Forward" },
+	{ Command::WINDOW_START_BACKWARD,	true, "WindowStartBackward", "Window Start Backward" },
+	{ Command::WINDOW_START_FORWARD,	true, "WindowStartForward", "Window Start Forward" },
+	{ Command::WINDOW_END_BACKWARD,		true, "WindowEndBackward", "Window End Backward" },
+	{ Command::WINDOW_END_FORWARD,		true, "WindowEndForward", "Window End Forward" },
 };
 
 vector<Control> controls {
-	{ Control::FEEDBACK,		"Feedback", "Feedback" },
-	{ Control::INPUT_LEVEL,		"InputLevel", "Input Level"  },
-	{ Control::OUTPUT_LEVEL,	"OutputLevel", "Output Level" },
-	{ Control::PAN,				"Pan", "Pan" },
-	{ Control::PITCH_BEND,		"PitchBend", "Pitch Bend" },
-	{ Control::PITCH_OCT,		"PitchOct", "Pitch Oct" },
-	{ Control::PITCH_STEP,		"PitchStep", "Pitch Step" },
-	{ Control::SECONDARY_FEEDBACK,	"SecondaryFeedback", "Secondary Feedback" },
-	{ Control::SPEED_BEND,		"SpeedBend", "Speed Bend" },
-	{ Control::SPEED_OCT,		"SpeedOct", "Speed Oct" },
-	{ Control::SPEED_STEP,		"SpeedStep", "Speed Step" },
-	{ Control::TIME_STRETCH,	"TimeStretch", "Time Stretch" }
+	{ Control::CLICK_COUNT,		false, true, "clickCount", "Click Count" },
+	{ Control::EMPTY_LOOP_ACT,	false, true, "emptyLoopAction", "Empty Loop Action" }, // This parameter determines the action that will be performed whenever an empty loop is activated
+	{ Control::FEEDBACK,		true, false, "feedback", "Feedback" },
+	{ Control::INPUT_LEVEL,		true, false, "inputLevel", "Input Level"  },
+	{ Control::INPUT_PAN,		true, false, "inputPan", "Input Pan" },
+	{ Control::IS_RECORDING,	false, true, "isRecording", "Is Recording" },
+	{ Control::MODE,			false, true, "mode", "Mode" },
+	{ Control::OUTPUT_LEVEL,	true, false, "outputLevel", "Output Level" },
+	{ Control::PAN,				true, false, "pan", "Pan" },
+	{ Control::PITCH_BEND,		true, false, "pitchBend", "Pitch Bend" },
+	{ Control::PITCH_OCT,		true, false, "pitchOct", "Pitch Oct" },
+	{ Control::PITCH_STEP,		true, false, "pitchStep", "Pitch Step" },
+	{ Control::SECONDARY_FEEDBACK,	true, false, "secondaryFeedback", "Secondary Feedback" },
+	{ Control::SPEED_BEND,		true, false, "speedBend", "Speed Bend" },
+	{ Control::SPEED_OCT,		true, false, "speedOct", "Speed Oct" },
+	{ Control::SPEED_STEP,		true, false, "speedStep", "Speed Step" },
+	{ Control::SUSTAIN_COUNT,	false, true, "sustainCount", "Sustain Count" },
+	{ Control::SWITCH_QUANTIZE,	false, true, "sustainCount", "Sustain Count" }, //This parameter determines when the loop switch functions will be performed.
+	{ Control::TIME_COPY_MODE,	false, true, "timeCopyMode", "Time Copy Mode" }, // When performing a Time Copy because Empty Loop Action was set to Copy Timing, this parameter specifies the mode you will be in after the copy
+	{ Control::TIME_STRETCH,	true, false, "timeStretch", "Time Stretch" }
 };
 
-Command doNothing(Command::NOTHING, "", "");
+Command doNothing(Command::NOTHING, false, "", "");
 
 Control *
 Control::find(string nm) {
@@ -374,27 +382,38 @@ bool Controller::processCommand(const cmd_id_t cmd, const tgt_id_t tgt) const
 	return false;
 }
 
-bool Controller::processMapping(const ControlMapping & m, int v)
+bool Controller::processMapping(const ControlMapping & m, midi_val_t v)
 {
-	return setControl(m.control, m.target, v);
+	return setControl(m.control, m.target, (float)(v/127.0));
 }
 
-bool Controller::setControl(const ctl_id_t control, const tgt_id_t tgt, const int v) const
+bool Controller::setControl(const ctl_id_t control, const tgt_id_t tgt, const KLFValue& v) const
 {
 	KleinTrack &t = klein.getTrack(tgt);
 	switch (control) {
-		case Control::FEEDBACK:		t.setFeedback(v);  return true;
-		case Control::INPUT_LEVEL:	t.setInputGain(v);  return true;
-		case Control::OUTPUT_LEVEL:	t.setOutputGain(v);   return true;
-		case Control::PAN:			t.setPan(v);  return true;
+		case Control::FEEDBACK:		t.setFeedback(v.ControlFloatValue());  return true;
+		case Control::INPUT_PAN:	t.setInputPan(v.ControlFloatValue());	return true;
+		case Control::INPUT_LEVEL:	t.setInputGain(v.ControlFloatValue());  return true;
+		case Control::OUTPUT_LEVEL:	t.setOutputGain(v.ControlFloatValue());   return true;
+		case Control::PAN:			t.setPan(v.ControlFloatValue());  return true;
 		case Control::PITCH_BEND:	return false;
 		case Control::PITCH_OCT:	return false;
 		case Control::PITCH_STEP:	return false;
-		case Control::SECONDARY_FEEDBACK: t.setSecondaryFeedback(v);  return true;
+		case Control::SECONDARY_FEEDBACK: t.setSecondaryFeedback(v.ControlFloatValue());  return true;
 		case Control::SPEED_BEND:	return false;
 		case Control::SPEED_OCT:	return false;
 		case Control::SPEED_STEP:	return false;
 		case Control::TIME_STRETCH:	return false;
+			// unmappable binding related variables
+		case Control::CLICK_COUNT:		return false; // readonly
+		case Control::SUSTAIN_COUNT:	return false; // readonly
+			// unmappable track variable
+		case Control::IS_RECORDING:	return false; // readonly
+		case Control::MODE:			return false; // readonly
+			// global variables
+		case Control::EMPTY_LOOP_ACT:	return false;
+		case Control::SWITCH_QUANTIZE:	return false;
+		case Control::TIME_COPY_MODE:	return false;
 	}
 	return false;
 }
@@ -405,6 +424,7 @@ KLFValue Controller::getControl(const ctl_id_t control, const tgt_id_t tgt) cons
 	switch (control) {
 	case Control::FEEDBACK:		return KLFValue(t.getFeedback());
 	case Control::INPUT_LEVEL:	return KLFValue(t.getInputGain());
+	case Control::INPUT_PAN:	return KLFValue(t.getInputPan());
 	case Control::OUTPUT_LEVEL:	return KLFValue(t.getOutputGain());
 	case Control::PAN:			return KLFValue(t.getPan());
 	case Control::PITCH_BEND:	return KLFValue();
@@ -415,11 +435,21 @@ KLFValue Controller::getControl(const ctl_id_t control, const tgt_id_t tgt) cons
 	case Control::SPEED_OCT:	return KLFValue();
 	case Control::SPEED_STEP:	return KLFValue();
 	case Control::TIME_STRETCH:	return KLFValue();
+		// unmappable binding related variables
+	case Control::CLICK_COUNT:	return KLFValue();
+	case Control::SUSTAIN_COUNT:	return KLFValue();
+		// unmappable track variable
+	case Control::IS_RECORDING:	return KLFValue(t.isRecording());
+	case Control::MODE:	return KLFValue(trackMode4(t.getMode()));
+		// global variables
+	case Control::EMPTY_LOOP_ACT:	return KLFValue();
+	case Control::SWITCH_QUANTIZE:	return KLFValue();
+	case Control::TIME_COPY_MODE:	return KLFValue();
 	}
 	return KLFValue();
 }
 
-bool Controller::processMapping(const ScriptMapping & m, int wh, int v)
+bool Controller::processMapping(const ScriptMapping & m, midi_what_t wh, midi_val_t v)
 {
 	auto s = m.script;
 	if (!s) return false;

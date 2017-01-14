@@ -14,7 +14,7 @@ class Sym {
 public:
 	Sym(const string &_name, Sym * const _scope, const type_t _type);
 	virtual ~Sym();
-
+	string &getName() { return name;  }
 protected:
 	string name;
 	Sym *scope;

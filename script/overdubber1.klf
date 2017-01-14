@@ -1,0 +1,27 @@
+!name Overdub Control
+!multiclick 250
+!sustain 1000
+!autoload
+
+# just pressed overdub control
+
+Overdub
+
+label click
+end
+
+label endClick
+    if $clickCount = 0
+    elseif $clickCount = 1
+    else
+    endif
+end
+
+label sustain
+    if $sustainCount = 1
+    endif
+end
+
+label endSustain
+    # long press checking done
+end

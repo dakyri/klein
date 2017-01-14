@@ -1,0 +1,63 @@
+!name Loop Control Glob
+!multiclick 1000
+!sustain 500
+!autoload
+
+# just pressed record control
+
+variable hasFired false
+variable hasEndsustain false
+
+set switchQuantize loop
+set emptyLoopAction copyTiming
+set timeCopyMode play
+
+label click
+    message on click $clickCount $hasFired
+end
+
+label endClick
+# message $mode end click
+#    set emptyLoopAction record
+#    set emptyLoopAction none
+#    set emptyLoopAction copy
+#    set emptyLoopAction copyTiming
+
+    if !hasFired 
+ 	set hasFired true
+	if $clickCount = 0
+	    variable newLoop (loopNumber+1)
+	    if $newLoop > $loopCount
+		variable newLoop 1
+	    endif
+	    # message $loopNumber $newLoop $loopCount
+	    for *
+		if $mode != 'reset'
+		    Loop $newLoop
+		endif
+	    next
+        elseif $clickCount = 1
+	    for *
+		Loop1	
+	    next
+	endif
+    endif
+end
+
+label sustain
+    # message sustaining $sustainCount
+    if $sustainCount >= 1
+        set hasFired true
+        message $loopNumber 
+        for *
+	     if $mode != 'reset'
+	         Loop $loopNumber
+	    endif
+        next
+    endif
+end
+
+label endSustain
+    # message end sustaining $sustainCount
+    set hasEndsustain true
+end

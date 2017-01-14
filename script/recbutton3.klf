@@ -1,0 +1,50 @@
+!name Overdub Feedback Button
+!multiclick 250
+!sustain 1000
+!autoload
+
+# just pressed record control
+
+variable hasFired false
+variable hasEndsustain false
+
+if mode="reset"
+    Record
+    set hasFired true
+endif
+
+label click
+end
+
+label endClick
+    if !hasFired
+ 	set hasFired true
+        if $clickCount = 0
+            if isRecording
+                set feedback 100
+            else
+                set feedback 100
+            endif
+            message single click to enter overdub currently $mode fb $feedback
+            Overdub
+            set hasFired true
+        elseif $clickCount = 1
+            message double click to end record, currently $mode
+            Play
+            set feedback 127
+            set hasFired true
+        else
+        endif
+    endif
+end
+
+label sustain
+    if $sustainCount = 1
+        Reset
+    endif
+end
+
+label endSustain
+    # long press checking done
+    set hasEndsustain true
+end
