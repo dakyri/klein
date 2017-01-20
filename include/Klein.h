@@ -13,6 +13,7 @@ using namespace std;
 #include "Bufferator.h"
 #include "KleinTrack.h"
 #include "Controller.h"
+#include "InputInfo.h"
 
 enum ParameterId {
 	kIdMasterGain,
@@ -79,15 +80,17 @@ public:
 	virtual void processReplacing(float **inputs, float **outputs, long sampleFrames) override;
 	virtual long processEvents(VstEvents* events) override;
 
-
 	virtual void setProgram(long program) override;
 	virtual void setProgramName(char *name) override;
 	virtual void getProgramName(char *name) override;
+
 	virtual void setParameter(long index, float value) override;
 	virtual float getParameter(long index) override;
 	virtual void getParameterLabel(long index, char *label) override;
 	virtual void getParameterDisplay(long index, char *text) override;
 	virtual void getParameterName(long index, char *text) override;
+	virtual bool getParameterProperties(long index, VstParameterProperties* p) override;
+
 	virtual float getVu() override;
 	virtual void suspend() override;
 
@@ -123,6 +126,9 @@ public:
 	bool globalPause();
 	bool globalReset();
 
+	void setInPort(const KleinTrack &t, const int port);
+	void setOutPort(const KleinTrack &t, const int port);
+	InputInfo *getInputInfo(const int pin);
 
 protected:
 	float getTempo();
@@ -130,6 +136,7 @@ protected:
 
 	KleinProgram *programs;
 	bool tracksSetupDone;
+	bool inputSetupDone;
 
 	int nTracks;
 	int nLoopsPerTrack;
@@ -137,14 +144,17 @@ protected:
 	int nOutputPort;
 
 	vector<unique_ptr<KleinTrack>> track;
+	vector<InputInfo> input;
 	Controller controller;
 
 	status_t loadConfig(const char *path, vector<string> &errorList);
 	tinyxml2::XMLError loadTrackConfig(tinyxml2::XMLElement *element, vector<string> &errorList);
+	tinyxml2::XMLError loadInputConfig(tinyxml2::XMLElement *element, vector<string> &errorList);
 	tinyxml2::XMLError loadScriptConfig(tinyxml2::XMLElement *element, vector<string> &errorList);
 	tinyxml2::XMLError loadMidiMapConfig(tinyxml2::XMLElement *element, vector<string> &errorList);
 
-	void setNTracks(int n);
+	int setNTracks(int n, int id = 0, bool clear = false);
+	int setNInput(int n, int pin = 0, bool clear = false);
 	void setNLoopsPerTrack(int n);
 
 	long nChunkFrames;

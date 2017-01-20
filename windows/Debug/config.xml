@@ -1,13 +1,25 @@
-<klein nInputPort="4" nOutputPort="4">
-  <tracks nTrack="8">
-    <track />
-  </tracks>
-  <scripts>
-    <script id="an_id" src="from somewhere"/>
-  </scripts>
-  <midiMap>
-    <note channel="1" which="1" context="1"/>
-    <ctrl channel="1" which="1" context="1"/>
-    <prog channel="1" which="1" context="1"/>
-  </midiMap>
+<klein nInputPort="1" nOutputPort="4">
+	<tracks nTracks="4" nLoopsPerTrack="4">
+		<track id="0" inPort="0" outPort="0" syncSrc="host" syncUnit="loop" />
+		<track id="1" inPort="0" outPort="1" syncSrc="host" syncUnit="loop" />
+		<track id="2" inPort="0" outPort="2" syncSrc="host" syncUnit="loop" />
+		<track id="3" inPort="0" outPort="3" syncSrc="host" syncUnit="loop" />
+	</tracks>
+	<inputs>
+		<input pin="0" stereo="true" thruMode="not" thruTrack="0"/>
+	</inputs>
+	<scripts>
+		<script id="some id" src="path"/>
+	</script>
+	<midiMap>
+		<!--		<note channel="1" which="10" script="some script" context="1" />-->
+		<note channel="1" which="10" function="Record" context="global" />
+		<ctrl channel="1" which="7" control="gain" context="global"/>
+		<ctrl channel="1" which="10" control="pan" context="global"/>
+		<prog channel="1" which="0" function="Track1" context="global"/>
+		<prog channel="1" which="1" function="Track2" context="global"/>
+		<prog channel="1" which="2" function="Track3" context="global"/>
+		<prog channel="1" which="3" function="Track4" context="global"/>
+		<prog channel="1" which="4" function="Track5" context="global"/>
+	</midiMap>
 </klein>

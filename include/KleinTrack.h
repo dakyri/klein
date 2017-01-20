@@ -98,8 +98,10 @@ public:
 	float getFeedback();
 	float getSecondaryFeedback();
 
-	void setInPort(const int port);
-	void setOutPort(const int port);
+	void setInPort(const int port) const;
+	void setOutPort(const int port) const;
+	int getInPort() const;
+	int getOutPort() const;
 
 	void setNLoops(const int nLoops);
 
@@ -162,8 +164,8 @@ protected:
 	vector<SampleLoop>::iterator allocateSampleLoop();
  
 	int id;
-	int inPortId;
-	int outPortId;
+	mutable int inPortId;
+	mutable int outPortId;
 	bool selected;
 
 	vector<SampleLoop>::iterator currentSampleLoop;
@@ -217,8 +219,8 @@ protected:
 
 };
 
-void addToBuffer(const float gain, float * const inl, float * const outl, const int nFrames);
-void addToBuffer(const float gain, float * const ins, float * const outl, float * const outr, const int nFrames);
+void writeToBufferMono(const float gain, float * const inl, float * const outl, const int nFrames);
+void writeToBufferPair(const float gain, float * const ins, float * const outl, float * const outr, const int nFrames);
 
 #include "debug.h"
 

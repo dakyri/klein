@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include "InputInfo.h"
+
 using namespace std;
 
 // or maybe boost::bimap
@@ -43,6 +45,12 @@ unordered_map<string, PlayDirection> playDir{
 	{ "back", PLAY_BAK },
 	{ "bakfwd", PLAY_FWDBAK },
 	{ "fwdbak", PLAY_BAKFWD }
+};
+
+unordered_map<string, InputInfo::ThruMode> inputProperties {
+	{ "none", InputInfo::ThruMode::NO_THRU },
+	{ "manual", InputInfo::ThruMode::MANUAL },
+	{ "select", InputInfo::ThruMode::ON_SELECT }
 };
 
 TrackMode trackMode4(string s) {
@@ -110,19 +118,40 @@ string playDir4(PlayDirection s) {
 	return "";
 }
 
-void addToBuffer(const float gain, float * const inl, float * const outl, const int nFrames)
+
+InputInfo::ThruMode
+InputInfo::findMode(const string &s) {
+	auto p = inputProperties.find(s);
+	if (p != inputProperties.end()) {
+		return p->second;
+	}
+	return InputInfo::ThruMode::NO_THRU;
+}
+
+
+string
+InputInfo::findMode(const InputInfo::ThruMode s) {
+	auto p = find_if(inputProperties.begin(), inputProperties.end(), [s](pair<string, InputInfo::ThruMode> t) { return t.second == s; });
+	if (p != inputProperties.end()) {
+		return p->first;
+	}
+	return "";
+}
+
+
+void writeToBuffer(const float gain, float * const inl, float * const outl, const int nFrames)
 {
 	for (int i = 0; i < nFrames; i++) {
 		outl[i] = gain * inl[i];
 	}
 }
 
-void addToBuffer(const float gain, float * const ins, float * const outl, float * const outr, const int nFrames)
+void writeToBufferPair(const float gain, float * const ins, float * const outl, float * const outr, const int nFrames)
 {
 	int j = 0;
 	for (int i = 0; i < nFrames; i++) {
 		outl[i] = gain * ins[j++];
-		outl[i] = gain * ins[j++];
+		outr[i] = gain * ins[j++];
 	}
 }
 
@@ -262,14 +291,27 @@ KleinTrack::setTimeStretch(int v) {
 
 }
 
+/**
+ * ??? XXXX FIXME we should also check that we are not in a record mode. 
+ */
 void
-KleinTrack::setInPort(const int port) {
+KleinTrack::setInPort(const int port) const {
 	inPortId = port;
 }
 
 void
-KleinTrack::setOutPort(const int port) {
+KleinTrack::setOutPort(const int port) const {
 	outPortId = port;
+}
+
+int KleinTrack::getInPort() const
+{
+	return 0;
+}
+
+int KleinTrack::getOutPort() const
+{
+	return 0;
 }
 
 void KleinTrack::setNLoops(const int nLoops)
@@ -430,10 +472,10 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 		}
 	}
 
-	if (selected) {
-		addToBuffer(inputGain, inl, outl, nFrames);
-		addToBuffer(inputGain, inr, outr, nFrames);
-	}
+//	if (selected) {
+//		addToBuffer(inputGain, inl, outl, nFrames);
+//		addToBuffer(inputGain, inr, outr, nFrames);
+//	}
 
 	if (trackMode == TRAK_REC) {
 		addToRecordBuffer(csf, inputGain, inl, inr, nFrames);
@@ -441,7 +483,7 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 	else if (trackMode == TRAK_DUB) {
 		addToRecordBuffer(csf, inputGain, inl, inr, nFrames, false);
 		addToRecordBuffer(csf, feedback, loopRawBuf, nFrames);
-		addToBuffer(feedback, loopOutBuf, outl, outr, nFrames);
+		writeToBufferPair(feedback, loopOutBuf, outl, outr, nFrames);
 	}
 	else if (trackMode == TRAK_INSERT) {
 		//add (gain * input) into currentLoop buffer
@@ -450,7 +492,7 @@ long KleinTrack::processAdding(float ** const inputs, float ** const outputs, co
 		//add(gain * input) into currentLoop buffer
 	}
 	else if (trackMode == TRAK_PLAY) {
-		addToBuffer(feedback, loopOutBuf, outl, outr, nFrames);
+		writeToBufferPair(feedback, loopOutBuf, outl, outr, nFrames);
 		if (feedback < 1.0) {
 			addToRecordBuffer(csf, feedback, loopRawBuf, nFrames);
 		}
@@ -605,23 +647,25 @@ bool SampleLoop::reset()
 
 
 /**
-* process a given buffer of output. pulled from android CPadSample.cpp
-* processes a single chunk worth at most, in a single direction, not looping
-*
-* can probably be further simplified.
-* ??? need to change the simple tune stuff to a lenght preserving pitch shift.
-* ??? possibly also a pitch preserving time stretch
-*
-* @param buff output buffer, stereo interleaved
-* @param nRequestedFrames optimal number of frames to play.
-* @param direction >= 0 for forwards, else backwards
-*/
-
+ * process a given buffer of output. pulled from android CPadSample.cpp
+ * processes a single chunk worth at most, in a single direction, not looping
+ *
+ * can probably be further simplified.
+ * ??? need to change the simple tune stuff to a lenght preserving pitch shift.
+ * ??? possibly also a pitch preserving time stretch
+ *
+ * @param csf shared_ptr to the sample info structure for this chunk
+ * @param outBuff output buffer, stereo interleaved
+ * @param rawBuf
+ * @param nRequestedFrames optimal number of frames to play.
+ * @param currentDataFrame
+ * @param directionFwd true for forwards, else backwards
+ */
 int
 KleinTrack::playChunk(
 	const shared_ptr<SampleInfo>& csf, float *const outBuf, float *const rawBuf, const int nRequestedFrames, const int currentDataFrame, const bool directionFwd)
 {
-#if KLEIN_DEBUG >= 6
+#if KLEIN_DEBUG >= 10
 	dbf << "playChunk " << id << " off " << nRequestedFrames << ", nFrames " << currentDataFrame << ", dir " << directionFwd << endl;
 #endif
 	int chunkStartFrame = 0;
@@ -665,12 +709,12 @@ KleinTrack::playChunk(
 				}
 			}
 		}
-#ifdef KLEIN_DEBUG >= 6
+#ifdef KLEIN_DEBUG >= 11
 		dbf << "player got " << currentDataFrame << " chunk  " << " len " << chunkNFrames << "@  " << chunkStartFrame
 			<< " data[0]  " << chunkData[0] << " path  " << csf->getPath() << endl;
 #endif
 	} else {
-#ifdef KLEIN_DEBUG >= 6
+#ifdef KLEIN_DEBUG >= 11
 		cerr << "player failed to find " << currentDataFrame << " chunk " << cpageid << " path " << csf->getPath() << endl;
 #endif
 	}
@@ -1006,6 +1050,8 @@ KleinTrack::calculateControlsStereo(float &l, float &r)
 
 /*
  * give an indication of how many sample frames until the next interesting thing happens
+ * this is called so that we will have the longest possible chunk of buffer to be filled that doesn't loop, change sample chunk
+ * or affect (or be affected by) any other loops synchronization
  * interesting things are:
  *  - loop ends
  *  - resynchronization opportunities

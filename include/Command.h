@@ -176,6 +176,8 @@ struct Control {
 		// unmappable track variable
 		IS_RECORDING,
 		MODE,
+		INPUT_PORT,
+		OUTPUT_PORT,
 
 		// global variables
 		EMPTY_LOOP_ACT,

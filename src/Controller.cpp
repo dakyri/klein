@@ -124,16 +124,21 @@ vector<Command> commands {
 	{ Command::WINDOW_END_FORWARD,		true, "WindowEndForward", "Window End Forward" },
 };
 
+/**
+ * searched via b-search ... this list should be alphabetical
+ */
 vector<Control> controls {
 	{ Control::CLICK_COUNT,		false, true, "clickCount", "Click Count" },
 	{ Control::EMPTY_LOOP_ACT,	false, true, "emptyLoopAction", "Empty Loop Action" }, // This parameter determines the action that will be performed whenever an empty loop is activated
 	{ Control::FEEDBACK,		true, false, "feedback", "Feedback" },
-	{ Control::INPUT_LEVEL,		true, false, "inputLevel", "Input Level"  },
+	{ Control::OUTPUT_LEVEL,	true, false, "gain", "Output Level" },
+	{ Control::INPUT_LEVEL,		true, false, "inputGain", "Input Level"  },
 	{ Control::INPUT_PAN,		true, false, "inputPan", "Input Pan" },
+	{ Control::INPUT_PORT,		false, true, "inputPort", "Input Port" },
 	{ Control::IS_RECORDING,	false, true, "isRecording", "Is Recording" },
 	{ Control::MODE,			false, true, "mode", "Mode" },
-	{ Control::OUTPUT_LEVEL,	true, false, "outputLevel", "Output Level" },
-	{ Control::PAN,				true, false, "pan", "Pan" },
+	{ Control::OUTPUT_PORT,		false, true, "outputPort", "Output Port" },
+	{ Control::PAN,				true, false, "pan", "Output Pan" },
 	{ Control::PITCH_BEND,		true, false, "pitchBend", "Pitch Bend" },
 	{ Control::PITCH_OCT,		true, false, "pitchOct", "Pitch Oct" },
 	{ Control::PITCH_STEP,		true, false, "pitchStep", "Pitch Step" },
@@ -190,7 +195,6 @@ Controller::processEvent(VstMidiEvent * e)
 	int cmd = midiCmd(midiData);	
 	int chan = midiChan(midiData);
 //	int hash = makeIdxHash(midiData);
-	cerr << "command " << cmd << " in klein" << endl;
 	vector<CommandMapping> *cmv;
 	vector<ControlMapping> *dmv;
 	vector<ScriptMapping> *smv;
@@ -201,6 +205,9 @@ Controller::processEvent(VstMidiEvent * e)
 		int note = midiNote(midiData);
 		int vel = midiNoteVel(midiData);
 		int rcmd = (cmd == MIDI_NOTE_OFF ? MIDI_NOTE_ON : cmd);
+#if KLEIN_DEBUG >= 7
+		dbf << "processEvent note" << (cmd == MIDI_NOTE_ON?" on ":" off ") << note<<":"<< vel <<endl;
+#endif
 		int hash = makeMidiHash(rcmd, chan, note);
 		if ((cmv = getCommandMap(hash)) != nullptr) {
 			for (auto cmi : *cmv) {
@@ -223,6 +230,9 @@ Controller::processEvent(VstMidiEvent * e)
 		int ctl = midiCtrl(midiData);
 		int val = midiCtrlVal(midiData);
 		int hash = makeMidiHash(cmd, chan, ctl);
+#if KLEIN_DEBUG >= 7
+		dbf << "processEvent ctl " << ctl << ":" << val << endl;
+#endif
 		if ((cmv = getCommandMap(hash)) != nullptr) {
 			for (auto cmi : *cmv) {
 				processMapping(cmi);
@@ -243,6 +253,9 @@ Controller::processEvent(VstMidiEvent * e)
 	case MIDI_PROG: { // instantaneous, single value
 		int prog = midiProg(midiData);
 		int hash = makeMidiHash(cmd, chan, prog);
+#if KLEIN_DEBUG >= 7
+		dbf << "processEvent prog " << prog << endl;
+#endif
 		if ((cmv = getCommandMap(hash)) != nullptr) {
 			for (auto cmi : *cmv) {
 				processMapping(cmi);
@@ -256,6 +269,9 @@ Controller::processEvent(VstMidiEvent * e)
 		break;
 	}
 	case MIDI_BEND:
+#if KLEIN_DEBUG >= 7
+		dbf << "processEvent bend " << endl;
+#endif
 		break;
 	}
 	return true;
@@ -267,6 +283,9 @@ bool Controller::processMapping(const CommandMapping & m) {
 
 bool Controller::processCommand(const cmd_id_t cmd, const tgt_id_t tgt) const
 {
+#if KLEIN_DEBUG >= 8
+	dbf << "processCommand " << cmd << ", " << tgt << endl;
+#endif
 	KleinTrack &t = klein.getTrack(tgt);
 	switch (cmd) {
 		case Command::AUTO_RECORD: return true;
@@ -384,11 +403,17 @@ bool Controller::processCommand(const cmd_id_t cmd, const tgt_id_t tgt) const
 
 bool Controller::processMapping(const ControlMapping & m, midi_val_t v)
 {
+#if KLEIN_DEBUG >= 8
+	dbf << "processMapping " << m.control << ", " << m.target << endl;
+#endif
 	return setControl(m.control, m.target, (float)(v/127.0));
 }
 
 bool Controller::setControl(const ctl_id_t control, const tgt_id_t tgt, const KLFValue& v) const
 {
+#if KLEIN_DEBUG >= 9
+	dbf << "setControl " << control << ", " << tgt << endl;
+#endif
 	KleinTrack &t = klein.getTrack(tgt);
 	switch (control) {
 		case Control::FEEDBACK:		t.setFeedback(v.ControlFloatValue());  return true;
@@ -408,6 +433,8 @@ bool Controller::setControl(const ctl_id_t control, const tgt_id_t tgt, const KL
 		case Control::CLICK_COUNT:		return false; // readonly
 		case Control::SUSTAIN_COUNT:	return false; // readonly
 			// unmappable track variable
+		case Control::INPUT_PORT:	klein.setInPort(t, v.IntValue()); return true; // read-write
+		case Control::OUTPUT_PORT:	klein.setOutPort(t, v.IntValue()); return true; // read-write
 		case Control::IS_RECORDING:	return false; // readonly
 		case Control::MODE:			return false; // readonly
 			// global variables
@@ -420,6 +447,9 @@ bool Controller::setControl(const ctl_id_t control, const tgt_id_t tgt, const KL
 
 KLFValue Controller::getControl(const ctl_id_t control, const tgt_id_t tgt) const
 {
+#if KLEIN_DEBUG >= 9
+	dbf << "getControl " << control << ", " << tgt << endl;
+#endif
 	KleinTrack &t = klein.getTrack(tgt);
 	switch (control) {
 	case Control::FEEDBACK:		return KLFValue(t.getFeedback());
@@ -439,6 +469,8 @@ KLFValue Controller::getControl(const ctl_id_t control, const tgt_id_t tgt) cons
 	case Control::CLICK_COUNT:	return KLFValue();
 	case Control::SUSTAIN_COUNT:	return KLFValue();
 		// unmappable track variable
+	case Control::INPUT_PORT:	return KLFValue(t.getInPort());
+	case Control::OUTPUT_PORT:	return KLFValue(t.getOutPort());
 	case Control::IS_RECORDING:	return KLFValue(t.isRecording());
 	case Control::MODE:	return KLFValue(trackMode4(t.getMode()));
 		// global variables
@@ -451,6 +483,9 @@ KLFValue Controller::getControl(const ctl_id_t control, const tgt_id_t tgt) cons
 
 bool Controller::processMapping(const ScriptMapping & m, midi_what_t wh, midi_val_t v)
 {
+#if KLEIN_DEBUG >= 7
+	dbf << "process script " << wh << ", " << v << endl;
+#endif
 	auto s = m.script;
 	if (!s) return false;
 	s->doStart(*this, m);

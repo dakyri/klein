@@ -124,6 +124,7 @@
     <ClInclude Include="..\..\include\Controller.h" />
     <ClInclude Include="..\..\include\Command.h" />
     <ClInclude Include="..\..\include\debug.h" />
+    <ClInclude Include="..\..\include\InputInfo.h" />
     <ClInclude Include="..\..\include\KleinEditor.h" />
     <ClInclude Include="..\..\include\KLFContext.h" />
     <ClInclude Include="..\..\include\Klein.h" />

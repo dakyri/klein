@@ -16,8 +16,6 @@ ofstream dbf;
 
 #endif
 
-//----------------------------------------------------------------------------- 
-
 KleinProgram::KleinProgram()
 {
 	masterGain = 0.7;
@@ -25,24 +23,32 @@ KleinProgram::KleinProgram()
 	strcpy (name, "Init");
 }
 
-
-
-
+/**
+ *
+ */
 Klein::Klein(audioMasterCallback audioMaster)
 	: AudioEffectX(audioMaster, 16, trackIdBase(kMaxTrack))
 	, controller(*this)
 	, nTracks(4)
 	, nLoopsPerTrack(4)
 	, kleinView(nullptr)
+	, tracksSetupDone(false), inputSetupDone(false)
 {
 	nInputPort = 1;
 	nOutputPort = 4;
-	tracksSetupDone = false;
+
+#ifdef KLEIN_DEBUG
+	dbf.open("debug.txt");
+	dbf << unitbuf;
+#endif
 
 	vector<string> configErrorList;
 	status_t err = loadConfig("config.xml", configErrorList);
 	if (err == ERR_OK) {
 		controller.lockAndLoadScripts(configErrorList);
+	}
+	if (!inputSetupDone) {
+		setNInput(nInputPort);
 	}
 	if (!tracksSetupDone) { 
 		setNTracks(nTracks);
@@ -60,11 +66,6 @@ Klein::Klein(audioMasterCallback audioMaster)
 	}
 
 	vu = 0;
-
-#ifdef KLEIN_DEBUG
-	dbf.open("debug.txt");
-	dbf << unitbuf;
-#endif
 	
 //	SGLFO::InitializeDefaultWavetables();
 	setNumInputs (2*nInputPort);
@@ -132,7 +133,7 @@ void Klein::setParameter (long index, float value)
 		case kIdMasterGain: masterGain = ap->masterGain = value; break;
 		default:
 			int trackid = track4Idx(index);
-			if (trackid >= 0 && trackid < kMaxTrack) {
+			if (trackid >= 0 && trackid < kMaxTrack && trackid < track.size()) {
 				switch (trackParamId4Idx(index)) {
 				case kIdTrackInputGain: return track[trackid]->setInputGain(ap->inputGain[trackid]=value);
 				case kIdTrackGain:		return track[trackid]->setOutputGain(ap->outputGain[trackid] = value);
@@ -154,6 +155,10 @@ float Klein::getParameter (long index)
 {
 	float v = 0;
 
+
+#ifdef KLEIN_DEBUG
+	dbf << "get p " << index << endl;
+#endif
 	switch (index)	{
 		case kIdMasterGain: v = masterGain; break;
 		default:
@@ -174,11 +179,14 @@ float Klein::getParameter (long index)
 char *
 Klein::parameterName(long index)
 {
+#ifdef KLEIN_DEBUG
+	dbf << "param name " << index << endl;
+#endif
 	switch (index) {
 		case kIdMasterGain: return "MasterGain";
 		default:
 			int trackid = track4Idx(index);
-			if (trackid >= 0 && trackid < kMaxTrack) {
+			if (trackid >= 0 && trackid < kMaxTrack && trackid < track.size()) {
 				switch (trackParamId4Idx(index)) {
 				case kIdTrackInputGain: return "Input";
 				case kIdTrackGain:		return "Gain";
@@ -196,14 +204,43 @@ void Klein::getParameterName(long index, char *label)
 	sprintf(label, " %10s", parameterName(index));
 }
 
+bool Klein::getParameterProperties(long index, VstParameterProperties * p)
+{
+#ifdef KLEIN_DEBUG
+	dbf << "getParameterProperties " << index << endl;
+#endif
+	return false;
+	/*
+	switch (index) {
+	case kIdMasterGain: {
+		return "MasterGain";
+	}
+	default:
+		int trackid = track4Idx(index);
+		if (trackid >= 0 && trackid < kMaxTrack && trackid < track.size()) {
+			switch (trackParamId4Idx(index)) {
+			case kIdTrackInputGain: return "Input";
+			case kIdTrackGain:		return "Gain";
+			case kIdTrackPan:		return "Pan";
+			case kIdTrackFeedback:	return "Feedback";
+			}
+		}
+
+	}
+	return false;*/
+}
+
 //------------------------------------------------------------------------
 void Klein::getParameterDisplay(long index, char *text)
 {
+#ifdef KLEIN_DEBUG
+	dbf << "param display " << index << endl;
+#endif
 	switch (index) {
 	case kIdMasterGain: dB2string(masterGain, text); break;
 	default:
 		int trackid = track4Idx(index);
-		if (trackid >= 0 && trackid < kMaxTrack) {
+		if (trackid >= 0 && trackid < kMaxTrack && trackid < track.size()) {
 			switch (trackParamId4Idx(index)) {
 			case kIdTrackInputGain: dB2string(track[trackid]->getInputGain(), text); break;
 			case kIdTrackGain:		dB2string(track[trackid]->getOutputGain(), text); break;
@@ -218,11 +255,14 @@ void Klein::getParameterDisplay(long index, char *text)
 //------------------------------------------------------------------------
 void Klein::getParameterLabel(long index, char *label)
 {
+#ifdef KLEIN_DEBUG
+	dbf << "param label " << index << endl;
+#endif
 	switch (index) {
 	case kIdMasterGain: strcpy(label, "   dB   ");	break;
 	default:
 		int trackid = track4Idx(index);
-		if (trackid >= 0 && trackid < kMaxTrack) {
+		if (trackid >= 0 && trackid < kMaxTrack && trackid < track.size()) {
 			switch (trackParamId4Idx(index)) {
 			case kIdTrackInputGain:  strcpy(label, "   dB   ");	break;
 			case kIdTrackGain:		 strcpy(label, "   dB   ");	break;
@@ -325,19 +365,36 @@ void Klein::process (float **inputs, float **outputs, long nFrames)
 }
 
 
-//---------------------------------------------------------------------------
+/**
+ *
+ */
 void Klein::processReplacing (float **inputs, float **outputs, long nFrames)
 {
-#if KLEIN_DEBUG >= 2
+#if KLEIN_DEBUG >= 10
 	dbf << "process replacing " << nFrames << endl;
 #endif
-	float cvu = vu;
 	for (int i = 0; i < nOutputPort * 2; ++i) {
 		memset(outputs[i], 0, nFrames * sizeof(float));
 	}
+	
+	for (InputInfo& it : input) {
+		if (it.thruMode != InputInfo::NO_THRU && it.thruTrack >= 0 && it.thruTrack < track.size()) {
+			int ip = it.pin;
+			int op = 2*track[it.thruTrack]->getOutPort();
+			if (op < nOutputPort) {
+				for (int i = 0; i < nFrames; i++) {
+					outputs[op][i] += inputs[ip][i];
+					outputs[op+1][i] += inputs[ip+1][i];
+				}
+			}
+		}
+	}
+	// add currently playing track loops to outputs
+	// if recording, insert current input to appropriate sample in recording track
+	float cvu = vu;
 	long currentOutFrame = 0;
 	while (currentOutFrame < nFrames) {
-#if KLEIN_DEBUG >= 4
+#if KLEIN_DEBUG >= 11
 		dbf << "process replacing loop currentOutFrame " << currentOutFrame << endl;
 #endif
 		const VstTimeInfo *t = getTimeInfo(kVstTempoValid);
@@ -351,7 +408,7 @@ void Klein::processReplacing (float **inputs, float **outputs, long nFrames)
 			dbf << "process replacing 3 framesThisChunk " << framesThisChunk << ", l " << l << endl;
 #endif
 		}
-#if KLEIN_DEBUG >= 6
+#if KLEIN_DEBUG >= 11
 		dbf << "process replacing 3 framesThisChunk " << framesThisChunk << endl;
 #endif
 		for (unique_ptr<KleinTrack> &ti : track) {
@@ -477,11 +534,16 @@ void Klein::outputConnected(long index, bool state)
 }
 
 
+/**
+ * VST hook for pin propertes. We're assuming for the moment that it's stereo in and stereo out
+ * but we are going to open that assumption up eventually, so we could have mono ins, or we could
+ * split a stereo input
+ */
 bool Klein::getInputProperties(long index, VstPinProperties* properties)
 {
 	bool ret = false;
-
-	if (index < nInputPort * 2) {
+	InputInfo *ip = getInputInfo(index);
+	if (ip != nullptr) {
 		sprintf(properties->label, "Input %1d", (index / 2) + 1);
 		sprintf(properties->shortLabel, "In %1d", (index / 2) + 1);
 		properties->flags = kVstPinIsActive;
@@ -493,6 +555,10 @@ bool Klein::getInputProperties(long index, VstPinProperties* properties)
 	return ret;
 }
 
+
+/**
+ * VST hook for pin propertes. outputs are stereo pairs
+ */
 bool Klein::getOutputProperties(long index, VstPinProperties* properties)
 {
 	bool ret = false;
@@ -585,6 +651,9 @@ Klein::loadConfig(const char *path, vector<string> &errorList)
 
 	string namestr = root->Value();
 	if (namestr == "klein") {
+#ifdef KLEIN_DEBUG
+		dbf << "xml config: got root" << endl;
+#endif
 		const char *inputPortAttrVal = root->Attribute("nInputPort");
 		const char *outputPortAttrVal = root->Attribute("nOutputPort");
 		if (inputPortAttrVal) nInputPort =  atoi(inputPortAttrVal);
@@ -593,8 +662,15 @@ Klein::loadConfig(const char *path, vector<string> &errorList)
 		tinyxml2::XMLElement *childElement = root->FirstChildElement();
 		while (childElement != nullptr) {
 			std::string childName = childElement->Value();
+#ifdef KLEIN_DEBUG
+			dbf << "xml config: main got child " << childName << endl;
+#endif
 			if (childName == "tracks") {
 				err = loadTrackConfig(childElement, errorList);
+				tracksSetupDone = true;
+			} else if (childName == "inputs") {
+				err = loadInputConfig(childElement, errorList);
+				inputSetupDone = true;
 			} else if (childName == "scripts") {
 				err = loadScriptConfig(childElement, errorList);
 			} else if (childName == "midiMap") {
@@ -619,13 +695,24 @@ tinyxml2::XMLError Klein::loadTrackConfig(tinyxml2::XMLElement *element, vector<
 	const char *trackAttrVal = element->Attribute("nTracks");
 	const char *loopAttrVal = element->Attribute("nLoopsPerTracks");
 	tinyxml2::XMLElement *childElement = element->FirstChildElement();
-	nTracks = atoi(trackAttrVal);
-	nLoopsPerTrack = atoi(loopAttrVal);
+	if (trackAttrVal) {
+		nTracks = atoi(trackAttrVal);
+	} else {
+		nTracks = 8;
+	}
+	if (loopAttrVal) {
+		nLoopsPerTrack = atoi(loopAttrVal);
+	} else {
+		nLoopsPerTrack = 4;
+	}
 	track.clear();
 	int i = 0;
 	int nTrackAdded = 0;
 	while (childElement != nullptr) {
 		std::string childName = childElement->Value();
+#ifdef KLEIN_DEBUG
+		dbf << "xml config: track config got " << childName << endl;
+#endif
 		if (childName == "track") {
 			const char *idAttrVal = childElement->Attribute("id");
 			const char *inPortAttrVal = childElement->Attribute("inPort");
@@ -641,14 +728,50 @@ tinyxml2::XMLError Klein::loadTrackConfig(tinyxml2::XMLElement *element, vector<
 
 			if (i <= trackId) i = trackId + 1;
 
+#ifdef KLEIN_DEBUG
+			dbf << "xml config: adding track " << trackId << ", " << nTrackAdded << endl;
+#endif
 			track.push_back(make_unique<KleinTrack>(trackId, inPortId, outPortId, nLoopsPerTrack, ss, su));
 			++nTrackAdded;
 		}
-		while (nTrackAdded < nTracks) {
-			track.push_back(make_unique<KleinTrack>(i++, 0, 0, nLoopsPerTrack, SYNC_HOST, SYNC_LOOP));
+		childElement = childElement->NextSiblingElement();
+	}
+	setNTracks(nTracks, i);
+	return tinyxml2::XML_NO_ERROR;
+}
+
+tinyxml2::XMLError Klein::loadInputConfig(tinyxml2::XMLElement *element, vector<string> &errorList) {
+	input.clear();
+	int i = 0;
+	int nInputAdded = 0;
+	tinyxml2::XMLElement *childElement = element->FirstChildElement();
+	while (childElement != nullptr) {
+		std::string childName = childElement->Value();
+#ifdef KLEIN_DEBUG
+		dbf << "xml config: input config got " << childName << endl;
+#endif
+		if (childName == "input") {
+			const char *pinAttrVal = childElement->Attribute("pin");
+			const char *stereoAttrVal = childElement->Attribute("stereo");
+			const char *thruTrackAttrVal = childElement->Attribute("thruTrack");
+			const char *thruModeAttrVal = childElement->Attribute("thruMode");
+
+			int pinId = pinAttrVal ? atoi(pinAttrVal) : 2*i;
+			bool stereo = stereoAttrVal ? (string(stereoAttrVal)=="true") : true;
+			InputInfo::ThruMode thruMode = thruModeAttrVal ? InputInfo::findMode(thruModeAttrVal) : InputInfo::ON_SELECT;
+			int thruTrack = thruTrackAttrVal ? atoi(thruTrackAttrVal) : -1;
+
+			if (i <= pinId) i = pinId + 1;
+
+#ifdef KLEIN_DEBUG
+			dbf << "xml config: adding input " << pinId << ", " << nInputAdded << endl;
+#endif
+			input.emplace_back(pinId, stereo, thruMode);
+			++nInputAdded;
 		}
 		childElement = childElement->NextSiblingElement();
 	}
+	setNInput(nInputPort, i);
 	return tinyxml2::XML_NO_ERROR;
 }
 
@@ -656,8 +779,10 @@ tinyxml2::XMLError Klein::loadScriptConfig(tinyxml2::XMLElement *element, vector
 	tinyxml2::XMLElement *childElement = element->FirstChildElement();
 	while (childElement != nullptr) {
 		std::string childName = childElement->Value();
-
-		if (childName == "script") { 
+#ifdef KLEIN_DEBUG
+		dbf << "xml config: got script " << childName << endl;
+#endif
+		if (childName == "script") {
 			const char *idAttrVal = childElement->Attribute("id");
 			const char *srcAttrVal = childElement->Attribute("src");
 			if (idAttrVal && srcAttrVal) {
@@ -677,6 +802,9 @@ tinyxml2::XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element, vecto
 	tinyxml2::XMLElement *childElement = element->FirstChildElement();
 	while (childElement != nullptr) {
 		std::string childName = childElement->Value();
+#ifdef KLEIN_DEBUG
+		dbf << "xml config: midimap: got child " << childName << endl;
+#endif
 		const char *channelAttrVal = childElement->Attribute("channel");
 		const char *whichAttrVal = childElement->Attribute("which");
 		const char *contextAttrVal = childElement->Attribute("context");
@@ -696,6 +824,9 @@ tinyxml2::XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element, vecto
 			tgt = atoi(targetAttrVal);
 		}
 		if (functionAttrVal) {
+#ifdef KLEIN_DEBUG
+			dbf << "xml config: midimap: got function attr " << functionAttrVal << endl;
+#endif
 			Command *c = Command::find(functionAttrVal);
 			if (c != nullptr) {
 				CommandMapping mapping(c->command, tgt); // <<<<<<<<<<<<<<<<<<<<<< ?????
@@ -711,6 +842,9 @@ tinyxml2::XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element, vecto
 			}
 		}
 		if (controlAttrVal) {
+#ifdef KLEIN_DEBUG
+			dbf << "xml config: midimap: got control attr " << controlAttrVal << endl;
+#endif
 			Control *c = Control::find(controlAttrVal);
 			if (c != nullptr) {
 				ControlMapping mapping(c->control, tgt); 
@@ -726,6 +860,9 @@ tinyxml2::XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element, vecto
 			}
 		}
 		if (scriptAttrVal) {
+#ifdef KLEIN_DEBUG
+			dbf << "xml config: midimap: got script attr " << scriptAttrVal << endl;
+#endif
 			script_id_t id = atoi(scriptAttrVal);
 			ScriptMapping mapping(id, tgt); // connect to the actual scripts later: check it all then
 			if (childName == "note") {
@@ -744,13 +881,38 @@ tinyxml2::XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element, vecto
 
 }
 
-void Klein::setNTracks(int n)
+int Klein::setNTracks(int _nTrack, int id, bool clear)
 {
-	nTracks = n;
-	track.clear();
-	for (int i = 0; i < n; i++) {
-		track.push_back(make_unique<KleinTrack>(i, nLoopsPerTrack));
+	nTracks = _nTrack;
+	if (clear) {
+		track.clear();
 	}
+	int n = nTracks - track.size();
+	for (int i = 0; i < n; i++) {
+#ifdef KLEIN_DEBUG
+		dbf << "xml config: adding track " << track.size() << ", id " << id << endl;
+#endif
+		track.push_back(make_unique<KleinTrack>(id++, 0, 0, nLoopsPerTrack, SYNC_TRACK, SYNC_LOOP));
+	}
+	return n;
+}
+
+int Klein::setNInput(int _nInput, int pin, bool clear)
+{
+	nInputPort = _nInput;
+	if (clear) {
+		input.clear();
+	}
+	int n = nInputPort - input.size();
+	for (int i = 0; i < n; i++) {
+#ifdef KLEIN_DEBUG
+		dbf << "xml config: adding input " << input.size() << ", pin " << pin << endl;
+#endif
+		input.emplace_back(pin, true, InputInfo::ON_SELECT);
+		pin += 2;
+	}
+	return n;
+
 }
 
 void Klein::setNLoopsPerTrack(int n)
@@ -790,4 +952,24 @@ bool Klein::globalPause()
 bool Klein::globalReset()
 {
 	return false;
+}
+
+void Klein::setInPort(const KleinTrack & t, const int port)
+{
+	t.setInPort(port);
+}
+
+void Klein::setOutPort(const KleinTrack & t, const int port)
+{
+	t.setOutPort(port);
+}
+
+InputInfo * Klein::getInputInfo(const int pin)
+{
+	for (auto it = input.begin(); it != input.end(); ++it) {
+		if (it->pin == pin || (it->pin + 1 == pin && it->isStereo)) {
+			return  &(*it);
+		}
+	}
+	return nullptr;
 }
