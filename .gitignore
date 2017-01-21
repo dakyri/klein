@@ -12,3 +12,7 @@ windows/Debug/Klein.ilk
 windows/Debug/Klein.lib
 windows/Debug/Klein.pdb
 src/KLFunParser.output
+config/config.xml~
+windows/Debug/Klein.dll
+windows/.vs/Klein/v14/.suo
+windows/Debug/debug.txt
