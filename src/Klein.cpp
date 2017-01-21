@@ -8,7 +8,7 @@ using namespace std;
 #include "tinyxml2.h"
 
 #include "Klein.h"
-#include "KleinEditor.h"
+#include "GUI/KleinEditor.h"
  
 
 #ifdef KLEIN_DEBUG
@@ -27,12 +27,13 @@ KleinProgram::KleinProgram()
  *
  */
 Klein::Klein(audioMasterCallback audioMaster)
-	: AudioEffectX(audioMaster, 16, trackIdBase(kMaxTrack))
+	: AudioEffectX(audioMaster, 16, 0/*trackIdBase(kMaxTrack)*/)
 	, controller(*this)
-	, nTracks(4)
+	, nTracks(8)
 	, nLoopsPerTrack(4)
 	, kleinView(nullptr)
 	, tracksSetupDone(false), inputSetupDone(false)
+	, programs(nullptr)
 {
 	nInputPort = 1;
 	nOutputPort = 4;
@@ -41,7 +42,7 @@ Klein::Klein(audioMasterCallback audioMaster)
 	dbf.open("debug.txt");
 	dbf << unitbuf;
 #endif
-
+#ifndef MINIMAL_TEST
 	vector<string> configErrorList;
 	status_t err = loadConfig("config.xml", configErrorList);
 	if (err == ERR_OK) {
@@ -53,8 +54,9 @@ Klein::Klein(audioMasterCallback audioMaster)
 	if (!tracksSetupDone) { 
 		setNTracks(nTracks);
 	}
-	programs = new KleinProgram[numPrograms];
 
+	programs = new KleinProgram[numPrograms];
+#endif
 
 	nChunkFrames = 0;
 	nChunkFrameRemaining = 0;
@@ -70,7 +72,7 @@ Klein::Klein(audioMasterCallback audioMaster)
 //	SGLFO::InitializeDefaultWavetables();
 	setNumInputs (2*nInputPort);
 	setNumOutputs (2*nOutputPort);
-	hasVu ();
+//	hasVu ();
 	canProcessReplacing ();
 	setUniqueID ('KLYN');
 	suspend ();		// flush buffer
@@ -96,7 +98,7 @@ Klein::~Klein()
  * VST PROGRAM/PARAMETER HOOKS
  *************************************************************************************/
 void
-Klein::setProgram (long program)
+Klein::setProgram (VstInt32 program)
 {
 	KleinProgram * ap = &programs[program];
 
@@ -122,7 +124,7 @@ void Klein::getProgramName (char *name)
 
 
 //------------------------------------------------------------------------
-void Klein::setParameter (long index, float value)
+void Klein::setParameter (VstInt32 index, float value)
 {
 	KleinProgram * ap = &programs[curProgram];
 
@@ -144,14 +146,14 @@ void Klein::setParameter (long index, float value)
 	}
 
 	if (editor) {
-		editor->postUpdate();
+//		editor->postUpdate();
 		((AEffGUIEditor*)editor)->setParameter(index, value);
 	}
 
 }
 
 //------------------------------------------------------------------------
-float Klein::getParameter (long index)
+float Klein::getParameter (VstInt32 index)
 {
 	float v = 0;
 
@@ -199,12 +201,12 @@ Klein::parameterName(long index)
 	return "";
 }
 
-void Klein::getParameterName(long index, char *label)
+void Klein::getParameterName(VstInt32 index, char *label)
 {
 	sprintf(label, " %10s", parameterName(index));
 }
 
-bool Klein::getParameterProperties(long index, VstParameterProperties * p)
+bool Klein::getParameterProperties(VstInt32 index, VstParameterProperties * p)
 {
 #ifdef KLEIN_DEBUG
 	dbf << "getParameterProperties " << index << endl;
@@ -231,21 +233,21 @@ bool Klein::getParameterProperties(long index, VstParameterProperties * p)
 }
 
 //------------------------------------------------------------------------
-void Klein::getParameterDisplay(long index, char *text)
+void Klein::getParameterDisplay(VstInt32 index, char *text)
 {
 #ifdef KLEIN_DEBUG
 	dbf << "param display " << index << endl;
 #endif
 	switch (index) {
-	case kIdMasterGain: dB2string(masterGain, text); break;
+	case kIdMasterGain: dB2string(masterGain, text, 10); break;
 	default:
 		int trackid = track4Idx(index);
 		if (trackid >= 0 && trackid < kMaxTrack && trackid < track.size()) {
 			switch (trackParamId4Idx(index)) {
-			case kIdTrackInputGain: dB2string(track[trackid]->getInputGain(), text); break;
-			case kIdTrackGain:		dB2string(track[trackid]->getOutputGain(), text); break;
-			case kIdTrackPan:		float2string(track[trackid]->getPan(), text); break;
-			case kIdTrackFeedback:	dB2string(track[trackid]->getFeedback(), text); break;
+			case kIdTrackInputGain: dB2string(track[trackid]->getInputGain(), text, 10); break;
+			case kIdTrackGain:		dB2string(track[trackid]->getOutputGain(), text, 10); break;
+			case kIdTrackPan:		float2string(track[trackid]->getPan(), text, 10); break;
+			case kIdTrackFeedback:	dB2string(track[trackid]->getFeedback(), text, 10); break;
 			}
 		}
 
@@ -253,7 +255,7 @@ void Klein::getParameterDisplay(long index, char *text)
 }
 
 //------------------------------------------------------------------------
-void Klein::getParameterLabel(long index, char *label)
+void Klein::getParameterLabel(VstInt32 index, char *label)
 {
 #ifdef KLEIN_DEBUG
 	dbf << "param label " << index << endl;
@@ -282,7 +284,7 @@ void Klein::getParameterLabel(long index, char *label)
 // a note on message.
 
 //------------------------------------------------------------------------
-long Klein::getMidiProgramName(long channel, MidiProgramName* mpn)
+VstInt32 Klein::getMidiProgramName(VstInt32 channel, MidiProgramName* mpn)
 {/*
  long prg = mpn->thisProgramIndex;
  if (prg < 0 || prg >= 128)
@@ -294,7 +296,7 @@ long Klein::getMidiProgramName(long channel, MidiProgramName* mpn)
 }
 
 //------------------------------------------------------------------------
-long Klein::getCurrentMidiProgram(long channel, MidiProgramName* mpn)
+VstInt32 Klein::getCurrentMidiProgram(VstInt32 channel, MidiProgramName* mpn)
 {/*
  if (channel < 0 || channel >= 16 || !mpn)
  return -1;
@@ -306,7 +308,7 @@ long Klein::getCurrentMidiProgram(long channel, MidiProgramName* mpn)
 
 
 //------------------------------------------------------------------------
-long Klein::getMidiProgramCategory(long channel, MidiProgramCategory* cat)
+VstInt32 Klein::getMidiProgramCategory(VstInt32 channel, MidiProgramCategory* cat)
 {
 	/*
 	cat->parentCategoryIndex = -1;	// -1:no parent category
@@ -325,11 +327,11 @@ long Klein::getMidiProgramCategory(long channel, MidiProgramCategory* cat)
 	return 0;
 }
 
-long Klein::getChunk(void** data, bool isPreset) {
+VstInt32 Klein::getChunk(void** data, bool isPreset) {
 	return 0;
 }
 
-long Klein::setChunk(void* data, long byteSize, bool isPreset) {
+VstInt32 Klein::setChunk(void* data, VstInt32 byteSize, bool isPreset) {
 	return 0;
 }
 
@@ -337,9 +339,10 @@ long Klein::setChunk(void* data, long byteSize, bool isPreset) {
 /**************************************************************************************
  * VST AUDIO HOOKS
  *************************************************************************************/
-
-void Klein::process (float **inputs, float **outputs, long nFrames)
+// @deprecated
+void Klein::process (float **inputs, float **outputs, VstInt32 nFrames)
 {
+#ifndef MINIMAL_TEST
 	float cvu = vu;
 	long currentOutFrame = 0;
 	while (currentOutFrame < nFrames) {
@@ -361,15 +364,16 @@ void Klein::process (float **inputs, float **outputs, long nFrames)
 		currentOutFrame += framesThisChunk;
 	}
 	vu = cvu;
-
+#endif
 }
 
 
 /**
  *
  */
-void Klein::processReplacing (float **inputs, float **outputs, long nFrames)
+void Klein::processReplacing (float **inputs, float **outputs, VstInt32 nFrames)
 {
+#ifndef MINIMAL_TEST
 #if KLEIN_DEBUG >= 10
 	dbf << "process replacing " << nFrames << endl;
 #endif
@@ -421,6 +425,7 @@ void Klein::processReplacing (float **inputs, float **outputs, long nFrames)
 		currentOutFrame += framesThisChunk;
 	}
 	vu = cvu;
+#endif
 }
 
 float
@@ -484,7 +489,7 @@ const char* plugCanDos [] =
 
 */
 
-long Klein::canDo(char* text)
+VstInt32 Klein::canDo(char* text)
 {
 	if (!strcmp(text, "receiveVstEvents"))
 		return 1;
@@ -595,13 +600,13 @@ bool Klein::getProductString(char* text)
 	return true;
 }
 
-long Klein::getVendorVersion() {
+VstInt32 Klein::getVendorVersion() {
 	return 1;
 }
 
 
 //-----------------------------------------------------------------------------------------
-long Klein::processEvents(VstEvents* ev)
+VstInt32 Klein::processEvents(VstEvents* ev)
 {
 	cerr << "process "<< ev->numEvents <<" events in xsynth non " << endl;
 	for (long i = 0; i < ev->numEvents; i++) {
@@ -613,7 +618,7 @@ long Klein::processEvents(VstEvents* ev)
 	return 1;	// want more
 }
 
-bool Klein::getMidiKeyName(long channel, MidiKeyName* key)
+bool Klein::getMidiKeyName(VstInt32 channel, MidiKeyName* key)
 // struct will be filled with information for 'thisProgramIndex' and 'thisKeyNumber'
 // if keyName is "" the standard name of the key will be displayed.
 // if false is returned, no MidiKeyNames defined for 'thisProgramIndex'.
@@ -628,7 +633,7 @@ bool Klein::getMidiKeyName(long channel, MidiKeyName* key)
 }
 
 //------------------------------------------------------------------------
-bool Klein::hasMidiProgramsChanged(long channel)
+bool Klein::hasMidiProgramsChanged(VstInt32 channel)
 {
 	return false;	// updateDisplay ()
 }
@@ -923,8 +928,8 @@ void Klein::setNLoopsPerTrack(int n)
 	}
 }
 
-void Klein::allocateBuffers(long blocksize) {
-	AudioEffectX::allocateBuffers(blocksize);
+void Klein::setBlockSize(VstInt32 blocksize) {
+	AudioEffectX::setBlockSize(blocksize);
 	allocateChildBuffers(blocksize);
 }
 

@@ -76,45 +76,45 @@ public:
 	static const int MAX_CHANNELS = 8;
 
 /* VST callbacks */
-	virtual void process(float **inputs, float **outputs, long sampleframes) override;
-	virtual void processReplacing(float **inputs, float **outputs, long sampleFrames) override;
-	virtual long processEvents(VstEvents* events) override;
+	virtual void process(float **inputs, float **outputs, VstInt32 sampleframes); // @deprecated
+	virtual void processReplacing(float **inputs, float **outputs, VstInt32 sampleFrames) override;
+	virtual VstInt32 processEvents(VstEvents* events) override;
 
-	virtual void setProgram(long program) override;
+	virtual void setProgram(VstInt32 program) override;
 	virtual void setProgramName(char *name) override;
 	virtual void getProgramName(char *name) override;
 
-	virtual void setParameter(long index, float value) override;
-	virtual float getParameter(long index) override;
-	virtual void getParameterLabel(long index, char *label) override;
-	virtual void getParameterDisplay(long index, char *text) override;
-	virtual void getParameterName(long index, char *text) override;
-	virtual bool getParameterProperties(long index, VstParameterProperties* p) override;
+	virtual void setParameter(VstInt32 index, float value) override;
+	virtual float getParameter(VstInt32 index) override;
+	virtual void getParameterLabel(VstInt32 index, char *label) override;
+	virtual void getParameterDisplay(VstInt32 index, char *text) override;
+	virtual void getParameterName(VstInt32 index, char *text) override;
+	virtual bool getParameterProperties(VstInt32 index, VstParameterProperties* p) override;
 
-	virtual float getVu() override;
+	virtual float getVu(); // @deprecated
 	virtual void suspend() override;
 
-	virtual long getChunk(void** data, bool isPreset = false) override;
-	virtual long setChunk(void* data, long byteSize, bool isPreset = false) override;
+	virtual VstInt32 getChunk(void** data, bool isPreset = false) override;
+	virtual VstInt32 setChunk(void* data, VstInt32 byteSize, bool isPreset = false) override;
 
-	virtual long getMidiProgramName(long channel, MidiProgramName* midiProgramName) override;
-	virtual long getCurrentMidiProgram(long channel, MidiProgramName* currentProgram) override;
-	virtual long getMidiProgramCategory(long channel, MidiProgramCategory* category) override;
-	virtual bool hasMidiProgramsChanged(long channel) override;
-	virtual bool getMidiKeyName(long channel, MidiKeyName* keyName) override;
+	virtual VstInt32 getMidiProgramName(VstInt32 channel, MidiProgramName* midiProgramName) override;
+	virtual VstInt32 getCurrentMidiProgram(VstInt32 channel, MidiProgramName* currentProgram) override;
+	virtual VstInt32 getMidiProgramCategory(VstInt32 channel, MidiProgramCategory* category) override;
+	virtual bool hasMidiProgramsChanged(VstInt32 channel) override;
+	virtual bool getMidiKeyName(VstInt32 channel, MidiKeyName* keyName) override;
 
 	virtual bool getEffectName(char* name) override;
 	virtual bool getVendorString(char* text) override;
 	virtual bool getProductString(char* text) override;
-	virtual long getVendorVersion() override;
-	virtual long canDo(char* text) override;
+	virtual VstInt32 getVendorVersion() override;
+	virtual VstInt32 canDo(char* text) override;
 
 	virtual void inputConnected(long index, bool state);	// Input at <index> has been (dis-)connected,
 	virtual void outputConnected(long index, bool state);	// Same as input; state == true: connected
 	virtual bool getInputProperties(long index, VstPinProperties* properties);
 	virtual bool getOutputProperties(long index, VstPinProperties* properties);
 
-	virtual void allocateBuffers(long blockSize) override;
+	virtual void setBlockSize(VstInt32 blockSize) override;
 
 	char *parameterName(long index);
 
@@ -166,6 +166,8 @@ protected:
 
 // vst parameters
 	float masterGain;
+
+	friend KleinEditor;
 };
 
 

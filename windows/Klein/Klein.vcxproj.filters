@@ -16,6 +16,12 @@
     <Filter Include="VST Files">
       <UniqueIdentifier>{6f7451d3-e6f0-460e-b40f-b9ddb6eb31f9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\GUI">
+      <UniqueIdentifier>{f1bd54d7-2d59-4575-ac9d-468cf6ac1120}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GUI">
+      <UniqueIdentifier>{c9f6cb42-4ec4-4459-97ee-0d645a07a113}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Klein.h">
@@ -63,9 +69,6 @@
     <ClInclude Include="..\..\include\KLFContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\KleinEditor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\debug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -77,6 +80,12 @@
     </ClInclude>
     <ClInclude Include="..\..\include\InputInfo.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\GUI\TrackStrip.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\GUI\KleinEditor.h">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -98,12 +107,6 @@
     <ClCompile Include="..\..\src\ParserDriver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\library\VST\vst-2.3-common\AudioEffect.cpp">
-      <Filter>VST Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\library\VST\vst-2.3-common\audioeffectx.cpp">
-      <Filter>VST Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\KLFunLexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -119,14 +122,23 @@
     <ClCompile Include="..\..\src\KleinTrack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\KleinEditor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Sym.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\KLFContext.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\GUI\TrackStrip.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\library\VST\VST3 SDK\public.sdk\source\vst2.x\audioeffect.cpp">
+      <Filter>VST Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\library\VST\VST3 SDK\public.sdk\source\vst2.x\audioeffectx.cpp">
+      <Filter>VST Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\GUI\KleinEditor.cpp">
+      <Filter>Source Files\GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

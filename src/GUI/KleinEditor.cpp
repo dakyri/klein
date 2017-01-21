@@ -1,7 +1,9 @@
-#include "KleinEditor.h"
+#include "Klein.h"
+#include "GUI/KleinEditor.h"
+#include "debug.h"
 
-KleinEditor::KleinEditor(AudioEffect *effect)
-	: AEffGUIEditor(effect)
+KleinEditor::KleinEditor(Klein *_klein)
+	: AEffGUIEditor(_klein), klein(*_klein)
 {
 	/*
 	short i;
@@ -80,11 +82,43 @@ KleinEditor::~KleinEditor()
 
 
 //-----------------------------------------------------------------------------
-long KleinEditor::open(void *ptr)
+bool KleinEditor::open(void *ptr)
 {
+#if KLEIN_DEBUG >= 5
+	dbf << "openning editor with " << klein.track.size() << " tracks" << endl;
+#endif
 	// !!! always call this !!!
 	AEffGUIEditor::open(ptr);
 
+	CRect frameSize(0, 0, 300, 300);
+	CFrame* newFrame = new CFrame(frameSize, ptr, this);
+	newFrame->setBackgroundColor(kGreenCColor);
+
+	CCoord pos = 0;
+	CCoord wid = 0;
+#if KLEIN_DEBUG >= 5
+	dbf << "now scanning tracks ... still got " << klein.track.size() << " tracks" << endl;
+#endif
+	for (unique_ptr<KleinTrack> &it: klein.track) {
+		KleinTrack *t = it.get();
+
+		TrackStrip *ts = new TrackStrip(t, pos, 0);
+//		newFrame->addView(ts);
+		CRect ssz;
+		ts->getViewSize(ssz);
+
+		if (ssz.getWidth() > wid) {
+			wid = ssz.getWidth();
+		}
+		pos += ssz.getHeight();
+#if KLEIN_DEBUG >= 5
+		dbf << "adding track strip " << pos << ", " << wid << endl;
+#endif
+	}
+
+//	newFrame->setSize(pos, wid);
+
+	frame = newFrame;
 	/*
 	// load some bitmaps
 
@@ -116,7 +150,7 @@ long KleinEditor::open(void *ptr)
 
 
 //-----------------------------------------------------------------------------
-void KleinEditor::setParameter(long index, float value)
+void KleinEditor::setParameter(VstInt32 index, float value)
 {
 	if (!frame)
 		return;
@@ -143,24 +177,24 @@ void KleinEditor::setParameter(long index, float value)
 
 void
 KleinEditor::idle() { 
-	if (updateFlag) { 
-		updateFlag = 0; update();
-	} 
+//	if (updateFlag) { 
+//		updateFlag = 0; update();
+//	} 
 }
 
-long
+bool
 KleinEditor::onKeyDown(VstKeyCode &keyCode) {
-	keyCode = keyCode; return -1;
+	keyCode = keyCode; return false;
 }
 
-long
+bool
 KleinEditor::onKeyUp(VstKeyCode &keyCode) { 
 	keyCode = keyCode;
-	return -1; 
+	return false; 
 }
 
 //-----------------------------------------------------------------------------
-void KleinEditor::valueChanged(CDrawContext* context, CControl* control)
+void KleinEditor::valueChanged(VSTGUI::CControl* control)
 {
 	long tag = control->getTag();
 	/*
@@ -180,10 +214,10 @@ void KleinEditor::valueChanged(CDrawContext* context, CControl* control)
 	}*/
 }
 
-long 
+bool 
 KleinEditor::getRect(ERect **ppRect) {
 	*ppRect = 0;
-	return 0;
+	return false;
 }
 
 
@@ -192,6 +226,9 @@ void KleinEditor::close()
 	delete frame;
 	frame = 0;
 
+	CFrame* oldFrame = frame;
+	frame = nullptr;
+	oldFrame->forget();
 	// free some bitmaps
 	/*
 
