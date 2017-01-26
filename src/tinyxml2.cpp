@@ -1594,7 +1594,7 @@ XMLDocument::~XMLDocument()
     _attributePool.Trace( "attribute" );
 #endif
 
-#ifdef DEBUG
+#ifdef TINYXML_DEBUG
 	if ( Error() == false ) {
 		TIXMLASSERT( _elementPool.CurrentAllocs()   == _elementPool.Untracked() );
 		TIXMLASSERT( _attributePool.CurrentAllocs() == _attributePool.Untracked() );

@@ -14,6 +14,8 @@ using namespace std;
 #include "ParserDriver.h"
 #include "KLFContext.h"
 
+#include "vstgui.h"
+
 class Klein;
 class KLFun;
 
@@ -74,10 +76,44 @@ struct ScriptMapping: public KLFBaseContext {
 };
 
 /**
+ * mappings for interface components. simple extensions of the prior with a few gui specific details
+ */
+struct GuiMapping {
+	enum ComponentType {
+		KNOB,
+		BUTTON
+	};
+
+	GuiMapping(string &_label, ComponentType c=KNOB) : label(_label), type(c), tag(0) {}
+
+	long tag;
+	ComponentType type;
+	string label;
+};
+
+struct CommandGuiMapping : CommandMapping, GuiMapping {
+	CommandGuiMapping() : CommandGuiMapping("", 0, -1) {}
+	CommandGuiMapping(string _label, cmd_id_t i, tgt_id_t t) : CommandMapping(i, t), GuiMapping(_label) {}
+};
+
+struct ControlGuiMapping : ControlMapping, GuiMapping {
+	ControlGuiMapping() : ControlGuiMapping("", 0, -1) {}
+	ControlGuiMapping(string _label, ctl_id_t i, tgt_id_t t) : ControlMapping(i, t), GuiMapping(_label) {}
+};
+
+
+struct ScriptGuiMapping : ScriptMapping, GuiMapping {
+	ScriptGuiMapping() : ScriptGuiMapping("", 0, -1) {}
+	ScriptGuiMapping(string _label, script_id_t i, tgt_id_t t) : ScriptMapping(i, t), GuiMapping(_label) {}
+};
+
+
+
+/**
  * handles mapping of control inputs (MIDI and eventually maybe other things). 
  * processes the inputs, and executs m-script commands
  */
-class Controller
+class Controller: public CControlListener
 {
 public:
 	Controller(Klein &k);
@@ -91,11 +127,24 @@ public:
 	status_t addScript(script_id_t id, const char *src);
 	status_t lockAndLoadScripts(vector<string> &errors);
 
+	void addCommandGuiMapping(CommandGuiMapping & mapping);
+	void addControlGuiMapping(ControlGuiMapping & mapping);
+	void addScriptGuiMapping(ScriptGuiMapping & mapping);
+
+	/* from CControlListener */
+	virtual void valueChanged(VSTGUI::CControl* pControl) override;
+	virtual long controlModifierClicked(VSTGUI::CControl* pControl, long button) override { return 0; }	///< return 1 if you want the control to not handle it, otherwise 0
+
+
 protected:
 	Klein &klein;
 	unordered_map<int, vector<CommandMapping>> cmdMap;
 	unordered_map<int, vector<ControlMapping>> ctlMap;
 	unordered_map<int, vector<ScriptMapping>> klfMap;
+
+	vector<CommandGuiMapping> guiCmds;
+	vector<ControlGuiMapping> guiCtls;
+	vector<ScriptGuiMapping> guiKlfs;
 
 	vector<CommandMapping> * getCommandMap(int);
 	vector<ControlMapping> * getControlMap(int);
@@ -103,7 +152,8 @@ protected:
 
 	vector<KLFun> scripts;
 
-	int makeMidiHash(int cmd, int chan, int which);
+	static int makeMidiHash(int cmd, int chan, int which);
+
 	bool processMapping(const CommandMapping &m);
 	bool processMapping(const ControlMapping &m, const midi_val_t v);
 	bool processMapping(const ScriptMapping &m, const midi_what_t wh, const midi_val_t v);
@@ -116,5 +166,7 @@ protected:
 	friend class KCmdBlock;
 	friend class KVarAssBlock;
 	friend class KCtlAssBlock;
+	friend class KleinEditor;
+	friend class MasterStrip;
 };
 

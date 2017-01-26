@@ -119,12 +119,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\library\VST\vstgui_360_rc2\vstgui\vstcontrols.h" />
+    <ClInclude Include="..\..\..\library\VST\vstgui_360_rc2\vstgui\vstgui.h" />
     <ClInclude Include="..\..\..\sg-audio\SampleFile.h" />
     <ClInclude Include="..\..\include\Bufferator.h" />
     <ClInclude Include="..\..\include\Controller.h" />
     <ClInclude Include="..\..\include\Command.h" />
     <ClInclude Include="..\..\include\debug.h" />
+    <ClInclude Include="..\..\include\GUI\LabelledButton.h" />
+    <ClInclude Include="..\..\include\GUI\LabelledKnob.h" />
+    <ClInclude Include="..\..\include\GUI\MasterStrip.h" />
     <ClInclude Include="..\..\include\GUI\KleinEditor.h" />
+    <ClInclude Include="..\..\include\GUI\TextDrawer.h" />
     <ClInclude Include="..\..\include\GUI\TrackStrip.h" />
     <ClInclude Include="..\..\include\InputInfo.h" />
     <ClInclude Include="..\..\include\KLFContext.h" />
@@ -140,6 +146,7 @@
     <ClInclude Include="..\..\include\tinyxml2.h" />
     <ClInclude Include="..\..\src\KLFunParser.hpp" />
     <ClInclude Include="KLFObject.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\library\VST\VST3 SDK\public.sdk\source\vst2.x\audioeffect.cpp" />
@@ -147,7 +154,11 @@
     <ClCompile Include="..\..\..\sg-audio\SampleFile.cpp" />
     <ClCompile Include="..\..\src\Bufferator.cpp" />
     <ClCompile Include="..\..\src\Controller.cpp" />
+    <ClCompile Include="..\..\src\GUI\LabelledButton.cpp" />
+    <ClCompile Include="..\..\src\GUI\LabelledKnob.cpp" />
+    <ClCompile Include="..\..\src\GUI\MasterStrip.cpp" />
     <ClCompile Include="..\..\src\GUI\KleinEditor.cpp" />
+    <ClCompile Include="..\..\src\GUI\TextDrawer.cpp" />
     <ClCompile Include="..\..\src\GUI\TrackStrip.cpp" />
     <ClCompile Include="..\..\src\Klein.cpp" />
     <ClCompile Include="..\..\src\KleinTrack.cpp" />
@@ -185,6 +196,13 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">KLFunParser.cpp;KLFunParser.hpp</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Bisonning away on the input script</Message>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\resources\kick1.bmp" />
+    <Image Include="..\..\resources\kick1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Klein.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

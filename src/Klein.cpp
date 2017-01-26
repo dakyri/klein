@@ -22,12 +22,12 @@ KleinProgram::KleinProgram()
 
 	strcpy (name, "Init");
 }
-
+#undef MINIMAL_TEST
 /**
  *
  */
 Klein::Klein(audioMasterCallback audioMaster)
-	: AudioEffectX(audioMaster, 16, 0/*trackIdBase(kMaxTrack)*/)
+	: AudioEffectX(audioMaster, 16, trackIdBase(0))
 	, controller(*this)
 	, nTracks(8)
 	, nLoopsPerTrack(4)
@@ -54,9 +54,9 @@ Klein::Klein(audioMasterCallback audioMaster)
 	if (!tracksSetupDone) { 
 		setNTracks(nTracks);
 	}
-
-	programs = new KleinProgram[numPrograms];
 #endif
+	programs = new KleinProgram[numPrograms];
+
 
 	nChunkFrames = 0;
 	nChunkFrameRemaining = 0;
@@ -680,6 +680,8 @@ Klein::loadConfig(const char *path, vector<string> &errorList)
 				err = loadScriptConfig(childElement, errorList);
 			} else if (childName == "midiMap") {
 				err = loadMidiMapConfig(childElement, errorList);
+			} else if (childName == "guiMap") {
+				err = loadGuiMapConfig(childElement, errorList);
 			}
 			if (err != tinyxml2::XML_NO_ERROR) {
 				errorList.push_back(doc.GetErrorStr1());
@@ -885,6 +887,83 @@ tinyxml2::XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element, vecto
 	return tinyxml2::XML_NO_ERROR;
 
 }
+
+
+tinyxml2::XMLError Klein::loadGuiMapConfig(tinyxml2::XMLElement *element, vector<string> &errorList) {
+	tinyxml2::XMLElement *childElement = element->FirstChildElement();
+	while (childElement != nullptr) {
+		std::string childName = childElement->Value();
+#ifdef KLEIN_DEBUG
+		dbf << "xml config: guimap: got child " << childName << endl;
+#endif
+		const char *functionAttrVal = childElement->Attribute("function");
+		const char *controlAttrVal = childElement->Attribute("control");
+		const char *scriptAttrVal = childElement->Attribute("script");
+		const char *targetAttrVal = childElement->Attribute("context");
+		const char *labelAttrVal = childElement->Attribute("label");
+
+		// TODO XXXX FIXME ???? map function/control/script here into mapping
+
+		tgt_id_t tgt = -1;
+		if (targetAttrVal) { // "global" == -1
+			tgt = atoi(targetAttrVal);
+		}
+		string label;
+		if (functionAttrVal) {
+#ifdef KLEIN_DEBUG
+			dbf << "xml config: guimap: got function attr " << functionAttrVal << endl;
+#endif
+			Command *c = Command::find(functionAttrVal);
+			if (c != nullptr) {
+				label = (labelAttrVal ? labelAttrVal : c->displayName);
+				CommandGuiMapping mapping(label, c->command, tgt); // <<<<<<<<<<<<<<<<<<<<<< ?????
+				if (childName == "button") {
+					mapping.type = GuiMapping::BUTTON;
+					controller.addCommandGuiMapping(mapping);
+				} else if (childName == "knob") {
+					controller.addCommandGuiMapping(mapping);
+					mapping.type = GuiMapping::KNOB;
+				}
+			}
+		}
+		if (controlAttrVal) {
+#ifdef KLEIN_DEBUG
+			dbf << "xml config: guimap: got control attr " << controlAttrVal << endl;
+#endif
+			Control *c = Control::find(controlAttrVal);
+			if (c != nullptr) {
+				label = (labelAttrVal ? labelAttrVal : c->displayName);
+				ControlGuiMapping mapping(label, c->control, tgt);
+				if (childName == "button") {
+					mapping.type = GuiMapping::BUTTON;
+					controller.addControlGuiMapping(mapping);
+				} else if (childName == "knob") {
+					controller.addControlGuiMapping(mapping);
+					mapping.type = GuiMapping::KNOB;
+				}
+			}
+		}
+		if (scriptAttrVal) {
+#ifdef KLEIN_DEBUG
+			dbf << "xml config: guimap: got script attr " << scriptAttrVal << endl;
+#endif
+			label = (labelAttrVal ? labelAttrVal : "*some name*"/*c->displayName*/);
+			script_id_t id = atoi(scriptAttrVal);
+			ScriptGuiMapping mapping(label, id, tgt); // connect to the actual scripts later: check it all then
+			if (childName == "button") {
+				mapping.type = GuiMapping::BUTTON;
+				controller.addScriptGuiMapping(mapping);
+			} else if (childName == "knob") {
+				mapping.type = GuiMapping::KNOB;
+				controller.addScriptGuiMapping(mapping);
+			}
+		}
+		childElement = childElement->NextSiblingElement();
+	}
+	return tinyxml2::XML_NO_ERROR;
+
+}
+
 
 int Klein::setNTracks(int _nTrack, int id, bool clear)
 {

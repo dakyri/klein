@@ -53,8 +53,8 @@ distribution.
 */
 
 #if defined( _DEBUG ) || defined( DEBUG ) || defined (__DEBUG__)
-#   ifndef DEBUG
-#       define DEBUG
+#   ifndef TINYXML_DEBUG
+#       define TINYXML_DEBUG
 #   endif
 #endif
 

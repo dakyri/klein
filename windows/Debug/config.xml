@@ -10,7 +10,7 @@
 	</inputs>
 	<scripts>
 		<script id="some id" src="path"/>
-	</script>
+	</scripts>
 	<midiMap>
 		<!--		<note channel="1" which="10" script="some script" context="1" />-->
 		<note channel="1" which="10" function="Record" context="global" />
@@ -22,4 +22,12 @@
 		<prog channel="1" which="3" function="Track4" context="global"/>
 		<prog channel="1" which="4" function="Track5" context="global"/>
 	</midiMap>
+	<guiMap>
+		<button function="Record" label="Record" context="global"/>
+		<button function="Reset" label="Reset" context="global"/>
+		<knob function="gain" label="Gain"  context="track"/>
+		<knob function="pan" label="Pan"  context="track"/>
+<!--		<button script="my record script" label="Script"  context="global"/>-->
+<!--		<knob script="my control script" label="Some other script"  context="global"/>-->
+	</guiMap>
 </klein>

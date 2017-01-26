@@ -76,6 +76,8 @@ public:
 
 	virtual ~KleinTrack();
 
+	int getId();
+
 	void setInputGain(int v);
 	void setInputPan(int v);
 	void setOutputGain(int v);

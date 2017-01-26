@@ -152,6 +152,7 @@ protected:
 	tinyxml2::XMLError loadInputConfig(tinyxml2::XMLElement *element, vector<string> &errorList);
 	tinyxml2::XMLError loadScriptConfig(tinyxml2::XMLElement *element, vector<string> &errorList);
 	tinyxml2::XMLError loadMidiMapConfig(tinyxml2::XMLElement *element, vector<string> &errorList);
+	tinyxml2::XMLError loadGuiMapConfig(tinyxml2::XMLElement *element, vector<string> &errorList);
 
 	int setNTracks(int n, int id = 0, bool clear = false);
 	int setNInput(int n, int pin = 0, bool clear = false);

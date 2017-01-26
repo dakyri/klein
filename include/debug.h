@@ -5,7 +5,7 @@
 #ifdef KLEIN_DEBUG
 
 #include <fstream>
-extern ofstream dbf;
+extern std::ofstream dbf;
 #endif
 
 #endif

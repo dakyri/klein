@@ -87,6 +87,27 @@
     <ClInclude Include="..\..\include\GUI\KleinEditor.h">
       <Filter>Header Files\GUI</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\GUI\MasterStrip.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\library\VST\vstgui_360_rc2\vstgui\vstgui.h">
+      <Filter>VST Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\library\VST\vstgui_360_rc2\vstgui\vstcontrols.h">
+      <Filter>VST Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\GUI\LabelledButton.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\GUI\TextDrawer.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\GUI\LabelledKnob.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Klein.cpp">
@@ -140,6 +161,18 @@
     <ClCompile Include="..\..\src\GUI\KleinEditor.cpp">
       <Filter>Source Files\GUI</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\GUI\MasterStrip.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\GUI\LabelledButton.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\GUI\TextDrawer.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\GUI\LabelledKnob.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\KLFunLexer.l">
@@ -148,5 +181,18 @@
     <CustomBuild Include="..\..\src\KLFunParser.yy">
       <Filter>Source Files</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\resources\kick1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\resources\kick1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Klein.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

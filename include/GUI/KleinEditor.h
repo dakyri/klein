@@ -2,11 +2,12 @@
 
 #define DEBUG 0
 #include "aeffguieditor.h"
+#include "GUI/MasterStrip.h"
 #include "GUI/TrackStrip.h"
 
 class Klein;
 
-class KleinEditor : public AEffGUIEditor, public CControlListener {
+class KleinEditor : public AEffGUIEditor/*, public CControlListener*/ {
 public:
 	KleinEditor(Klein *effect);
 	virtual ~KleinEditor();
@@ -22,8 +23,10 @@ public:
 	virtual bool onKeyDown(VstKeyCode &keyCode) override;
 	virtual bool onKeyUp(VstKeyCode &keyCode) override;
 #endif
-	virtual void valueChanged(VSTGUI::CControl* pControl);
-	virtual long controlModifierClicked(VSTGUI::CControl* pControl, long button) { return 0; }	///< return 1 if you want the control to not handle it, otherwise 0
-
+//	virtual void valueChanged(VSTGUI::CControl* pControl) override;
+//	virtual long controlModifierClicked(VSTGUI::CControl* pControl, long button) override { return 0; }	///< return 1 if you want the control to not handle it, otherwise 0
+protected:
 	Klein &klein;
+
+	CBitmap *buttonBitmap;
 };

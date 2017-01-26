@@ -198,6 +198,11 @@ KleinTrack::~KleinTrack()
 	if (rightCycleBuffer != nullptr) delete[] rightCycleBuffer;
 }
 
+int
+KleinTrack::getId() {
+	return id;
+}
+
 void
 KleinTrack::setInputGain(int v) {
 	inputGain = v;

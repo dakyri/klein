@@ -2,60 +2,12 @@
 #include "GUI/KleinEditor.h"
 #include "debug.h"
 
+#include "../windows/Klein/resource.h"
+
 KleinEditor::KleinEditor(Klein *_klein)
-	: AEffGUIEditor(_klein), klein(*_klein)
+	: AEffGUIEditor(_klein), klein(*_klein), buttonBitmap(nullptr)
 {
 	/*
-	short i;
-#ifdef DEBUG
-	if (!dbf) {
-		dbf = fopen("debug", "w");
-		setbuf(dbf, NULL);
-	}
-#endif
-	hKnobHandle = 0;
-	hKnobBody = 0;
-	hOnOffButton = 0;
-
-	for (i = 0; i<NSGDelayTap; i++) {
-		tapDelayFader[i] = NULL;
-		tapLevelFader[i] = NULL;
-		tapPanFader[i] = NULL;
-		tapDelayDisplay[i] = NULL;
-		tapLevelDisplay[i] = NULL;
-		tapPanDisplay[i] = NULL;
-		tapChannelSwapButton[i] = NULL;
-		tapSendMenu[i] = NULL;
-	}
-
-	feedbackFader = NULL;
-	feedbackDisplay = NULL;
-
-	for (i = 0; i<NSGDelayFilter; i++) {
-		filterFreqFader[i] = NULL;
-		filterResFader[i] = NULL;
-		filterFreqDisplay[i] = NULL;
-		filterResDisplay[i] = NULL;
-		filterEnableButton[i] = NULL;
-		filterTypeMenu[i] = NULL;
-	}
-
-	for (i = 0; i<NSGDelayLFO; i++) {
-		lfoRateFader[i] = NULL;
-		lfoDepthFader[i] = NULL;
-		lfoRateDisplay[i] = NULL;
-		lfoDepthDisplay[i] = NULL;
-		lfoTypeMenu[i] = NULL;
-		lfoTargetMenu[i] = NULL;
-	}
-
-	directLevelDisplay = NULL;
-	directLevelFader = NULL;
-	directPanDisplay = NULL;
-	directPanFader = NULL;
-
-
-
 
 	// load the background bitmap
 	// we don't need to load all bitmaps, this could be done when open is called
@@ -72,12 +24,13 @@ KleinEditor::KleinEditor(Klein *_klein)
 //-----------------------------------------------------------------------------
 KleinEditor::~KleinEditor()
 {
-	/*
 	// free background bitmap
-	if (hBackground)
-		hBackground->forget();
-	hBackground = 0;
-	*/
+	
+	if (buttonBitmap) {
+		buttonBitmap->forget();
+	}
+	buttonBitmap = nullptr;
+
 }
 
 
@@ -85,26 +38,42 @@ KleinEditor::~KleinEditor()
 bool KleinEditor::open(void *ptr)
 {
 #if KLEIN_DEBUG >= 5
-	dbf << "openning editor with " << klein.track.size() << " tracks" << endl;
+	dbf << "openning editor with " << /*klein.track.size() << */" tracks" << endl;
 #endif
 	// !!! always call this !!!
-	AEffGUIEditor::open(ptr);
+//	AEffGUIEditor::open(ptr);
 
+	if (!buttonBitmap) {
+		buttonBitmap = new CBitmap(IDB_BITMAP1);
+#if KLEIN_DEBUG >= 5
+		dbf << "loading bitmap " << buttonBitmap->isLoaded() << ", wide " << buttonBitmap->getWidth() << ", high " << buttonBitmap->getHeight() << endl;
+#endif
+	}
+	
 	CRect frameSize(0, 0, 300, 300);
 	CFrame* newFrame = new CFrame(frameSize, ptr, this);
 	newFrame->setBackgroundColor(kGreenCColor);
 
 	CCoord pos = 0;
 	CCoord wid = 0;
+	CRect ssz;
 #if KLEIN_DEBUG >= 5
 	dbf << "now scanning tracks ... still got " << klein.track.size() << " tracks" << endl;
 #endif
+
+	MasterStrip *bs = new MasterStrip(klein.controller, 0, pos, newFrame, buttonBitmap);
+	newFrame->addView(bs);
+	bs->getViewSize(ssz);
+	if (ssz.getWidth() > wid) {
+		wid = ssz.getWidth();
+	}
+	pos += ssz.getHeight();
+
 	for (unique_ptr<KleinTrack> &it: klein.track) {
 		KleinTrack *t = it.get();
 
-		TrackStrip *ts = new TrackStrip(t, pos, 0);
-//		newFrame->addView(ts);
-		CRect ssz;
+		TrackStrip *ts = new TrackStrip(klein.controller, t, 0, pos, newFrame);
+		newFrame->addView(ts);
 		ts->getViewSize(ssz);
 
 		if (ssz.getWidth() > wid) {
@@ -112,18 +81,19 @@ bool KleinEditor::open(void *ptr)
 		}
 		pos += ssz.getHeight();
 #if KLEIN_DEBUG >= 5
-		dbf << "adding track strip " << pos << ", " << wid << endl;
+		dbf << "adding track strip " << pos << ", " << wid << ", id " << t->getId() << endl;
 #endif
 	}
+	newFrame->setSize(wid, pos);
 
-//	newFrame->setSize(pos, wid);
 
 	frame = newFrame;
+#if KLEIN_DEBUG >= 5
+	dbf << "main frame ... is built " << endl;
+#endif
 	/*
 	// load some bitmaps
 
-	if (!hKnobHandle)
-		hKnobHandle = new CBitmap(kKnobHandleId);
 
 	if (!hKnobBody)
 		hKnobBody = new CBitmap(kKnobBodyId);
@@ -193,26 +163,6 @@ KleinEditor::onKeyUp(VstKeyCode &keyCode) {
 	return false; 
 }
 
-//-----------------------------------------------------------------------------
-void KleinEditor::valueChanged(VSTGUI::CControl* control)
-{
-	long tag = control->getTag();
-	/*
-	switch (tag)
-	{
-
-	case kTap1Delay:
-		effect->setParameterAutomated(tag, control->getValue());
-		tapDelayFader[0]->update(context);
-		tapDelayDisplay[0]->update(context);
-		break;
-	case kTap1Level:
-		effect->setParameterAutomated(tag, control->getValue());
-		tapLevelFader[0]->update(context);
-		tapLevelDisplay[0]->update(context);
-		break;
-	}*/
-}
 
 bool 
 KleinEditor::getRect(ERect **ppRect) {
@@ -223,12 +173,11 @@ KleinEditor::getRect(ERect **ppRect) {
 
 void KleinEditor::close()
 {
-	delete frame;
-	frame = 0;
-
 	CFrame* oldFrame = frame;
 	frame = nullptr;
-	oldFrame->forget();
+	if (oldFrame) {
+		oldFrame->forget();
+	}
 	// free some bitmaps
 	/*
 

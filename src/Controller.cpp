@@ -188,6 +188,29 @@ Controller::~Controller()
 {
 }
 
+//-----------------------------------------------------------------------------
+void
+Controller::valueChanged(VSTGUI::CControl* control)
+{
+	long tag = control->getTag();
+	control->setDirty(true);
+	/*
+	switch (tag)
+	{
+
+	case kTap1Delay:
+	effect->setParameterAutomated(tag, control->getValue());
+	tapDelayFader[0]
+	tapDelayDisplay[0]->update(context);
+	break;
+	case kTap1Level:
+	effect->setParameterAutomated(tag, control->getValue());
+	tapLevelFader[0]->update(context);
+	tapLevelDisplay[0]->update(context);
+	break;
+	}*/
+}
+
 bool
 Controller::processEvent(VstMidiEvent * e)
 {
@@ -557,6 +580,29 @@ void Controller::addScriptMapping(ScriptMapping & mapping, int mdicmd, int chann
 	klfMap[makeMidiHash(mdicmd, channel, which)].push_back(mapping);
 }
 
+/**
+* @param mapping
+*/
+void Controller::addCommandGuiMapping(CommandGuiMapping & mapping)
+{
+	guiCmds.push_back(mapping);
+}
+
+/**
+* @param mapping
+*/
+void Controller::addControlGuiMapping(ControlGuiMapping & mapping)
+{
+	guiCtls.push_back(mapping);
+}
+
+/**
+* @param mapping
+*/
+void Controller::addScriptGuiMapping(ScriptGuiMapping & mapping)
+{
+	guiKlfs.push_back(mapping);
+}
 
 status_t Controller::addScript(script_id_t id, const char * src)
 {
