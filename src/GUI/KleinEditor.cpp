@@ -34,7 +34,10 @@ KleinEditor::~KleinEditor()
 }
 
 
-//-----------------------------------------------------------------------------
+/**
+ * open the window. main vst hook
+ * ownership of the master strip, track strips etc. belong to the frame
+ */
 bool KleinEditor::open(void *ptr)
 {
 #if KLEIN_DEBUG >= 5
@@ -51,7 +54,8 @@ bool KleinEditor::open(void *ptr)
 	}
 	
 	CRect frameSize(0, 0, 300, 300);
-	CFrame* newFrame = new CFrame(frameSize, ptr, this);
+	CFrame* newFrame = new CFrame(frameSize, this);
+	newFrame->open(ptr);
 	newFrame->setBackgroundColor(kGreenCColor);
 
 	CCoord pos = 0;
@@ -61,9 +65,9 @@ bool KleinEditor::open(void *ptr)
 	dbf << "now scanning tracks ... still got " << klein.track.size() << " tracks" << endl;
 #endif
 
-	MasterStrip *bs = new MasterStrip(klein.controller, 0, pos, newFrame, buttonBitmap);
-	newFrame->addView(bs);
-	bs->getViewSize(ssz);
+	masterStrip = new MasterStrip(klein.controller, 0, pos, newFrame, buttonBitmap);
+	newFrame->addView(masterStrip);
+	masterStrip->getViewSize(ssz);
 	if (ssz.getWidth() > wid) {
 		wid = ssz.getWidth();
 	}
@@ -74,6 +78,7 @@ bool KleinEditor::open(void *ptr)
 
 		TrackStrip *ts = new TrackStrip(klein.controller, t, 0, pos, newFrame);
 		newFrame->addView(ts);
+		trackStrip.push_back(ts);
 		ts->getViewSize(ssz);
 
 		if (ssz.getWidth() > wid) {
@@ -164,6 +169,7 @@ KleinEditor::onKeyUp(VstKeyCode &keyCode) {
 }
 
 
+
 bool 
 KleinEditor::getRect(ERect **ppRect) {
 	*ppRect = 0;
@@ -175,6 +181,8 @@ void KleinEditor::close()
 {
 	CFrame* oldFrame = frame;
 	frame = nullptr;
+	masterStrip = nullptr;
+	trackStrip.clear();
 	if (oldFrame) {
 		oldFrame->forget();
 	}
@@ -193,4 +201,55 @@ void KleinEditor::close()
 		hKnobBody->forget();
 	hKnobBody = 0;
 	*/
+}
+
+
+void KleinEditor::displayHostClock(VstTimeInfo *t)
+{
+	if (masterStrip) {
+		masterStrip->displayHostClock();
+	}
+
+}
+
+void KleinEditor::displayTrackStatus(int trackId)
+{
+	if (trackId >= 0 && trackId < trackStrip.size()) {
+		trackStrip[trackId]->displayTrackStatus();
+	}
+}
+
+void KleinEditor::displaySampleData(int trackId)
+{
+	if (trackId >= 0 && trackId < trackStrip.size()) {
+		trackStrip[trackId]->displaySampleData();
+	}
+}
+
+void KleinEditor::displaySelectedTrack(int trackId)
+{
+	if (trackId >= 0 && trackId < trackStrip.size()) {
+		trackStrip[trackId]->displaySelectedTrack();
+	}
+}
+
+void KleinEditor::displaySelectedLoop(int trackId)
+{
+	if (trackId >= 0 && trackId < trackStrip.size()) {
+		trackStrip[trackId]->displaySelectedLoop();
+	}
+}
+
+void KleinEditor::displayCurrentLayer(int trackId)
+{
+	if (trackId >= 0 && trackId < trackStrip.size()) {
+		trackStrip[trackId]->displayCurrentLayer();
+	}
+}
+
+void KleinEditor::displayMessage(const string & msg)
+{
+	if (masterStrip) {
+		masterStrip->displayMessage(msg);
+	}
 }

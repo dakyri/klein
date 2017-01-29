@@ -3,10 +3,10 @@
 #include <string>
 using namespace std;
 
-typedef int cmd_id_t;
-typedef int ctl_id_t;
-typedef int script_id_t;
-typedef int tgt_id_t;
+typedef unsigned int cmd_id_t;
+typedef unsigned int ctl_id_t;
+typedef unsigned int script_id_t;
+typedef unsigned int tgt_id_t;
 
 
 /**

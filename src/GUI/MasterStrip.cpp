@@ -1,3 +1,4 @@
+#include "aeffectx.h"
 #include "GUI\MasterStrip.h"
 #include "GUI\LabelledButton.h"
 #include "Controller.h"
@@ -5,7 +6,7 @@
 #include "debug.h"
 
 MasterStrip::MasterStrip(Controller &c, CCoord x, CCoord y, CFrame *parent, CBitmap *_buttonBitmap)
-	: CViewContainer(CRect(x, y, x + 300, y + 100), parent), controller(c), buttonBitmap(_buttonBitmap)
+	: CViewContainer(CRect(x, y, x + 300, y + 100)), controller(c), buttonBitmap(_buttonBitmap)
 {
 
 #if KLEIN_DEBUG >= 5
@@ -40,7 +41,7 @@ void MasterStrip::setComponents4(Controller & c)
 	dbf << "MasterStrip:: " << c.guiCmds.size() << " gui elements" << endl;
 #endif
 	for (CommandGuiMapping &it : c.guiCmds) {
-		if (it.type == GuiMapping::BUTTON) {	
+		if (it.type == GuiMapping::BUTTON && it.target != kTargetAllTracks) { // either global (ie selected) or specifi track
 #if KLEIN_DEBUG >= 5
 			dbf << "MasterStrip:: adding <" << it.command << ", " << it.label << "> at " << buttonSz.left << ", " << buttonSz.top << " wide " << endl;
 #endif
@@ -70,3 +71,12 @@ void MasterStrip::setComponents4(Controller & c)
 	sz.bottom = sz.top + pos + 2;
 	setViewSize(sz);
 }
+
+void MasterStrip::displayHostClock()
+{
+}
+
+void MasterStrip::displayMessage(const string & msg)
+{
+}
+

@@ -828,7 +828,14 @@ tinyxml2::XMLError Klein::loadMidiMapConfig(tinyxml2::XMLElement *element, vecto
 
 		tgt_id_t tgt = -1;
 		if (targetAttrVal) {
-			tgt = atoi(targetAttrVal);
+			string s = string(targetAttrVal);
+			if (s == "global") {
+				tgt = kTargetGlobal;
+			} else if (s == "track") {
+				tgt = kTargetAllTracks;
+			} else {
+				tgt = stoi(s);
+			}
 		}
 		if (functionAttrVal) {
 #ifdef KLEIN_DEBUG
@@ -906,7 +913,14 @@ tinyxml2::XMLError Klein::loadGuiMapConfig(tinyxml2::XMLElement *element, vector
 
 		tgt_id_t tgt = -1;
 		if (targetAttrVal) { // "global" == -1
-			tgt = atoi(targetAttrVal);
+			string s = string(targetAttrVal);
+			if (s == "global") {
+				tgt = kTargetGlobal;
+			} else if (s == "track") {
+				tgt = kTargetAllTracks;
+			} else {
+				tgt = stoi(s);
+			}
 		}
 		string label;
 		if (functionAttrVal) {
@@ -921,8 +935,8 @@ tinyxml2::XMLError Klein::loadGuiMapConfig(tinyxml2::XMLElement *element, vector
 					mapping.type = GuiMapping::BUTTON;
 					controller.addCommandGuiMapping(mapping);
 				} else if (childName == "knob") {
-					controller.addCommandGuiMapping(mapping);
 					mapping.type = GuiMapping::KNOB;
+					controller.addCommandGuiMapping(mapping);
 				}
 			}
 		}
@@ -938,8 +952,8 @@ tinyxml2::XMLError Klein::loadGuiMapConfig(tinyxml2::XMLElement *element, vector
 					mapping.type = GuiMapping::BUTTON;
 					controller.addControlGuiMapping(mapping);
 				} else if (childName == "knob") {
-					controller.addControlGuiMapping(mapping);
 					mapping.type = GuiMapping::KNOB;
+					controller.addControlGuiMapping(mapping);
 				}
 			}
 		}
@@ -1014,7 +1028,10 @@ void Klein::setBlockSize(VstInt32 blocksize) {
 
 KleinTrack & Klein::getTrack(int which)
 {
-	// TODO: maybe we should put in a guard and exception
+	// TODO ???? fixme: maybe we should put in a guard and exception
+	if (which == kTargetGlobal || which == kTargetAllTracks) {
+		
+	}
 	return *track[0];
 }
 

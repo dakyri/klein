@@ -46,6 +46,41 @@ class KLFun;
  *  - something else??
  * 
  */
+enum MappingType {
+	kMapCommand = 0,
+	kMapControl = 1,
+	kMapScript = 2
+};
+
+/**
+ * values for tgt_id_t.
+ * ???? xxxx fixme assuming for the moment that target will not be too large for a 6 bit unsigned quantity
+ */
+enum {
+	kTargetGlobal = 0x3f,
+	kTargetAllTracks = 0x3e
+};
+
+/***
+* vstgui tag
+*
+*  @param mapIdx Mapping index
+*  @param mapType (command, control or script)
+*  @param targetType (global, all track, specific track)
+*	@param track track number if from or for a specific track
+*/
+inline long makeTag(const int mapInd, const MappingType mapType, tgt_id_t target) {
+	return (mapInd << 8) | ((mapType & 0x3) << 6) | (target & 0x3F);
+}
+inline void parseTag(const long tag, int &mapInd, MappingType &mapType, tgt_id_t &target) {
+	target = (tag & 0x3F);
+	mapType = (MappingType)((tag >> 6) & 0x3);
+	mapInd = ((tag >> 8) & 0x00ffffff);
+}
+inline void setTagTargetId(long &t, tgt_id_t target) {
+	t = (t & 0xffffffc0) | (target & 0x3f);
+}
+
 struct CommandMapping {
 	CommandMapping() : CommandMapping(0, -1) {}
 	CommandMapping(cmd_id_t i, tgt_id_t t) : command(i), target(t), attack(0), lastUpdate(0) {}
@@ -113,7 +148,7 @@ struct ScriptGuiMapping : ScriptMapping, GuiMapping {
  * handles mapping of control inputs (MIDI and eventually maybe other things). 
  * processes the inputs, and executs m-script commands
  */
-class Controller: public CControlListener
+class Controller: public IControlListener
 {
 public:
 	Controller(Klein &k);
@@ -131,9 +166,9 @@ public:
 	void addControlGuiMapping(ControlGuiMapping & mapping);
 	void addScriptGuiMapping(ScriptGuiMapping & mapping);
 
-	/* from CControlListener */
+	/* from IControlListener */
 	virtual void valueChanged(VSTGUI::CControl* pControl) override;
-	virtual long controlModifierClicked(VSTGUI::CControl* pControl, long button) override { return 0; }	///< return 1 if you want the control to not handle it, otherwise 0
+	virtual int32_t controlModifierClicked(CControl* pControl, CButtonState button) override { return 0; }	///< return 1 if you want the control to not handle it, otherwise 0
 
 
 protected:
@@ -168,5 +203,6 @@ protected:
 	friend class KCtlAssBlock;
 	friend class KleinEditor;
 	friend class MasterStrip;
+	friend class TrackStrip;
 };
 

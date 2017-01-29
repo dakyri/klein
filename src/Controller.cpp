@@ -187,30 +187,6 @@ Controller::Controller(Klein &k)
 Controller::~Controller()
 {
 }
-
-//-----------------------------------------------------------------------------
-void
-Controller::valueChanged(VSTGUI::CControl* control)
-{
-	long tag = control->getTag();
-	control->setDirty(true);
-	/*
-	switch (tag)
-	{
-
-	case kTap1Delay:
-	effect->setParameterAutomated(tag, control->getValue());
-	tapDelayFader[0]
-	tapDelayDisplay[0]->update(context);
-	break;
-	case kTap1Level:
-	effect->setParameterAutomated(tag, control->getValue());
-	tapLevelFader[0]->update(context);
-	tapLevelDisplay[0]->update(context);
-	break;
-	}*/
-}
-
 bool
 Controller::processEvent(VstMidiEvent * e)
 {
@@ -580,19 +556,25 @@ void Controller::addScriptMapping(ScriptMapping & mapping, int mdicmd, int chann
 	klfMap[makeMidiHash(mdicmd, channel, which)].push_back(mapping);
 }
 
+
 /**
-* @param mapping
-*/
+ *  save a gui command mapping. set it's tag value
+ * @param mapping
+ */
 void Controller::addCommandGuiMapping(CommandGuiMapping & mapping)
 {
+	mapping.tag = makeTag(guiCmds.size(), MappingType::kMapCommand, mapping.target);
 	guiCmds.push_back(mapping);
 }
 
 /**
-* @param mapping
-*/
+ *  save a gui control mapping. set it's tag value 
+ * @param mapping
+ */
 void Controller::addControlGuiMapping(ControlGuiMapping & mapping)
 {
+	mapping.tag = makeTag(guiCtls.size(), MappingType::kMapControl, mapping.target);
+	dbf << "adding control " << hex << mapping.tag << " at " << dec << guiCtls.size() << ", " << hex << mapping.target << dec << endl;
 	guiCtls.push_back(mapping);
 }
 
@@ -601,8 +583,65 @@ void Controller::addControlGuiMapping(ControlGuiMapping & mapping)
 */
 void Controller::addScriptGuiMapping(ScriptGuiMapping & mapping)
 {
+	mapping.tag = makeTag(guiKlfs.size(), MappingType::kMapScript, mapping.target);
 	guiKlfs.push_back(mapping);
 }
+
+//-----------------------------------------------------------------------------
+void
+Controller::valueChanged(VSTGUI::CControl* control)
+{
+	long tag = control->getTag();
+	tgt_id_t target = kTargetGlobal;
+	MappingType mapType = MappingType::kMapCommand;
+	int mapInd = 0;
+	parseTag(tag, mapInd, mapType, target);
+
+	dbf << "val tag " << hex << tag << " map " << mapInd << " type " << mapType << " tgt " << target << dec << " val " << control->getValue() << endl;
+
+	switch (mapType) {
+	case MappingType::kMapCommand: {
+		if (mapInd >= 0 && mapInd < guiCmds.size()) {
+			CommandGuiMapping &c = guiCmds[mapInd];
+			processCommand(c.command, target);
+		}
+		break;
+	}
+	case MappingType::kMapControl: {
+		if (mapInd >= 0 && mapInd < guiCmds.size()) {
+			ControlGuiMapping &c = guiCtls[mapInd];
+			setControl(c.control, target, control->getValue());
+		}
+		break;
+	}
+	case MappingType::kMapScript: {
+		if (mapInd >= 0 && mapInd < guiCmds.size()) {
+			ScriptGuiMapping &c = guiKlfs[mapInd];
+//			processCommand(c.command, target);
+		}
+		break;
+	}
+	}
+
+
+	control->setDirty(true);
+	/*
+	switch (tag)
+	{
+
+	case kTap1Delay:
+	effect->setParameterAutomated(tag, control->getValue());
+	tapDelayFader[0]
+	tapDelayDisplay[0]->update(context);
+	break;
+	case kTap1Level:
+	effect->setParameterAutomated(tag, control->getValue());
+	tapLevelFader[0]->update(context);
+	tapLevelDisplay[0]->update(context);
+	break;
+	}*/
+}
+
 
 status_t Controller::addScript(script_id_t id, const char * src)
 {

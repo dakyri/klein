@@ -25,8 +25,8 @@
 	<guiMap>
 		<button function="Record" label="Record" context="global"/>
 		<button function="Reset" label="Reset" context="global"/>
-		<knob function="gain" label="Gain"  context="track"/>
-		<knob function="pan" label="Pan"  context="track"/>
+		<knob control="gain" label="Gain"  context="track"/>
+		<knob control="pan" label="Pan"  context="track"/>
 <!--		<button script="my record script" label="Script"  context="global"/>-->
 <!--		<knob script="my control script" label="Some other script"  context="global"/>-->
 	</guiMap>

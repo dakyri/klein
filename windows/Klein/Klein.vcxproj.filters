@@ -90,12 +90,6 @@
     <ClInclude Include="..\..\include\GUI\MasterStrip.h">
       <Filter>Header Files\GUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\library\VST\vstgui_360_rc2\vstgui\vstgui.h">
-      <Filter>VST Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\library\VST\vstgui_360_rc2\vstgui\vstcontrols.h">
-      <Filter>VST Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\GUI\LabelledButton.h">
       <Filter>Header Files\GUI</Filter>
     </ClInclude>

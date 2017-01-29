@@ -9,7 +9,7 @@
 
 TextDrawer::TextDrawer(CColor _fontColor, int _style, CColor _shadowColor)
 	: horiTxtAlign(kCenterText), fontColor(_fontColor), shadowColor(_shadowColor), style(_style),
-		bTextTransparencyEnabled(true), bAntialias(true), fontSize(0), fontStyle(0)
+		bAntialias(true), fontSize(0), fontStyle(0)
 {
 	fontID = kNormalFont;
 	fontID->remember();
@@ -21,7 +21,6 @@ TextDrawer::TextDrawer(const TextDrawer& v)
 	, fontID(v.fontID)
 	, fontColor(v.fontColor)
 	, shadowColor(v.shadowColor)
-	, bTextTransparencyEnabled(v.bTextTransparencyEnabled)
 	, bAntialias(v.bAntialias), fontSize(v.fontSize), fontStyle(v.fontStyle)
 {
 	fontID->remember();
@@ -104,18 +103,10 @@ TextDrawer::drawText(CDrawContext *pContext, const char *string, const CRect& re
 			CRect newSize(rect);
 			newSize.offset(1, 1);
 			pContext->setFontColor(shadowColor);
-#if VSTGUI_USES_UTF8
-			pContext->drawStringUTF8(string, newSize, horiTxtAlign, bAntialias);
-#else
-			pContext->drawString(string, newSize, !bTextTransparencyEnabled, horiTxtAlign);
-#endif
+			pContext->drawString(string, newSize, horiTxtAlign, bAntialias);
 		}
 		pContext->setFontColor(fontColor);
-#if VSTGUI_USES_UTF8
-		pContext->drawStringUTF8(string, rect, horiTxtAlign, bAntialias);
-#else
-		pContext->drawString(string, rect, !bTextTransparencyEnabled, horiTxtAlign);
-#endif
+		pContext->drawString(string, rect, horiTxtAlign, bAntialias);
 		pContext->setClipRect(oldClip);
 	}
 }

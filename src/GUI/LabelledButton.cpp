@@ -18,7 +18,7 @@ Quick override of CKickButton
 * @param offset unused
 */
 //------------------------------------------------------------------------
-LabelledButton::LabelledButton(const std::string & _label, const CRect& size, CControlListener* listener,
+LabelledButton::LabelledButton(const std::string & _label, const CRect& size, IControlListener* listener,
 		long tag, CBitmap* background, const CPoint& offset)
 	: CKickButton(size, listener, tag, background, offset), label(_label)
 	, TextDrawer()
@@ -36,7 +36,7 @@ LabelledButton::LabelledButton(const std::string & _label, const CRect& size, CC
 * @param offset of background
 */
 //------------------------------------------------------------------------
-LabelledButton::LabelledButton(const std::string & _label, const CRect& size, CControlListener* listener,
+LabelledButton::LabelledButton(const std::string & _label, const CRect& size, IControlListener* listener,
 		long tag, CCoord heightOfOneImage, CBitmap* background, const CPoint& offset)
 	: CKickButton(size, listener, tag, heightOfOneImage, background, offset), label(_label)
 	, TextDrawer()

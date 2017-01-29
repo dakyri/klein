@@ -1,13 +1,29 @@
 #pragma once
 
-#define DEBUG 0
-#include "aeffguieditor.h"
+#include <string>
+#include <vector>
+
+#include "plugin-bindings/aeffguieditor.h"
 #include "GUI/MasterStrip.h"
 #include "GUI/TrackStrip.h"
 
 class Klein;
 
-class KleinEditor : public AEffGUIEditor/*, public CControlListener*/ {
+/**
+ * interface encapsulating non vst-able info that we'd like the editor to show
+ */
+class KleinEditorI {
+public:
+	virtual void displayHostClock(VstTimeInfo *t) = 0;
+	virtual void displayTrackStatus(int trackId) = 0;
+	virtual void displaySampleData(int trackId) = 0;
+	virtual void displaySelectedTrack(int trackId) = 0;
+	virtual void displaySelectedLoop(int trackId) = 0;
+	virtual void displayCurrentLayer(int trackId) = 0;
+	virtual void displayMessage(const string &msg) = 0;
+};
+
+class KleinEditor : public AEffGUIEditor, public KleinEditorI {
 public:
 	KleinEditor(Klein *effect);
 	virtual ~KleinEditor();
@@ -23,10 +39,21 @@ public:
 	virtual bool onKeyDown(VstKeyCode &keyCode) override;
 	virtual bool onKeyUp(VstKeyCode &keyCode) override;
 #endif
-//	virtual void valueChanged(VSTGUI::CControl* pControl) override;
-//	virtual long controlModifierClicked(VSTGUI::CControl* pControl, long button) override { return 0; }	///< return 1 if you want the control to not handle it, otherwise 0
+// hooks from KleinEditorI
+	virtual void displayHostClock(VstTimeInfo *t);
+	virtual void displayTrackStatus(int trackId);
+	virtual void displaySampleData(int trackId);
+	virtual void displaySelectedTrack(int trackId);
+	virtual void displaySelectedLoop(int trackId);
+	virtual void displayCurrentLayer(int trackId);
+	virtual void displayMessage(const string &msg);
+
+
 protected:
 	Klein &klein;
 
 	CBitmap *buttonBitmap;
+
+	MasterStrip *masterStrip;
+	vector<TrackStrip*> trackStrip;
 };

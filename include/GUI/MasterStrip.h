@@ -16,6 +16,9 @@ public:
 	void setComponents4(Controller &c);
 	void clearComponents();
 
+	void displayHostClock();
+	void displayMessage(const string &msg);
+
 protected:
 	Controller &controller;
 	vector<LabelledButton*> buttons;

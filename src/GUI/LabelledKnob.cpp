@@ -4,7 +4,45 @@
 
 const float kPi = 3.14159265358979323846;
 
-LabelledKnob::LabelledKnob(const std::string & _label, const CRect & size, CControlListener * const listener,
+#ifdef _ASVIEWCONTAINER_
+LabelledKnob::LabelledKnob(const std::string & _label, const CRect & size, IControlListener * const listener,
+	const long tag, float _radius, const CColor & _handleColor, const CColor & _shadowColor,
+	const CColor &fontC, const CColor & fontShadowC, const float _startAngle, const float _rangeAngle)
+	: LabelledKnob(_label, size, listener, tag, _radius, _handleColor, _shadowColor, fontC, fontShadowC)
+{
+	vKnob->setStartAngle(_startAngle);
+	vKnob->setRangeAngle(_rangeAngle);
+}
+
+LabelledKnob::LabelledKnob(const std::string & _label, const CRect & size, IControlListener * const listener,
+	const long tag, float _radius, const CColor & _handleColor, const CColor & _shadowColor,
+	const CColor &fontC, const CColor & fontShadowC)
+	: CViewContainer(size), label(_label)
+{
+	float c = size.getWidth() / 2;
+	CRect knobRect(2, c - _radius, 2 + 2 * _radius, c + _radius);
+	CRect labelRect(2, knobRect.bottom + 2, size.getWidth()-2, size.getHeight()-knobRect.bottom);
+
+	vKnob = new CKnob(knobRect, listener, tag, nullptr, nullptr);
+	addView(vKnob);
+	vKnob->setColorShadowHandle(_shadowColor);
+	vKnob->setColorHandle(_handleColor);
+
+	vLabel = new CTextLabel(labelRect);
+	addView(vLabel);
+	vLabel->setText(label.c_str());
+	vLabel->setStyle(kNoFrame | kShadowText);
+	vLabel->setFontColor(fontC);
+	vLabel->setShadowColor(fontShadowC);
+}
+
+LabelledKnob::LabelledKnob(const LabelledKnob & v)
+	: CViewContainer(v), label(v.label), vKnob(v.vKnob), vLabel(v.vLabel) 
+{
+}
+
+#else
+LabelledKnob::LabelledKnob(const std::string & _label, const CRect & size, IControlListener * const listener,
 		const long tag, float _radius, const CColor & _handleColor, const CColor & _shadowColor,
 		const CColor &fontC, const CColor & fontShadowC, const float _startAngle, const float _rangeAngle)
 	: LabelledKnob(_label, size, listener, tag, _radius, _handleColor, _shadowColor, fontC, fontShadowC)
@@ -13,7 +51,7 @@ LabelledKnob::LabelledKnob(const std::string & _label, const CRect & size, CCont
 	setRangeAngle(_rangeAngle);
 }
 
-LabelledKnob::LabelledKnob(const std::string & _label, const CRect & size, CControlListener * const listener,
+LabelledKnob::LabelledKnob(const std::string & _label, const CRect & size, IControlListener * const listener,
 	const long tag, float _radius, const CColor & _handleColor, const CColor & _shadowColor,
 	const CColor &fontC, const CColor & fontShadowC)
 	: CKnob(size, listener, tag, nullptr, nullptr), TextDrawer(fontC, kShadowText, fontShadowC), label(_label)
@@ -58,7 +96,7 @@ void LabelledKnob::draw(CDrawContext *pContext)
 		where.offset(kr.left - width / 2, kr.top - height / 2);
 
 		CRect handleSize(0, 0, width, height);
-		handleSize.offset(where.h, where.v);
+		handleSize.offset(where.x, where.y);
 		pHandle->drawTransparent(pContext, handleSize);
 	} else {
 		CPoint origin(kr.width() / 2, kr.height() / 2);
@@ -66,12 +104,10 @@ void LabelledKnob::draw(CDrawContext *pContext)
 		where.offset(kr.left, kr.top);
 
 		pContext->setFrameColor(colorShadowHandle);
-		pContext->moveTo(CPoint(where.x-1, where.y));
-		pContext->lineTo(CPoint(origin.x-1, origin.y));
+		pContext->drawLine(CPoint(where.x-1, where.y), CPoint(origin.x-1, origin.y));
 
 		pContext->setFrameColor(colorHandle);
-		pContext->moveTo(where);
-		pContext->lineTo(origin);
+		pContext->drawLine(where, origin);
 		/*
 
 		float toAngle = (startAngle + (value * rangeAngle)) * 360.0 / kPi;
@@ -94,8 +130,8 @@ void LabelledKnob::draw(CDrawContext *pContext)
 void LabelledKnob::valueToPoint(CPoint &point) const
 {
 	float alpha = (value - bCoef) / aCoef;
-	point.h = (CCoord)(radius + cosf(alpha) * (radius - inset) + 0.5f);
-	point.v = (CCoord)(radius - sinf(alpha) * (radius - inset) + 0.5f);
+	point.x = (CCoord)(radius + cosf(alpha) * (radius - inset) + 0.5f);
+	point.y = (CCoord)(radius - sinf(alpha) * (radius - inset) + 0.5f);
 //	point.x -= knobRect.left;
 }
 
@@ -104,3 +140,5 @@ LabelledKnob::valueFromPoint(CPoint& point) const {
 	point.x -= (knobRect.left-size.left);
 	return CKnob::valueFromPoint(point);
 }
+
+#endif

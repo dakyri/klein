@@ -17,7 +17,6 @@ protected:
 	CFontRef fontID;
 	CColor fontColor;
 	CColor shadowColor;
-	bool bTextTransparencyEnabled;
 	bool bAntialias;
 	CHoriTxtAlign horiTxtAlign;
 	long style;
