@@ -74,15 +74,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>D:\src\cpp\sg-audio;D:\src\cpp\library\VST\vstgui_4\vstgui;D:\src\cpp\library\VST\vstgui_4\vstgui\lib;D:\src\cpp\library\VST\VST3 SDK;D:\src\cpp\library\VST\VST3 SDK\public.sdk\source\vst2.x;D:\src\cpp\library\VST\VST3 SDK\pluginterfaces\vst2.x;D:\src\cpp\Klein\src;D:\src\cpp\Klein\include;D:\src\cpp\library\boost\boost_1_61_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;WINDOWS=1;_USRDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\src\cpp\sg-audio;D:\src\cpp\library\VST\VST3 SDK\vstgui4\vstgui;D:\src\cpp\library\VST\VST3 SDK\vstgui4\vstgui\lib;D:\src\cpp\library\VST\VST3 SDK;D:\src\cpp\library\VST\VST3 SDK\public.sdk\source\vst2.x;D:\src\cpp\library\VST\VST3 SDK\pluginterfaces\vst2.x;D:\src\cpp\Klein\src;D:\src\cpp\Klein\include;D:\src\cpp\library\boost\boost_1_61_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;WINDOWS=1;_USRDLL;_CRT_SECURE_NO_DEPRECATE=1;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>Linker.def</ModuleDefinitionFile>
       <AdditionalDependencies>vstgui.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\src\cpp\library\VST\vstgui_4\vstgui\ide\visualstudio\vs2015\build\Win32\Debug;D:\src\cpp\library\boost\boost_1_61_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\src\cpp\library\VST\VST3 SDK\vstgui4\vstgui\ide\visualstudio\vs2015\build\Win32\Debug;D:\src\cpp\library\boost\boost_1_61_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -99,6 +99,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>D:\src\cpp\sg-audio;D:\src\cpp\library\VST\VST3 SDK\vstgui4\vstgui;D:\src\cpp\library\VST\VST3 SDK\vstgui4\vstgui\lib;D:\src\cpp\library\VST\VST3 SDK;D:\src\cpp\library\VST\VST3 SDK\public.sdk\source\vst2.x;D:\src\cpp\library\VST\VST3 SDK\pluginterfaces\vst2.x;D:\src\cpp\Klein\src;D:\src\cpp\Klein\include;D:\src\cpp\library\boost\boost_1_61_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -150,6 +151,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\library\VST\VST3 SDK\public.sdk\source\vst2.x\audioeffect.cpp" />
     <ClCompile Include="..\..\..\library\VST\VST3 SDK\public.sdk\source\vst2.x\audioeffectx.cpp" />
+    <ClCompile Include="..\..\..\library\VST\VST3 SDK\vstgui4\vstgui\plugin-bindings\aeffguieditor.cpp" />
+    <ClCompile Include="..\..\..\library\VST\VST3 SDK\vstgui4\vstgui\vstgui_win32.cpp">
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Level2</WarningLevel>
+      <SDLCheck Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </SDLCheck>
+    </ClCompile>
     <ClCompile Include="..\..\..\sg-audio\SampleFile.cpp" />
     <ClCompile Include="..\..\src\Bufferator.cpp" />
     <ClCompile Include="..\..\src\Controller.cpp" />
@@ -195,10 +202,6 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">KLFunParser.cpp;KLFunParser.hpp</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Bisonning away on the input script</Message>
     </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\..\resources\kick1.bmp" />
-    <Image Include="..\..\resources\kick1.png" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Klein.rc" />

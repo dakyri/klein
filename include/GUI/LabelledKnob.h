@@ -16,6 +16,12 @@ public:
 	LabelledKnob(const std::string& _label, const CRect& size, IControlListener* const listener,
 		const long tag, float radius, const CColor &handleC, const CColor & shadowC,
 		const CColor &fontC, const CColor & fontShadowC);
+	LabelledKnob(const std::string& _label, const CRect& size, IControlListener* const listener,
+		const long tag, CBitmap *knob, const CColor &handleC, const CColor & shadowC,
+		const CColor &fontC, const CColor & fontShadowC, const float _startTheta, const float _rangeTheta);
+	LabelledKnob(const std::string& _label, const CRect& size, IControlListener* const listener,
+		const long tag, CBitmap *knob, const CColor &handleC, const CColor & shadowC,
+		const CColor &fontC, const CColor & fontShadowC);
 	LabelledKnob(const LabelledKnob& labelledKnob);
 	//@}
 

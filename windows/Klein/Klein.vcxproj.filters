@@ -167,6 +167,12 @@
     <ClCompile Include="..\..\src\GUI\LabelledKnob.cpp">
       <Filter>Source Files\GUI</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\library\VST\VST3 SDK\vstgui4\vstgui\plugin-bindings\aeffguieditor.cpp">
+      <Filter>VST Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\library\VST\VST3 SDK\vstgui4\vstgui\vstgui_win32.cpp">
+      <Filter>VST Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\KLFunLexer.l">
@@ -175,14 +181,6 @@
     <CustomBuild Include="..\..\src\KLFunParser.yy">
       <Filter>Source Files</Filter>
     </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\..\resources\kick1.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="..\..\resources\kick1.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Klein.rc">

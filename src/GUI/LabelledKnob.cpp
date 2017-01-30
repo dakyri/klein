@@ -2,8 +2,6 @@
 
 #include "debug.h"
 
-const float kPi = 3.14159265358979323846;
-
 #ifdef _ASVIEWCONTAINER_
 LabelledKnob::LabelledKnob(const std::string & _label, const CRect & size, IControlListener * const listener,
 	const long tag, float _radius, const CColor & _handleColor, const CColor & _shadowColor,
@@ -35,6 +33,38 @@ LabelledKnob::LabelledKnob(const std::string & _label, const CRect & size, ICont
 	vLabel->setFontColor(fontC);
 	vLabel->setShadowColor(fontShadowC);
 }
+
+LabelledKnob::LabelledKnob(const std::string & _label, const CRect & size, IControlListener * const listener,
+	const long tag, CBitmap *knob, const CColor & _handleColor, const CColor & _shadowColor,
+	const CColor &fontC, const CColor & fontShadowC, const float _startAngle, const float _rangeAngle)
+	: LabelledKnob(_label, size, listener, tag, knob, _handleColor, _shadowColor, fontC, fontShadowC)
+{
+	vKnob->setStartAngle(_startAngle);
+	vKnob->setRangeAngle(_rangeAngle);
+}
+
+LabelledKnob::LabelledKnob(const std::string & _label, const CRect & size, IControlListener * const listener,
+	const long tag, CBitmap *knob, const CColor & _handleColor, const CColor & _shadowColor,
+	const CColor &fontC, const CColor & fontShadowC)
+	: CViewContainer(size), label(_label)
+{
+	float _radius = (knob != nullptr? knob->getWidth()/2 : 20);
+	float c = size.getWidth() / 2;
+	CRect knobRect(c - _radius, 2, c + _radius, 2 + 2 * _radius);
+	CRect labelRect(2, knobRect.bottom + 2, size.getWidth() - 2, size.getHeight() - 2);
+	dbf << "knob " << label << " rect " << labelRect.left << ", " << labelRect.top << ", " << labelRect.right << ", " << labelRect.bottom << std::endl;
+	vKnob = new CKnob(knobRect, listener, tag, knob, nullptr);
+	addView(vKnob);
+	vKnob->setColorShadowHandle(_shadowColor);
+	vKnob->setColorHandle(_handleColor);
+
+	vLabel = new CTextLabel(labelRect, label.c_str());
+	addView(vLabel);
+	vLabel->setStyle(kNoFrame|kShadowText);
+	vLabel->setFontColor(fontC);
+	vLabel->setShadowColor(fontShadowC);
+}
+
 
 LabelledKnob::LabelledKnob(const LabelledKnob & v)
 	: CViewContainer(v), label(v.label), vKnob(v.vKnob), vLabel(v.vLabel) 

@@ -2,10 +2,11 @@
 #include "GUI/KleinEditor.h"
 #include "debug.h"
 
-#include "../windows/Klein/resource.h"
+CBitmap *KleinEditor::buttonBitmap = nullptr;
+CBitmap *KleinEditor::knob20Bitmap = nullptr;
 
 KleinEditor::KleinEditor(Klein *_klein)
-	: AEffGUIEditor(_klein), klein(*_klein), buttonBitmap(nullptr)
+	: AEffGUIEditor(_klein), klein(*_klein)
 {
 	/*
 
@@ -30,6 +31,10 @@ KleinEditor::~KleinEditor()
 		buttonBitmap->forget();
 	}
 	buttonBitmap = nullptr;
+	if (knob20Bitmap) {
+		knob20Bitmap->forget();
+	}
+	knob20Bitmap = nullptr;
 
 }
 
@@ -47,12 +52,18 @@ bool KleinEditor::open(void *ptr)
 //	AEffGUIEditor::open(ptr);
 
 	if (!buttonBitmap) {
-		buttonBitmap = new CBitmap(IDB_BITMAP1);
+		buttonBitmap = new CBitmap("Button.png");
 #if KLEIN_DEBUG >= 5
 		dbf << "loading bitmap " << buttonBitmap->isLoaded() << ", wide " << buttonBitmap->getWidth() << ", high " << buttonBitmap->getHeight() << endl;
 #endif
 	}
-	
+	if (!knob20Bitmap) {
+		knob20Bitmap = new CBitmap("Knob20.png");
+#if KLEIN_DEBUG >= 5
+		dbf << "loading bitmap " << knob20Bitmap->isLoaded() << ", wide " << knob20Bitmap->getWidth() << ", high " << knob20Bitmap->getHeight() << endl;
+#endif
+	}
+
 	CRect frameSize(0, 0, 300, 300);
 	CFrame* newFrame = new CFrame(frameSize, this);
 	newFrame->open(ptr);
@@ -65,7 +76,7 @@ bool KleinEditor::open(void *ptr)
 	dbf << "now scanning tracks ... still got " << klein.track.size() << " tracks" << endl;
 #endif
 
-	masterStrip = new MasterStrip(klein.controller, 0, pos, newFrame, buttonBitmap);
+	masterStrip = new MasterStrip(klein.controller, 0, pos, newFrame);
 	newFrame->addView(masterStrip);
 	masterStrip->getViewSize(ssz);
 	if (ssz.getWidth() > wid) {

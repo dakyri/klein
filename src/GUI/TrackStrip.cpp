@@ -6,6 +6,7 @@
 #include "Controller.h"
 #include "GUI\TrackStrip.h"
 #include "GUI\LabelledKnob.h"
+#include "GUI\KleinEditor.h"
 
 #include "debug.h"
 
@@ -44,7 +45,7 @@ void TrackStrip::setComponents4(Controller & c, KleinTrack * t) {
 	CCoord wid = 42;
 	CCoord height = 64;
 
-	CRect knobSz(0, 0, 60, 60);
+	CRect knobSz(0, 0, 60, 63);
 	knobSz.offset(60, 2);
 	for (CommandGuiMapping &it : c.guiCmds) {
 		dbf << "TrackStrip:: checking command <" << it.command << ", " << it.label << "> at " << knobSz.left << ", " << knobSz.top << " wide " << endl;
@@ -60,7 +61,7 @@ void TrackStrip::setComponents4(Controller & c, KleinTrack * t) {
 				setTagTargetId(tag, track->getId());
 				dbf << " setting target to " << track->getId() << hex << " from " << it.tag << " to " << tag << dec << endl;
 			}
-			LabelledKnob *kg = new LabelledKnob(it.label, knobSz, &c, tag, 20, kWhiteCColor, kGreyCColor, kWhiteCColor, kGreyCColor);
+			LabelledKnob *kg = new LabelledKnob(it.label, knobSz, &c, tag, KleinEditor::knob20Bitmap, kBlackCColor, kGreyCColor, kWhiteCColor, kGreyCColor);
 			kg->remember();
 			addView(kg);
 			knobs.push_back(kg);

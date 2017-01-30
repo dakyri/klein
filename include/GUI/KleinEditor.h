@@ -48,11 +48,10 @@ public:
 	virtual void displayCurrentLayer(int trackId);
 	virtual void displayMessage(const string &msg);
 
-
+	static CBitmap *buttonBitmap;
+	static CBitmap *knob20Bitmap;
 protected:
 	Klein &klein;
-
-	CBitmap *buttonBitmap;
 
 	MasterStrip *masterStrip;
 	vector<TrackStrip*> trackStrip;

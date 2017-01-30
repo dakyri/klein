@@ -10,7 +10,7 @@ class LabelledButton;
 
 class MasterStrip : public CViewContainer {
 public:
-	MasterStrip(Controller &c, CCoord x, CCoord y, CFrame *parent, CBitmap *_buttonBitmap);
+	MasterStrip(Controller &c, CCoord x, CCoord y, CFrame *parent);
 	virtual ~MasterStrip();
 
 	void setComponents4(Controller &c);
@@ -22,5 +22,4 @@ public:
 protected:
 	Controller &controller;
 	vector<LabelledButton*> buttons;
-	CBitmap *buttonBitmap;
 };
