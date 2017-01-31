@@ -55,4 +55,6 @@ protected:
 
 	MasterStrip *masterStrip;
 	vector<TrackStrip*> trackStrip;
+
+	CVSTGUITimer *timeUpdateTimer;
 };

@@ -1,7 +1,9 @@
 #include "aeffectx.h"
-#include "GUI\MasterStrip.h"
-#include "GUI\LabelledButton.h"
-#include "GUI\KleinEditor.h"
+#include "GUI/MasterStrip.h"
+#include "GUI/LabelledButton.h"
+#include "GUI/KleinEditor.h"
+#include "GUI/ClockView.h"
+#include "GUI/MessageView.h"
 #include "Controller.h"
 
 #include "debug.h"
@@ -9,7 +11,6 @@
 MasterStrip::MasterStrip(Controller &c, CCoord x, CCoord y, CFrame *parent)
 	: CViewContainer(CRect(x, y, x + 300, y + 100)), controller(c)
 {
-
 #if KLEIN_DEBUG >= 5
 	dbf << "MasterStrip ... we're in " << c.guiCmds.size() << " gui elements" << endl;
 #endif
@@ -66,6 +67,26 @@ void MasterStrip::setComponents4(Controller & c)
 	for (ScriptGuiMapping &it : c.guiKlfs) {
 
 	}
+	float x = 2;
+	float y = pos + 2;
+	clockView = new ClockView(CRect(x, y, x+kClockViewWidth, y+kClockViewHeight));
+	addView(clockView);
+	CRect r = clockView->getViewSize();
+	x = r.right;
+	if (r.bottom > pos) {
+		pos = r.bottom;
+	}
+	messageView = new MessageView(CRect(x+10, y, x+10+kMessageViewWidth, y+kMessageViewHeight));
+	addView(messageView);
+	r = messageView->getViewSize();
+	x = r.right;
+	if (x > wid) {
+		wid = x;
+	}
+	if (r.bottom > pos) {
+		pos = r.bottom;
+	}
+
 	CRect sz;
 	getViewSize(sz);
 	sz.right = sz.left + wid + 2;
@@ -78,6 +99,10 @@ void MasterStrip::displayHostClock()
 }
 
 void MasterStrip::displayMessage(const string & msg)
+{
+}
+
+void MasterStrip::onTimedUpdate(const VstTimeInfo *)
 {
 }
 

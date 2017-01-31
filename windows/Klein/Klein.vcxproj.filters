@@ -102,6 +102,18 @@
     <ClInclude Include="..\..\include\GUI\LabelledKnob.h">
       <Filter>Header Files\GUI</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\GUI\MessageView.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\GUI\ClockView.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\GUI\TrackStatusView.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\GUI\TrackWaveView.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Klein.cpp">
@@ -172,6 +184,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\library\VST\VST3 SDK\vstgui4\vstgui\vstgui_win32.cpp">
       <Filter>VST Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\GUI\TrackStatusView.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\GUI\TrackWaveView.cpp">
+      <Filter>Source Files\GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

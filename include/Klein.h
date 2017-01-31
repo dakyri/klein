@@ -72,7 +72,6 @@ public:
 	Klein(audioMasterCallback audioMaster);
 	virtual ~Klein();
 
-
 	static const int MAX_CHANNELS = 8;
 
 /* VST callbacks */
@@ -130,6 +129,7 @@ public:
 	void setOutPort(const KleinTrack &t, const int port);
 	InputInfo *getInputInfo(const int pin);
 
+	VstTimeInfo &getCurrentVSTTime() { return currentTimeInfo; }
 protected:
 	float getTempo();
 	void allocateChildBuffers(long blockSize);
@@ -137,6 +137,8 @@ protected:
 	KleinProgram *programs;
 	bool tracksSetupDone;
 	bool inputSetupDone;
+
+	VstTimeInfo currentTimeInfo;
 
 	int nTracks;
 	int nLoopsPerTrack;

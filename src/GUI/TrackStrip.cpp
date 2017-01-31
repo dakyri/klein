@@ -2,11 +2,14 @@
 #include <string>
 #include "aeffectx.h"
 #include "vstgui.h"
+#include "Klein.h"
 #include "KleinTrack.h"
 #include "Controller.h"
-#include "GUI\TrackStrip.h"
-#include "GUI\LabelledKnob.h"
-#include "GUI\KleinEditor.h"
+#include "GUI/TrackStrip.h"
+#include "GUI/LabelledKnob.h"
+#include "GUI/KleinEditor.h"
+#include "GUI/TrackStatusView.h"
+#include "GUI/TrackWaveView.h"
 
 #include "debug.h"
 
@@ -34,19 +37,41 @@ void TrackStrip::clearComponents() {
 }
 
 void TrackStrip::setComponents4(Controller & c, KleinTrack * t) {
-
+	CRect labelRect(0, 0, kLabelWidth, kLabelHeight);
+	labelRect.offset(2, 2);
 	string s = std::to_string(t->getId());
-	CTextLabel *tl = new CTextLabel(CRect(2, 2, getHeight() - 2, 40), s.c_str(), nullptr, kShadowText | kNoFrame);
+	CTextLabel *tl = new CTextLabel(labelRect, s.c_str(), nullptr, kShadowText | kNoFrame);
 	tl->setShadowColor(kGreyCColor);
 	tl->setFontColor(kWhiteCColor);
 	tl->setBackColor(kBlackCColor);
 	tl->setHoriAlign(CHoriTxtAlign::kLeftText);
 	addView(tl);
-	CCoord wid = 42;
-	CCoord height = 64;
+	CCoord wid = kLabelWidth + 2 * 2;
+	CCoord height = kLabelHeight + 2 * 2;
 
-	CRect knobSz(0, 0, 60, 63);
-	knobSz.offset(60, 2);
+	CRect statusRect(0, 0, kStatusViewWidth, kStatusViewHeight);
+	statusRect.offset(tl->getViewSize().right + 4, 2);
+	TrackStatusView *tsv = new TrackStatusView(statusRect, t);
+	tsv->remember();
+	addView(tsv);
+	CRect r = tsv->getViewSize();
+
+	CRect waveRect(0, 0, kWaveViewWidth, kWaveViewHeight);
+	waveRect.offset(tsv->getViewSize().right + 4, 2);
+	TrackWaveView *twv = new TrackWaveView(waveRect);
+	twv->remember();
+	addView(twv);
+
+	if (waveRect.right > wid) {
+		wid = waveRect.right;
+	}
+	if (waveRect.bottom > height) {
+		height = waveRect.bottom;
+	}
+
+
+	CRect knobSz(0, 0, kKnobWidth, kKnobHeight);
+	knobSz.offset(wid+2, 2);
 	for (CommandGuiMapping &it : c.guiCmds) {
 		dbf << "TrackStrip:: checking command <" << it.command << ", " << it.label << "> at " << knobSz.left << ", " << knobSz.top << " wide " << endl;
 	}
@@ -59,20 +84,23 @@ void TrackStrip::setComponents4(Controller & c, KleinTrack * t) {
 			long tag = it.tag;
 			if (it.target == kTargetAllTracks) {
 				setTagTargetId(tag, track->getId());
+#if KLEIN_DEBUG >= 5
 				dbf << " setting target to " << track->getId() << hex << " from " << it.tag << " to " << tag << dec << endl;
+#endif
 			}
-			LabelledKnob *kg = new LabelledKnob(it.label, knobSz, &c, tag, KleinEditor::knob20Bitmap, kBlackCColor, kGreyCColor, kWhiteCColor, kGreyCColor);
+			LabelledKnob *kg = new LabelledKnob(
+					it.label, knobSz, &c, tag, KleinEditor::knob20Bitmap, kBlackCColor, kGreyCColor, kWhiteCColor, kGreyCColor);
 			kg->remember();
 			addView(kg);
 			knobs.push_back(kg);
 
-			knobSz.offset(2 + 60, 0);
 			if (knobSz.right > wid) {
 				wid = knobSz.right;
 			}
 			if (knobSz.bottom > height) {
 				height = knobSz.bottom;
 			}
+			knobSz.offset(2 + kKnobWidth, 0);
 		}
 	}
 	for (ScriptGuiMapping &it : c.guiKlfs) {
@@ -112,4 +140,10 @@ void TrackStrip::displaySelectedLoop()
 
 void TrackStrip::displayCurrentLayer()
 {
+}
+
+void TrackStrip::onTimedUpdate(const Klein &k, const VstTimeInfo *t)
+{
+	trackStatusView->onTimedUpdate(k, t);
+	trackWaveView->onTimedUpdate(k, t);
 }

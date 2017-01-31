@@ -126,12 +126,16 @@
     <ClInclude Include="..\..\include\Controller.h" />
     <ClInclude Include="..\..\include\Command.h" />
     <ClInclude Include="..\..\include\debug.h" />
+    <ClInclude Include="..\..\include\GUI\ClockView.h" />
     <ClInclude Include="..\..\include\GUI\LabelledButton.h" />
     <ClInclude Include="..\..\include\GUI\LabelledKnob.h" />
     <ClInclude Include="..\..\include\GUI\MasterStrip.h" />
     <ClInclude Include="..\..\include\GUI\KleinEditor.h" />
+    <ClInclude Include="..\..\include\GUI\MessageView.h" />
     <ClInclude Include="..\..\include\GUI\TextDrawer.h" />
+    <ClInclude Include="..\..\include\GUI\TrackStatusView.h" />
     <ClInclude Include="..\..\include\GUI\TrackStrip.h" />
+    <ClInclude Include="..\..\include\GUI\TrackWaveView.h" />
     <ClInclude Include="..\..\include\InputInfo.h" />
     <ClInclude Include="..\..\include\KLFContext.h" />
     <ClInclude Include="..\..\include\Klein.h" />
@@ -158,6 +162,7 @@
       </SDLCheck>
     </ClCompile>
     <ClCompile Include="..\..\..\sg-audio\SampleFile.cpp" />
+    <ClCompile Include="..\..\include\GUI\TrackWaveView.cpp" />
     <ClCompile Include="..\..\src\Bufferator.cpp" />
     <ClCompile Include="..\..\src\Controller.cpp" />
     <ClCompile Include="..\..\src\GUI\LabelledButton.cpp" />
@@ -165,6 +170,7 @@
     <ClCompile Include="..\..\src\GUI\MasterStrip.cpp" />
     <ClCompile Include="..\..\src\GUI\KleinEditor.cpp" />
     <ClCompile Include="..\..\src\GUI\TextDrawer.cpp" />
+    <ClCompile Include="..\..\src\GUI\TrackStatusView.cpp" />
     <ClCompile Include="..\..\src\GUI\TrackStrip.cpp" />
     <ClCompile Include="..\..\src\Klein.cpp" />
     <ClCompile Include="..\..\src\KleinTrack.cpp" />

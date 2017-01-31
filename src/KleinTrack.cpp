@@ -1068,34 +1068,39 @@ long KleinTrack::boringFrames(const VstTimeInfo * const t, const long startOffse
 	return 0;
 }
 
-bool KleinTrack::isPlaying()
+bool KleinTrack::isPlaying() const
 {
-	return true;
+	return trackMode == TRAK_PLAY;
 }
 
-bool KleinTrack::isRecording()
+bool KleinTrack::isRecording() const
 {
-	return false;
+	return trackMode == TRAK_REC || trackMode == TRAK_DUB;
 }
 
-SyncSource KleinTrack::getSyncSrc()
+bool KleinTrack::isMute() const
 {
-	return SyncSource();
+	return mute;
 }
 
-SyncUnit KleinTrack::getSyncUnit()
+SyncSource KleinTrack::getSyncSrc() const
 {
-	return SyncUnit();
+	return syncSrc;
 }
 
-PlayDirection KleinTrack::getPlayDirection()
+SyncUnit KleinTrack::getSyncUnit() const
 {
-	return PlayDirection();
+	return syncUnit;
 }
 
-TrackMode KleinTrack::getMode()
+PlayDirection KleinTrack::getPlayDirection() const
 {
-	return TrackMode();
+	return playDirection;
+}
+
+TrackMode KleinTrack::getMode() const
+{
+	return trackMode;
 }
 
 void KleinTrack::allocateBuffers(long blocksize)

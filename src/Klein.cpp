@@ -346,7 +346,13 @@ void Klein::process (float **inputs, float **outputs, VstInt32 nFrames)
 	float cvu = vu;
 	long currentOutFrame = 0;
 	while (currentOutFrame < nFrames) {
-		const VstTimeInfo *t = getTimeInfo(kVstTempoValid);
+		const VstTimeInfo *t = getTimeInfo(
+									kVstTempoValid |
+									kVstTimeSigValid |
+									kVstCyclePosValid |
+									kVstBarsValid |
+									kVstPpqPosValid |
+									kVstTransportPlaying);
 		long framesThisChunk = nFrames - currentOutFrame;
 		for (unique_ptr<KleinTrack> &ti : track) {
 			long l = ti->boringFrames(t, currentOutFrame);
@@ -369,7 +375,7 @@ void Klein::process (float **inputs, float **outputs, VstInt32 nFrames)
 
 
 /**
- *
+ * 
  */
 void Klein::processReplacing (float **inputs, float **outputs, VstInt32 nFrames)
 {
@@ -401,7 +407,16 @@ void Klein::processReplacing (float **inputs, float **outputs, VstInt32 nFrames)
 #if KLEIN_DEBUG >= 11
 		dbf << "process replacing loop currentOutFrame " << currentOutFrame << endl;
 #endif
-		const VstTimeInfo *t = getTimeInfo(kVstTempoValid);
+		const VstTimeInfo *t = getTimeInfo(
+									kVstTempoValid |
+									kVstTimeSigValid |
+									kVstCyclePosValid |
+									kVstBarsValid |
+									kVstPpqPosValid |
+									kVstTransportPlaying);
+		if (t != nullptr) {
+			currentTimeInfo = *t;
+		}
 		long framesThisChunk = nFrames-currentOutFrame;
 		for (unique_ptr<KleinTrack> &ti: track) {
 			long l = ti->boringFrames(t, currentOutFrame);

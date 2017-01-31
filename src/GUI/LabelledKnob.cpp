@@ -1,4 +1,4 @@
-#include "GUI\LabelledKnob.h"
+#include "GUI/LabelledKnob.h"
 
 #include "debug.h"
 

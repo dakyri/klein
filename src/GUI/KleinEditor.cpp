@@ -6,20 +6,8 @@ CBitmap *KleinEditor::buttonBitmap = nullptr;
 CBitmap *KleinEditor::knob20Bitmap = nullptr;
 
 KleinEditor::KleinEditor(Klein *_klein)
-	: AEffGUIEditor(_klein), klein(*_klein)
+	: AEffGUIEditor(_klein), klein(*_klein), timeUpdateTimer(nullptr), masterStrip(nullptr)
 {
-	/*
-
-	// load the background bitmap
-	// we don't need to load all bitmaps, this could be done when open is called
-	hBackground = new CBitmap(kBackgroundId);
-
-	// init the size of the plugin
-	rect.left = 0;
-	rect.top = 0;
-	rect.right = (short)hBackground->getWidth();
-	rect.bottom = (short)hBackground->getHeight();
-	*/
 }
 
 //-----------------------------------------------------------------------------
@@ -35,7 +23,10 @@ KleinEditor::~KleinEditor()
 		knob20Bitmap->forget();
 	}
 	knob20Bitmap = nullptr;
-
+	if (timeUpdateTimer) {
+		timeUpdateTimer->forget();
+	}
+	timeUpdateTimer = nullptr;
 }
 
 
@@ -107,30 +98,15 @@ bool KleinEditor::open(void *ptr)
 #if KLEIN_DEBUG >= 5
 	dbf << "main frame ... is built " << endl;
 #endif
-	/*
-	// load some bitmaps
-
-
-	if (!hKnobBody)
-		hKnobBody = new CBitmap(kKnobBodyId);
-
-	if (!hOnOffButton)
-		hOnOffButton = new CBitmap(kOnOffButtonId);
-
-	//--init background frame-----------------------------------------------
-	CRect size(0, 0, hBackground->getWidth(), hBackground->getHeight());
-	frame = new CFrame(size, ptr, this);
-	frame->setBackground(hBackground);
-
-
-	//--init the faders------------------------------------------------
-	CPoint point(0, 0);
-	CPoint offset(1, 0);
-	CPoint	offs(0, 0);
-	//	size (kFaderX, kFaderY,
-	//          kFaderX + hFaderBody->getWidth (), kFaderY + hFaderBody->getHeight ());
-
-	*/
+	if (!timeUpdateTimer) {
+		timeUpdateTimer = new CVSTGUITimer([this](CVSTGUITimer *t){
+			VstTimeInfo vti = klein.getCurrentVSTTime();
+			masterStrip->onTimedUpdate(&vti);
+			for (auto it : trackStrip) {
+				it->onTimedUpdate(klein, &vti);
+			}
+		}, 50);
+	}
 	return true;
 }
 
@@ -197,21 +173,6 @@ void KleinEditor::close()
 	if (oldFrame) {
 		oldFrame->forget();
 	}
-	// free some bitmaps
-	/*
-
-	if (hOnOffButton)
-		hOnOffButton->forget();
-	hOnOffButton = 0;
-
-	if (hKnobHandle)
-		hKnobHandle->forget();
-	hKnobHandle = 0;
-
-	if (hKnobBody)
-		hKnobBody->forget();
-	hKnobBody = 0;
-	*/
 }
 
 

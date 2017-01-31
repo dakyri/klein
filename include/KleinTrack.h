@@ -110,11 +110,12 @@ public:
 	void setSyncSrc(const SyncSource ss);
 	void setSyncUnit(const SyncUnit su);
 	void setPlayDirection(const PlayDirection p);
+
 // getters for track properties
-	TrackMode getMode();
-	SyncSource getSyncSrc();
-	SyncUnit getSyncUnit();
-	PlayDirection getPlayDirection();
+	TrackMode getMode() const;
+	SyncSource getSyncSrc() const;
+	SyncUnit getSyncUnit() const;
+	PlayDirection getPlayDirection() const;
 
 	void recordStart(const ktime_t &at);
 	void recordStop(const ktime_t &at);
@@ -130,8 +131,9 @@ public:
 	long processAdding(float ** const inputs, float ** const  outputs, const long startOffset, const long sampleFrames);
 	long boringFrames(const VstTimeInfo * const t, const long startOffset);
 
-	bool isPlaying();
-	bool isRecording();
+	bool isPlaying() const;
+	bool isRecording() const;
+	bool isMute() const;
 
 	void allocateBuffers(long blocksize);
 
