@@ -14,9 +14,11 @@
 
 enum SyncSource {
 	DFLT_SRC,
+	SYNC_NOT,
 	SYNC_HOST,
-	SYNC_TRACK,
-	SYNC_MIDI
+	SYNC_MIDI,
+	SYNC_MASTER_TRACK,
+	SYNC_TRACK // sync lock to specific track, SyncSrc == SYNC_TRACK + id
 };
 
 enum SyncUnit {
@@ -129,7 +131,7 @@ public:
 	float getVu();
 
 	long processAdding(float ** const inputs, float ** const  outputs, const long startOffset, const long sampleFrames);
-	long boringFrames(const VstTimeInfo * const t, const long startOffset);
+	long startSlice(const VstTimeInfo * const t, int currentMasterTrackId, const vector<unique_ptr<KleinTrack>> & track);
 
 	bool isPlaying() const;
 	bool isRecording() const;

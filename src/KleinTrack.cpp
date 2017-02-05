@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <iostream>
+#include <regex>
 
 #include "InputInfo.h"
 
@@ -16,7 +17,9 @@ unordered_map<string, SyncSource> syncSrc {
 	{ "default", DFLT_SRC },
 	{ "host", SYNC_HOST },
 	{ "track", SYNC_TRACK },
-	{ "midi", SYNC_MIDI }
+	{ "midi", SYNC_MIDI },
+	{ "master", SYNC_MASTER_TRACK },
+	{ "not", SYNC_NOT }
 };
 
 unordered_map<string, SyncUnit> syncUnit{
@@ -75,10 +78,19 @@ SyncSource syncSrc4(string s) {
 	if (p != syncSrc.end()) {
 		return p->second;
 	}
+	if (regex_match(s, regex("track\\d+"))) {
+		int i = stoi(s.substr(5));
+		return SyncSource(SYNC_TRACK + i);
+	}
 	return DFLT_SRC;
 }
 
 string syncSrc4(SyncSource s) {
+	if (s >= SYNC_TRACK) {
+		stringstream ss;
+		ss << "track" << s;
+		return ss.str();
+	}
 	auto p = find_if(syncSrc.begin(), syncSrc.end(), [s](pair<string, SyncSource> t) { return t.second == s; });
 	if (p != syncSrc.end()) {
 		return p->first;
@@ -1053,8 +1065,14 @@ KleinTrack::calculateControlsStereo(float &l, float &r)
 	l = lAmp = (g)*(1 - p) / 2;
 }
 
-/*
- * give an indication of how many sample frames until the next interesting thing happens
+/**
+ * does any necessary startup stuff for the track playing in the current slice, starting at the given vst time
+ *  - run command stack here
+ *  - change mode from pending to record or play
+ * typically called just before a tracks 'process' function
+ * all 'startSlice' calls are before all 'process' calls for the slice
+ *
+ * return value gives an indication of how many sample frames until the next interesting thing happens
  * this is called so that we will have the longest possible chunk of buffer to be filled that doesn't loop, change sample chunk
  * or affect (or be affected by) any other loops synchronization
  * interesting things are:
@@ -1062,9 +1080,22 @@ KleinTrack::calculateControlsStereo(float &l, float &r)
  *  - resynchronization opportunities
  *  - pretty much anything that will affect another track, or require being affected by another track
  *  - return 0 if we want to say nothing about what's going on, or nothing interesting ever happens
+ *
+ * @param hostTime the current Vst host time
+ * @param startOffset current frame offset within a process cycle
  */
-long KleinTrack::boringFrames(const VstTimeInfo * const t, const long startOffset)
+long KleinTrack::startSlice(const VstTimeInfo *t, int currentMasterTrackId, const vector<unique_ptr<KleinTrack>> & track)
 {
+	bool atStart = false;
+	if (syncSrc == SYNC_NOT) {
+
+	} else if (syncSrc == SYNC_HOST) {
+		
+	} else if (syncSrc == SYNC_MASTER_TRACK) {
+	
+	} else if (syncSrc == SYNC_TRACK) {
+		
+	}
 	return 0;
 }
 

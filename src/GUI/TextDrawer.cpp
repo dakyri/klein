@@ -7,7 +7,7 @@
  borrows a pile of stuff from CParamDisplay to provide clean text drawing capability to classes that don't otherwise inherit
 */
 
-TextDrawer::TextDrawer(CColor _fontColor, int _style, CColor _shadowColor)
+TextDrawer::TextDrawer(CColor _fontColor, int _style, CColor _shadowColor, CHoriTxtAlign _align)
 	: horiTxtAlign(kCenterText), fontColor(_fontColor), shadowColor(_shadowColor), style(_style),
 		bAntialias(true), fontSize(0), fontStyle(0)
 {
@@ -134,6 +134,14 @@ TextDrawer::setFontColor(CColor color)
 	}
 	fontColor = color;
 }
+void TextDrawer::setShadowColor(CColor color)
+{
+	// to force the redraw
+	if (shadowColor != color) {
+		//		setDirty();
+	}
+	shadowColor = color;
+}
 void
 TextDrawer::setStyle(long val)
 {
@@ -141,4 +149,9 @@ TextDrawer::setStyle(long val)
 		style = val;
 		//		setDirty();
 	}
+}
+
+void TextDrawer::setAlign(CHoriTxtAlign val)
+{
+	horiTxtAlign = val;
 }

@@ -100,13 +100,14 @@ bool KleinEditor::open(void *ptr)
 #endif
 	if (!timeUpdateTimer) {
 		timeUpdateTimer = new CVSTGUITimer([this](CVSTGUITimer *t){
-			VstTimeInfo vti = klein.getCurrentVSTTime();
+			VstTimeInfo vti = klein.getCurrentHostTime();
 			masterStrip->onTimedUpdate(&vti);
 			for (auto it : trackStrip) {
 				it->onTimedUpdate(klein, &vti);
 			}
 		}, 50);
 	}
+	timeUpdateTimer->start();
 	return true;
 }
 
@@ -167,6 +168,7 @@ KleinEditor::getRect(ERect **ppRect) {
 void KleinEditor::close()
 {
 	CFrame* oldFrame = frame;
+	timeUpdateTimer->stop();
 	frame = nullptr;
 	masterStrip = nullptr;
 	trackStrip.clear();

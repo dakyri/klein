@@ -76,7 +76,9 @@ void TrackStrip::setComponents4(Controller & c, KleinTrack * t) {
 		dbf << "TrackStrip:: checking command <" << it.command << ", " << it.label << "> at " << knobSz.left << ", " << knobSz.top << " wide " << endl;
 	}
 	for (ControlGuiMapping &it : c.guiCtls) {
+#if KLEIN_DEBUG >= 5
 		dbf << "TrackStrip:: checking control <" << it.control << ", " << it.label << "> at " << knobSz.left << ", " << knobSz.top << " wide " << endl;
+#endif
 		if (it.type == GuiMapping::KNOB && (it.target == kTargetAllTracks || it.target == track->getId())) {
 #if KLEIN_DEBUG >= 5
 			dbf << "TrackStrip:: " << track->getId() << " adding <" << it.control << ", " << it.label << "> for " << hex << it.tag << dec <<" at " << knobSz.left << ", " << knobSz.top << " wide " << endl;

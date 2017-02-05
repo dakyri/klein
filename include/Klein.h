@@ -7,6 +7,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <mutex>
 
 using namespace std;
 
@@ -129,16 +130,24 @@ public:
 	void setOutPort(const KleinTrack &t, const int port);
 	InputInfo *getInputInfo(const int pin);
 
-	VstTimeInfo &getCurrentVSTTime() { return currentTimeInfo; }
+	VstTimeInfo &getCurrentHostTime() { return currentHostTime; }
 protected:
+	bool checkSyncOrder();
+	bool setCurrentSyncMaster(int nm);
 	float getTempo();
 	void allocateChildBuffers(long blockSize);
+	void updateVstTime(VstTimeInfo &t, const long nf);
+	long framesTillVstBeat(const VstTimeInfo & t);
+	long framesTillVstBar(const VstTimeInfo & t);
 
 	KleinProgram *programs;
 	bool tracksSetupDone;
 	bool inputSetupDone;
+	mutex syncOrderLock;
 
-	VstTimeInfo currentTimeInfo;
+	vector<int> syncOrder;
+	int currentMasterTrackId;
+	VstTimeInfo currentHostTime;
 
 	int nTracks;
 	int nLoopsPerTrack;

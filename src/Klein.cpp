@@ -34,6 +34,7 @@ Klein::Klein(audioMasterCallback audioMaster)
 	, kleinView(nullptr)
 	, tracksSetupDone(false), inputSetupDone(false)
 	, programs(nullptr)
+	, currentMasterTrackId(-1)
 {
 	nInputPort = 1;
 	nOutputPort = 4;
@@ -355,7 +356,7 @@ void Klein::process (float **inputs, float **outputs, VstInt32 nFrames)
 									kVstTransportPlaying);
 		long framesThisChunk = nFrames - currentOutFrame;
 		for (unique_ptr<KleinTrack> &ti : track) {
-			long l = ti->boringFrames(t, currentOutFrame);
+			long l = ti->startSlice(t, currentMasterTrackId, track);
 			if (l > 0 && l < framesThisChunk) {
 				framesThisChunk = l;
 			}
@@ -377,7 +378,7 @@ void Klein::process (float **inputs, float **outputs, VstInt32 nFrames)
 /**
  * 
  */
-void Klein::processReplacing (float **inputs, float **outputs, VstInt32 nFrames)
+void Klein::processReplacing(float **inputs, float **outputs, VstInt32 nFrames)
 {
 #ifndef MINIMAL_TEST
 #if KLEIN_DEBUG >= 10
@@ -386,15 +387,15 @@ void Klein::processReplacing (float **inputs, float **outputs, VstInt32 nFrames)
 	for (int i = 0; i < nOutputPort * 2; ++i) {
 		memset(outputs[i], 0, nFrames * sizeof(float));
 	}
-	
+
 	for (InputInfo& it : input) {
 		if (it.thruMode != InputInfo::NO_THRU && it.thruTrack >= 0 && it.thruTrack < track.size()) {
 			int ip = it.pin;
-			int op = 2*track[it.thruTrack]->getOutPort();
+			int op = 2 * track[it.thruTrack]->getOutPort();
 			if (op < nOutputPort) {
 				for (int i = 0; i < nFrames; i++) {
 					outputs[op][i] += inputs[ip][i];
-					outputs[op+1][i] += inputs[ip+1][i];
+					outputs[op + 1][i] += inputs[ip + 1][i];
 				}
 			}
 		}
@@ -403,44 +404,168 @@ void Klein::processReplacing (float **inputs, float **outputs, VstInt32 nFrames)
 	// if recording, insert current input to appropriate sample in recording track
 	float cvu = vu;
 	long currentOutFrame = 0;
+	const VstTimeInfo *t = getTimeInfo(
+								kVstTempoValid |
+								kVstTimeSigValid |
+								kVstCyclePosValid |
+								kVstBarsValid |
+								kVstPpqPosValid |
+//								kVstClockValid |
+								kVstTransportPlaying);
+	if (t != nullptr) {
+		currentHostTime = *t;
+//		dbf << "got time bsp " << currentHostTime.barStartPos << ", ppq " << currentHostTime.ppqPos << " nf " << nFrames << " tl next " <<  currentHostTime.samplesToNextClock << endl;
+	}
+
 	while (currentOutFrame < nFrames) {
 #if KLEIN_DEBUG >= 11
-		dbf << "process replacing loop currentOutFrame " << currentOutFrame << endl;
+		dbf << "process replacing loop currentOutFrame " << currentOutFrame << " t " << currentHostTime.ppqPos << endl;
 #endif
-		const VstTimeInfo *t = getTimeInfo(
-									kVstTempoValid |
-									kVstTimeSigValid |
-									kVstCyclePosValid |
-									kVstBarsValid |
-									kVstPpqPosValid |
-									kVstTransportPlaying);
-		if (t != nullptr) {
-			currentTimeInfo = *t;
-		}
+
 		long framesThisChunk = nFrames-currentOutFrame;
-		for (unique_ptr<KleinTrack> &ti: track) {
-			long l = ti->boringFrames(t, currentOutFrame);
+		syncOrderLock.lock();
+		for (int i = 0; i < syncOrder.size(); i++) {
+			unique_ptr<KleinTrack> &ti = track[syncOrder[i]];
+			// begin processing for the current (sub)slice, returning the maximum lenght of this
+			// slice until the next interesting event ...
+			long l = ti->startSlice(&currentHostTime, currentMasterTrackId, track);
 			if (l > 0 && l < framesThisChunk) {
 				framesThisChunk = l;
 			}
-#if KLEIN_DEBUG >= 12
-			dbf << "process replacing 3 framesThisChunk " << framesThisChunk << ", l " << l << endl;
-#endif
 		}
-#if KLEIN_DEBUG >= 11
-		dbf << "process replacing 3 framesThisChunk " << framesThisChunk << endl;
-#endif
+		syncOrderLock.unlock();
+
+		const long framesTillNextHostEvent = framesTillVstBeat(currentHostTime);
+//		const long framesTillNextClock = -currentHostTime.samplesToNextClock;
+//		dbf << "   frames till next " << framesTillNextHostEvent << ", " << framesThisChunk << endl;
+		if (framesTillNextHostEvent > 0 && framesThisChunk > framesTillNextHostEvent) {
+			framesThisChunk = framesTillNextHostEvent;
+		}
 		for (unique_ptr<KleinTrack> &ti : track) {
-			const long framesHandled = ti->processAdding(inputs, outputs, currentOutFrame, nFrames);
+			const long framesHandled = ti->processAdding(inputs, outputs, currentOutFrame, framesThisChunk);
 			float tvu = ti->getVu();
 			if (tvu > cvu) {
 				cvu = tvu;
 			}
 		}
 		currentOutFrame += framesThisChunk;
+		updateVstTime(currentHostTime, framesThisChunk);
 	}
 	vu = cvu;
 #endif
+}
+
+/**
+ * Works out the most reasonable order for starting slices in
+ *
+ * I think we are definitely going to need locks around. Sync order can definitely change while the looper is running.
+ * Also, we should not do modify or add tracks or change sync while doing this ... I think that's a reasonable assumption.
+ *
+ * Should also watch if the sync order changes at the start of a sync. __This can't be called from track->startSlice()__
+ */
+bool
+Klein::checkSyncOrder() {
+	syncOrderLock.lock();
+	bool success = true;
+	vector<int> newSyncOrder;
+	set<int> trials;
+	int i = 0;
+	for (unique_ptr<KleinTrack> &ti : track) { // first look at the host and unsync'd tracks
+		if (ti->getSyncSrc() == SYNC_HOST || ti->getSyncSrc() == SYNC_NOT) {
+			newSyncOrder.push_back(i);
+		} else {
+			trials.insert(i);
+		}
+		i++;
+	}
+	auto fi = trials.find(currentMasterTrackId);
+	if (fi != trials.end()) { // then the default track if it isn't already there
+		trials.erase(fi);
+		newSyncOrder.push_back(currentMasterTrackId);
+	}
+	for (unique_ptr<KleinTrack> &ti : track) { // now look at any tracks that are simply sync'd to the default master
+		if (ti->getSyncSrc() == SYNC_MASTER_TRACK || ti->getSyncSrc() == DFLT_SRC) {
+			fi = trials.find(i);
+			if (fi != trials.end()) {
+				newSyncOrder.push_back(i);
+				trials.erase(fi);
+			}
+		}
+	}
+	vector<int> omo;
+
+	// left overs are tracks sync locked to a specific track
+	while (trials.size() > 0) {
+		int it = *trials.begin();
+		trials.erase(it);
+		const unique_ptr<KleinTrack> &ti = track[it];
+		const int mst = ti->getSyncSrc();
+		
+		if (mst >= SYNC_TRACK) {
+			const int mstid = mst - SYNC_TRACK;
+			if (find(newSyncOrder.begin(), newSyncOrder.end(), mstid) != newSyncOrder.end()) { // no loop in sync dependency
+				newSyncOrder.push_back(it);
+			} else { // insert this before any element of omo that uses it as a sync master
+				auto oit = find_if(omo.begin(), newSyncOrder.end(),
+						[mstid, this](int i)->bool {
+							const unique_ptr<KleinTrack> &ti = track[i];
+							return mstid == ti->getSyncSrc() - SYNC_TRACK;
+						}
+					);
+				omo.insert(oit, it);
+			}
+		} else {
+			success = false;
+			break;
+		}
+	}
+	for (auto it : omo) {
+		newSyncOrder.push_back(it);
+	}
+	if (success) {
+		syncOrder = newSyncOrder;
+	}
+	syncOrderLock.unlock();
+	return success;
+}
+
+bool
+Klein::setCurrentSyncMaster(int nm) {
+	currentMasterTrackId = nm;
+	return checkSyncOrder();
+}
+
+void
+Klein::updateVstTime(VstTimeInfo &t, const long nf) {
+	t.samplePos += nf;
+	const double bi = (nf / ((double)t.sampleRate)) * (t.tempo / 60.0);
+	t.ppqPos += bi;
+	double bind = t.ppqPos - t.barStartPos;
+	if (bind > t.timeSigNumerator) {
+		int bt = int(floor(bind)); // beats since last known bar in doubles
+		int ba = bt / t.timeSigNumerator; // whole bars since then, according to current time sig
+		int bab = ba * t.timeSigNumerator; // whole beats since then
+		t.barStartPos += bab;
+	}
+	t.samplesToNextClock += nf;
+//	dbf << "    updateVstTime " << t.ppqPos << ", " << t.barStartPos << " till next " << t.samplesToNextClock << endl;
+}
+
+long
+Klein::framesTillVstBeat(const VstTimeInfo &t) {
+	const double bind = 1.0 - (t.ppqPos - floor(t.ppqPos));
+	const double secsLeft = bind * 60.0 / t.tempo;
+	return round(secsLeft * t.sampleRate);
+}
+
+long
+Klein::framesTillVstBar(const VstTimeInfo &t) {
+	const double bind = t.ppqPos - t.barStartPos; // barstartpos may be innacurate
+	const int ba = int(floor(bind)) / t.timeSigNumerator; // whole bars since then, according to current time sig
+	const int bab = (ba + 1) * t.timeSigNumerator; // whole beats at the next one
+	const double secsLeft = (bab - bind) * 60.0 / t.tempo;
+//	dbf << "    framesTillVstBar " << " bind " << bind << " ba " << ba << " bab " << bab << " secsLeft " << secsLeft << " frames " << secsLeft * t.sampleRate << endl;
+	return round(secsLeft * t.sampleRate);
 }
 
 float

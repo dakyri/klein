@@ -67,16 +67,21 @@ void MasterStrip::setComponents4(Controller & c)
 	for (ScriptGuiMapping &it : c.guiKlfs) {
 
 	}
-	float x = 2;
-	float y = pos + 2;
-	clockView = new ClockView(CRect(x, y, x+kClockViewWidth, y+kClockViewHeight));
+
+	CRect clockRect(0, 0, kClockViewWidth, kClockViewHeight);
+	clockRect.offset(2, pos + 2);
+	clockView = new ClockView(clockRect);
 	addView(clockView);
+	clockView->setTime(0, 0, 0);
 	CRect r = clockView->getViewSize();
-	x = r.right;
+	float x = r.right;
+	float y = r.top;
 	if (r.bottom > pos) {
 		pos = r.bottom;
 	}
-	messageView = new MessageView(CRect(x+10, y, x+10+kMessageViewWidth, y+kMessageViewHeight));
+	CRect messageRect(0, 0, kMessageViewWidth, kMessageViewHeight);
+	messageRect.offset(x + 10, y);
+	messageView = new MessageView(messageRect);
 	addView(messageView);
 	r = messageView->getViewSize();
 	x = r.right;
@@ -102,7 +107,8 @@ void MasterStrip::displayMessage(const string & msg)
 {
 }
 
-void MasterStrip::onTimedUpdate(const VstTimeInfo *)
+void MasterStrip::onTimedUpdate(const VstTimeInfo *t)
 {
+	clockView->setTime(t);
 }
 

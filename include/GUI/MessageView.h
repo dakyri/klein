@@ -11,13 +11,16 @@ using namespace std;
 class MessageView : public CView, public TextDrawer {
 public:
 	MessageView(const CRect &rect)
-		: CView(rect), TextDrawer() {
+			: CView(rect), TextDrawer() {
+		setFontColor(kBlackCColor);
 	}
 
 	~MessageView() {
 	}
 
 	virtual void draw(CDrawContext *context) override {
+		context->setFillColor(kGreyCColor);
+		context->drawRect(size, kDrawFilled);
 		if (messages.size() > 0) {
 			drawText(context, messages.back().c_str(), size);
 		}
